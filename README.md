@@ -117,3 +117,8 @@ VL의 제어는 VLSDKManager를 통해서 할 수 있습니다. VLSDKManager는 
 | StartSession() | PoseTracker 세션을 시작합니다. 세션이 시작되면 매 프레임마다 카메라의 위치를 갱신하고 필요한 순간에 VL 요청을 보냅니다. 기본적으로 VLSDKManager의 Start 이벤트에서 실행합니다. |
 | StopSession() | PoseTracker 세션을 중단합니다. 카메라 위치 갱신이 중단되고 VL 요청을 보내지 않습니다. |
 | Reset() | PoseTracker 세션을 초기화합니다. State가 INITIAL이 되고 AR Session Origin이 원점으로 이동됩니다. |
+
+
+# License
+
+전체 오픈소스 라이선스는 [LICENSE](./LICENSE) 에서 확인하세요.
