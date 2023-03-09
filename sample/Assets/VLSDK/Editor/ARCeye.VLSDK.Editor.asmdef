@@ -1,0 +1,19 @@
+{
+    "name": "ARCeye.VLSDK.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e27c65c44dfc1422a93ade7e48f908f0",
+        "GUID:a9420e37d7990b54abdef6688edbe313"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
