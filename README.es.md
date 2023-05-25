@@ -1,3 +1,6 @@
+[![kr](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/docs/badge/lang_kr.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.md)
+[![es](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/docs/badge/lang_es.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.es.md)
+
 # ARC eye VL SDK
 
 # Overview

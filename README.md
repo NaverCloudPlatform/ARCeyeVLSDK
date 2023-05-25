@@ -1,3 +1,6 @@
+[![kr](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/docs/badge/lang_kr.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.md)
+[![es](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/docs/badge/lang_es.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.es.md)
+
 # ARC eye VL SDK
 
 # 개요
@@ -98,14 +101,9 @@ VL는 내부적으로 세 가지 상태를 가집니다. 최초에는 Initial �
 
 | 상태 | 설명 |
 | --- | --- |
-| Initial | VL 초기화가 안 된 상태. 앱 최초 실행 시, 혹은 VL 요청이 일정 수 이상 실패 시 INITIAL 상태가 됩니다.
-VL Settings의 Request Interval Before Localization에 설정된 주기에 맞춰 VL 요청을 보냅니다.
-이 상태가 되면 AR Session Origin은 원점으로 이동하고 VL의 내부 세선은 모두 초기화 됩니다. |
-| VL_PASS | VL 응답을 성공적으로 수신한 상태. 
-Request Interval After Localization에서 설정한 주기에 맞게 VL 요청을 보냅니다. |
-| VL_FAIL | VL 응답이 일시적으로 실패 중인 상태.
-Request Interval Before Localization에서 설정한 주기에 맞게 VL 요청을 보냅니다. 
-VL 요청을 통해 갱신된 AR Session Origin은 유지 됩니다. 이 상태가 지속되면 INITIAL 상태로 변환. |
+| Initial | VL 초기화가 안 된 상태. 앱 최초 실행 시, 혹은 VL 요청이 일정 수 이상 실패 시 INITIAL 상태가 됩니다. VL Settings의 Request Interval Before Localization에 설정된 주기에 맞춰 VL 요청을 보냅니다. 이 상태가 되면 AR Session Origin은 원점으로 이동하고 VL의 내부 세선은 모두 초기화 됩니다. |
+| VL_PASS | VL 응답을 성공적으로 수신한 상태. Request Interval After Localization에서 설정한 주기에 맞게 VL 요청을 보냅니다. |
+| VL_FAIL | VL 응답이 일시적으로 실패 중인 상태. Request Interval Before Localization에서 설정한 주기에 맞게 VL 요청을 보냅니다. VL 요청을 통해 갱신된 AR Session Origin은 유지 됩니다. 이 상태가 지속되면 INITIAL 상태로 변환. |
 | VL_OUT_OF_SERVICE | GPS Guide 사용 결과 유효한 VL API를 찾을 수 없는 상태. 지속적으로 GPS 값을 이용해 사용 가능한 VL API를 탐색합니다. |
 
 ## VLSDKManager
