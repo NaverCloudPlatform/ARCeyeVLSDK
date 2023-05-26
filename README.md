@@ -1,5 +1,5 @@
 [![kr](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/docs/badge/lang_kr.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.md)
-[![es](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/docs/badge/lang_es.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.es.md)
+[![es](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/docs/badge/lang_en.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.en.md)
 
 # ARC eye VL SDK
 
