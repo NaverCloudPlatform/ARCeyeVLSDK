@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fd195d0e5390462ebd375d2dfbd7e1c, type: 3}
+  m_Name: VLSDK Settings_NAVER
+  m_EditorClassIdentifier: 
+  m_URLList:
+  - m_Location: amco
+    m_InvokeUrl: https://vl-arc-eye.ncloud.com/api/v1/96/7b1a278f5abe8e9da907fc9c29dfd432d60dc76e17b0fabab659d2a508bc65c4/location
+    m_SecretKey: S0prT0pNYVp6ZGJ1SXZGckRESEtObG9QZnhlZFlOVVI=
+    m_IsInactivated: 0
+  m_GPSGuide: 0
+  m_LocationGeoJson: "{\n  \"type\": \"FeatureCollection\",\n  \"features\": [\n   
+    {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"location\":
+    \"tour-1784\"\n      },\n      \"geometry\": {\n        \"coordinates\": [\n         
+    [\n            [\n              127.10450360698871,\n              37.35985385694738\n           
+    ],\n            [\n              127.1044985060035,\n              37.35843478001753\n           
+    ],\n            [\n              127.10592678189249,\n              37.35842667092898\n           
+    ],\n            [\n              127.10593188287771,\n              37.35984574801208\n           
+    ],\n            [\n              127.10450360698871,\n              37.35985385694738\n           
+    ]\n          ]\n        ],\n        \"type\": \"Polygon\"\n      },\n      \"id\":
+    0\n    },\n    {\n      \"type\": \"Feature\",\n      \"properties\": {\n       
+    \"location\": \"jeongja\"\n      },\n      \"geometry\": {\n        \"coordinates\":
+    [\n          [\n            [\n              127.1059328425282,\n             
+    37.36344018655649\n            ],\n            [\n              127.1059328425282,\n             
+    37.361591841672364\n            ],\n            [\n              127.10800513265997,\n             
+    37.361591841672364\n            ],\n            [\n              127.10800513265997,\n             
+    37.36344018655649\n            ],\n            [\n              127.1059328425282,\n             
+    37.36344018655649\n            ]\n          ]\n        ],\n        \"type\":
+    \"Polygon\"\n      },\n      \"id\": 1\n    }\n  ]\n}"
+  m_VLIntervalInitial: 500
+  m_VLIntervalPassed: 1000
+  m_LogLevel: 0

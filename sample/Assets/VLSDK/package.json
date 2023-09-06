@@ -1,0 +1,21 @@
+{
+    "name": "com.naverlabs.vlsdk",
+    "version": "1.2.0",
+    "description": "VLSDK project",
+    "unity": "2021.3",
+    "dependencies": {
+        "com.unity.xr.arfoundation": "4.2.7",
+        "com.unity.xr.arkit": "4.2.7",
+        "com.unity.xr.arcore": "4.2.7",
+        "com.unity.xr.management": "4.0.1"
+    },
+    "repository": {
+        "url": "https://github.cds.internal.unity3d.com/unity/arfoundation.git",
+        "type": "git",
+        "revision": "f49c023e846a14016db6ff2bc4c5d0d2e421bef6"
+    },
+    "author": {
+      "name": "NAVER LABS"
+    }
+  }
+  
