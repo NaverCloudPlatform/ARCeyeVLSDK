@@ -1,0 +1,2 @@
+sample/Assets/VLSDK/Dataset/File/amco_test_720.mov filter=lfs diff=lfs merge=lfs -text
+sample/Assets/VLSDK/Dataset/File/openport01.mov filter=lfs diff=lfs merge=lfs -text
