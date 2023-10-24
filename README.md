@@ -9,7 +9,7 @@ ARC eye VL SDK는 ARC eye Visual Localization (VL) API를 이용하여 공간 �
 
 # 문서
 
-[VLSDK documentation](./docs/VLSDK_documentation.html)
+[VLSDK documentation](https://ar.naverlabs.com/ARPG/docs/VLSDK_v1.3.0.html)
 
 # License
 
