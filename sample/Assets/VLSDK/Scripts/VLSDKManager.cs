@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,6 +19,13 @@ namespace ARCeye
         const string dll = "VLSDK";
 #endif
         private static VLSDKManager s_Instance;
+
+        [SerializeField]
+        private bool m_PlayOnAwake;
+        public bool playOnAwake {
+            get => m_PlayOnAwake;
+            set => m_PlayOnAwake = value;
+        }
         
         [SerializeField]
         private VLSDKSettings m_Settings;
@@ -52,7 +60,7 @@ namespace ARCeye
             }
         }
 
-        [SerializeField]
+        // [SerializeField]
         private ChangedLocationEvent m_OnLocationChanged;
         public  ChangedLocationEvent OnLocationChanged {
             get => m_OnLocationChanged;
@@ -62,7 +70,7 @@ namespace ARCeye
             }
         }
 
-        [SerializeField]
+        // [SerializeField]
         private ChangedBuildingEvent m_OnBuildingChanged; 
         public ChangedBuildingEvent OnBuildingChanged {
             get => m_OnBuildingChanged;
@@ -72,7 +80,7 @@ namespace ARCeye
             }
         }
 
-        [SerializeField]
+        // [SerializeField]
         private ChangedFloorEvent m_OnFloorChanged; 
         public ChangedFloorEvent OnFloorChanged {
             get => m_OnFloorChanged;
@@ -82,13 +90,23 @@ namespace ARCeye
             }
         }
 
-        [SerializeField]
+        // [SerializeField]
         private ChangedRegionCodeEvent m_OnRegionCodeChanged; 
         public ChangedRegionCodeEvent OnRegionCodeChanged {
             get => m_OnRegionCodeChanged;
             set {
                 m_PoseTracker.onRegionCodeChanged = value;
                 m_OnRegionCodeChanged = value;
+            }
+        }
+
+        [SerializeField]
+        private ChangedLayerInfoEvent m_OnLayerInfoChanged; 
+        public ChangedLayerInfoEvent OnLayerInfoChanged {
+            get => m_OnLayerInfoChanged;
+            set {
+                m_PoseTracker.onLayerInfoChanged = value;
+                m_OnLayerInfoChanged = value;
             }
         }
 
@@ -119,6 +137,16 @@ namespace ARCeye
             set {
                 m_PoseTracker.onObjectDetected = value;
                 m_OnObjectDetected = value;
+            }
+        }
+
+        private Camera m_MainCamera;
+        public Camera mainCamera {
+            get {
+                if(m_MainCamera == null) {
+                    m_MainCamera = Camera.main;
+                }
+                return m_MainCamera;
             }
         }
 
@@ -160,21 +188,22 @@ namespace ARCeye
             if(logViewer) { 
                 logViewer.logLevel = m_Config.logLevel;
 
-                m_OnStateChanged.AddListener(logViewer.OnStateChanged);
-                m_OnLocationChanged.AddListener(logViewer.OnLocationChanged);
-                m_OnBuildingChanged.AddListener(logViewer.OnBuildingChanged);
-                m_OnFloorChanged.AddListener(logViewer.OnFloorChanged);
-                m_OnRegionCodeChanged.AddListener(logViewer.OnRegionCodeChanged);
-                m_OnPoseUpdated.AddListener(logViewer.OnPoseUpdated);
+                m_OnStateChanged?.AddListener(logViewer.OnStateChanged);
+                // m_OnLocationChanged.AddListener(logViewer.OnLocationChanged);
+                // m_OnBuildingChanged.AddListener(logViewer.OnBuildingChanged);
+                // m_OnFloorChanged.AddListener(logViewer.OnFloorChanged);
+                m_OnRegionCodeChanged?.AddListener(logViewer.OnLayerInfoChanged);
+                m_OnLayerInfoChanged?.AddListener(logViewer.OnLayerInfoChanged);
+                m_OnPoseUpdated?.AddListener(logViewer.OnPoseUpdated);
             }
         }
 
         private void InitCamera()
         {
-            if(Camera.main == null) {
+            if(mainCamera == null) {
                 Debug.LogError("Main Camera를 찾을 수 없습니다.");
             }
-            m_ARCamera = Camera.main.transform;
+            m_ARCamera = mainCamera.transform;
             m_Origin = m_ARCamera.parent;
         }
 
@@ -200,8 +229,8 @@ namespace ARCeye
                 m_GeoCoordProvider = GetComponent<GeoCoordProvider>();
             }
 
-            m_PoseTracker.Initialize(m_ARCamera, m_Config);
             m_PoseTracker.SetGeoCoordProvider(m_GeoCoordProvider);
+            m_PoseTracker.Initialize(m_ARCamera, m_Config);
         }
 
         private void Start()
@@ -223,14 +252,34 @@ namespace ARCeye
 
             m_PoseTracker.onStateChanged = m_OnStateChanged;
             m_PoseTracker.onPoseUpdated = m_OnPoseUpdated;
-            m_PoseTracker.onLocationChanged = m_OnLocationChanged;
-            m_PoseTracker.onBuildingChanged = m_OnBuildingChanged;
-            m_PoseTracker.onFloorChanged = m_OnFloorChanged;
             m_PoseTracker.onRegionCodeChanged = m_OnRegionCodeChanged;
+            m_PoseTracker.onLayerInfoChanged = m_OnLayerInfoChanged;
             m_PoseTracker.onObjectDetected = m_OnObjectDetected;
+
+            CheckObsoleteEvents();
 
             m_PoseTracker.SetGPSLocationRequester(this);
             StartDetectingGPSLocation();
+
+            if(m_PlayOnAwake)
+            {
+                StartSession();
+            }
+        }
+
+        private void CheckObsoleteEvents() {
+            if(m_OnLocationChanged?.GetPersistentEventCount() > 0) {
+                Debug.LogWarning("[VLSDKManager] OnLocationChanged 이벤트는 삭제 될 예정입니다. OnLayerInfoChanged 이벤트를 사용해주세요");
+            }
+            if(m_OnBuildingChanged?.GetPersistentEventCount() > 0) {
+                Debug.LogWarning("[VLSDKManager] OnBuildingChanged 이벤트는 삭제 될 예정입니다. OnLayerInfoChanged 이벤트를 사용해주세요");
+            }
+            if(m_OnFloorChanged?.GetPersistentEventCount() > 0) {
+                Debug.LogWarning("[VLSDKManager] OnFloorChanged 이벤트는 삭제 될 예정입니다. OnLayerInfoChanged 이벤트를 사용해주세요");
+            }
+            if(m_OnRegionCodeChanged?.GetPersistentEventCount() > 0) {
+                Debug.LogWarning("[VLSDKManager] OnRegionCodeChanged 이벤트는 삭제 될 예정입니다. OnLayerInfoChanged 이벤트를 사용해주세요");
+            }
         }
 
         private void OnDisable() {
@@ -248,7 +297,7 @@ namespace ARCeye
             Matrix4x4 localizedPoseMatrix = Matrix4x4.Inverse(localizedViewMatrix);
 
             // 디바이스의 AR SDK session을 기준으로 하는 AR Camera의 Local Transform Matrix 계산.
-            Transform camTrans = Camera.main.transform;
+            Transform camTrans = mainCamera.transform;
             Matrix4x4 lhCamModelMatrix = Matrix4x4.TRS(camTrans.localPosition, camTrans.localRotation, Vector3.one);
 
             // 위의 두 Matrix를 이용하여 AR Session Origin의 WC Transform Matrix 계산.

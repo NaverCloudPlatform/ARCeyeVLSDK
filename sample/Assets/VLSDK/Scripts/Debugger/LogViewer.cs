@@ -69,7 +69,7 @@ namespace ARCeye
         private static string m_Building = "";
         private static string m_CurrState = "";
         private static string m_Floor = "";
-        private static string m_RegionCode = "";
+        private static string m_LayerInfo = "";
 
         private Vector3 m_Position;
         private Vector3 m_EulerRotation;
@@ -105,24 +105,9 @@ namespace ARCeye
             // Debug.Log($"[LogViewer] Latitude : {locationInfo.latitude}, Longitude : {locationInfo.longitude}");
         }
 
-        public void OnLocationChanged(string location) {
-            Debug.Log($"[LogViewer] OnLocationChanged : {location}");
-            m_Location = location;
-        }
-
-        public void OnBuildingChanged(string building) {
-            Debug.Log($"[LogViewer] OnBuildingChanged : {building}");
-            m_Building = building;
-        }
-
-        public void OnFloorChanged(string floor) {
-            Debug.Log($"[LogViewer] OnFloorChanged : {floor}");
-            m_Floor = floor;
-        }
-
-        public void OnRegionCodeChanged(string regionCode) {
-            Debug.Log($"[LogViewer] OnRegionCodeChanged : {regionCode}");
-            m_RegionCode = regionCode;
+        public void OnLayerInfoChanged(string layerInfo) {
+            Debug.Log($"[LogViewer] OnLayerInfoChanged : {layerInfo}");
+            m_LayerInfo = layerInfo;
         }
 
         public void OnPoseUpdated(Matrix4x4 matrix, Matrix4x4 projMatrix) {
@@ -130,8 +115,6 @@ namespace ARCeye
 
             Quaternion rotation = Quaternion.LookRotation(poseMatrix.GetColumn(2), poseMatrix.GetColumn(1));
             m_EulerRotation = rotation.eulerAngles;
-            
-            m_Position = poseMatrix.GetColumn(3);
         }
 
         public void OnObjectDetected(DetectedObject detectedObject) {
@@ -232,11 +215,8 @@ namespace ARCeye
                 GUILayout.BeginHorizontal();
                 string stateStr = "State : " + m_CurrState;
                 GUILayout.Label(stateStr);
-
-                GUILayout.Label($"Location : {m_Location}");
-                GUILayout.Label($"Building : {m_Building}");
-                GUILayout.Label($"Floor : {m_Floor}");
-                GUILayout.Label($"Region Code : {m_RegionCode}");
+                
+                GUILayout.Label($"Layer Info : {m_LayerInfo}");
 
                 GUILayout.EndHorizontal();
 

@@ -5,7 +5,7 @@ using UnityEditor;
 namespace ARCeye
 {
     public class VLSDKSettingsGenerator {
-        [MenuItem("Assets/Create/VLSDKSettings")]
+        [MenuItem("Assets/Create/ARCeye/VLSDKSettings")]
         public static void CreateVLSDKSettings()
         {
             VLSDKSettings asset = ScriptableObject.CreateInstance<VLSDKSettings>();

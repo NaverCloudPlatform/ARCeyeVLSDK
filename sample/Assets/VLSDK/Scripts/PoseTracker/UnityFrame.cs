@@ -8,7 +8,7 @@ using AOT;
 namespace ARCeye
 {
 [StructLayout(LayoutKind.Sequential)]
-public class UnityFrame {
+public struct UnityFrame {
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
     public float[] viewMatrix;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
@@ -19,12 +19,5 @@ public class UnityFrame {
     public float[] geoCoord;
     
     public IntPtr  imageBuffer;
-
-    public UnityFrame() {
-        viewMatrix = new float[16];
-        projMatrix = new float[16];
-        texTrans = new float[9];
-        imageBuffer = new IntPtr(0);
-    }
 }
 }

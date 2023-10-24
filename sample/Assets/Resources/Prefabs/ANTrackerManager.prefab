@@ -1,0 +1,305 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2300080915882230838
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 814515185610580061}
+  - component: {fileID: 1309190262843580921}
+  m_Layer: 0
+  m_Name: LogViewer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &814515185610580061
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2300080915882230838}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8631322762342601738}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1309190262843580921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2300080915882230838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac9d71e6e5e374d93b90b1237967894d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ANTrackerManager: {fileID: 7523601577835025113}
+  m_ARCoordRoot: {fileID: 0}
+  m_VOTObject: {fileID: 0}
+  m_ShowDebugUI: 1
+  m_ShowARCoord: 1
+--- !u!1 &8631322762342601736
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8631322762342601738}
+  - component: {fileID: 7523601577835025113}
+  - component: {fileID: 8631322762342601739}
+  - component: {fileID: 9220349159911007369}
+  m_Layer: 0
+  m_Name: ANTrackerManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8631322762342601738
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8631322762342601736}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 814515185610580061}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7523601577835025113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8631322762342601736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 714792e97ea2f4620b4bf8d17531ed5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_CameraManager: {fileID: 0}
+  m_OriginTransform: {fileID: 0}
+  m_Config:
+    tracker:
+      location: mtower
+      previewWidth: 360
+      previewHeight: 640
+      useTranslationFilter: 0
+      useRotationFilter: 0
+      useInterpolation: 0
+      useVOTPoseFiltering: 0
+      votLocation: sptek
+      votMapId: sptek_7F
+      requestIntervalBeforeLocalization: 300
+      requestIntervalAfterLocalization: 500
+      logLevel: 0
+    fx: 948.91534
+    fy: 948.91534
+    cx: 360
+    cy: 643.0853
+    debugRequestTexture: {fileID: 8400000, guid: 59b55a5822e324b1192a9668c09d43fa,
+      type: 2}
+  m_OnStateChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnStateChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnLocationChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnLocationChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnBuildingChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnBuildingChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnRegionCodeChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnRegionCodeChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnPoseUpdated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_OnStartChangingFloor:
+    m_PersistentCalls:
+      m_Calls: []
+  m_OnFloorDetected:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnFloorDetected
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnGPSInitialized:
+    m_PersistentCalls:
+      m_Calls: []
+  m_OnVLLocationDetected:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnVLLocationDetected
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnVOTLocationReceived:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnVOTLocationReceived
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnVOTMapIdReceived:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnVOTMapIdReceived
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnVOTObjectIdReceived:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnVOTObjectIdReceived
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnObjectDetected:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1309190262843580921}
+        m_TargetAssemblyTypeName: ARLabs.LogViewer, ANTrackerAssembly
+        m_MethodName: OnObjectDetected
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &8631322762342601739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8631322762342601736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e2c8f0cd02a9e7478eee0a8a14a75d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &9220349159911007369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8631322762342601736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a6645be3f3ac49f7af54a48b2e59dea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Latitude: 37.490845
+  m_Longitude: 126.723625

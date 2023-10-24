@@ -14,7 +14,7 @@ namespace ARCeye
         [field:SerializeField, Tooltip("GPS를 활용한 invokeUrl 추정 기능 사용")]
         private bool m_GPSGuide = true;
         public bool GPSGuide { 
-            get => m_GPSGuide; 
+            get => m_GPSGuide;
         }
 
         [SerializeField, Tooltip("GPS를 기반으로 추정할 영역들에 대한 geojson 내용")]

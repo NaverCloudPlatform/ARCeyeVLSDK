@@ -19,7 +19,7 @@ public abstract class PoseTracker
     public delegate void ChangeLocationDelegate(IntPtr rawLocation);
     public delegate void ChangeBuildingDelegate(IntPtr rawBuilding);
     public delegate void ChangeFloorDelegate(IntPtr rawFloor);
-    public delegate void ChangeRegionCodeDelegate(IntPtr rawRegionCode);
+    public delegate void ChangeLayerInfoDelegate(IntPtr rawRegionCode);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void DetectVLLocationNativeDelegate(
@@ -85,6 +85,12 @@ public abstract class PoseTracker
     public ChangedRegionCodeEvent onRegionCodeChanged {
         get => m_OnRegionCodeChanged;
         set => m_OnRegionCodeChanged = value;
+    }
+
+    protected ChangedLayerInfoEvent m_OnLayerInfoChanged;
+    public ChangedLayerInfoEvent onLayerInfoChanged {
+        get => m_OnLayerInfoChanged;
+        set => m_OnLayerInfoChanged = value;
     }
 
     protected UpdatedPoseEvent m_OnPoseUpdated;
@@ -164,7 +170,9 @@ public abstract class PoseTracker
     private static extern void SetChangeFloorFuncNative(ChangeFloorDelegate func);
 
     [DllImport(dll)]
-    private static extern void SetChangeRegionCodeFuncNative(ChangeRegionCodeDelegate func);
+    private static extern void SetChangeRegionCodeFuncNative(ChangeLayerInfoDelegate func);
+    [DllImport(dll)]
+    private static extern void SetChangeLayerInfoFuncNative(ChangeLayerInfoDelegate func);
 
     [DllImport(dll)]
     private static extern void SetDetectObjectFuncNative(DetectObjectDelegate func);
@@ -209,6 +217,7 @@ public abstract class PoseTracker
     {
         m_Config = config;
         m_Frame = new UnityFrame();
+        m_ARCamera = Camera.main.transform;
 
         InitNativeMethods();
         InitVLURLCandidates(config);
@@ -236,11 +245,14 @@ public abstract class PoseTracker
     {
         SetPoseUpdateFuncNative(OnPoseUpdated);
         SetChangeStateFuncNative(OnStateChanged);
+        SetChangeLayerInfoFuncNative(OnLayerInfoChanged);
+        SetDetectObjectFuncNative(OnObjectDetected);
+
+        // deprecate 예정.
         SetChangeLocationFuncNative(OnLocationChanged);
         SetChangeBuildingFuncNative(OnBuildingChanged);
         SetChangeFloorFuncNative(OnFloorChanged);
-        SetChangeRegionCodeFuncNative(OnRegionCodeChanged);
-        SetDetectObjectFuncNative(OnObjectDetected);
+        SetChangeRegionCodeFuncNative(OnLayerInfoChanged);
 
         InitVLSDKNative(m_Config.tracker);
     }
@@ -275,7 +287,7 @@ public abstract class PoseTracker
         ResetVLSDKNative();
     }
 
-    public void Release() 
+    public virtual void Release() 
     {
         ReleaseVLSDKNative();
     }
@@ -319,13 +331,14 @@ public abstract class PoseTracker
         AssignCameraIntrinsicToNative();
 
         Matrix4x4 lhCamModelMatrix;
-        if(Camera.main == null)
+        if(m_ARCamera == null)
         {
+            m_ARCamera = Camera.main.transform;
             lhCamModelMatrix = Matrix4x4.identity;
         }
         else
         {
-            Transform camTrans = Camera.main.transform;
+            Transform camTrans = m_ARCamera;
             lhCamModelMatrix = Matrix4x4.TRS(camTrans.localPosition, camTrans.localRotation, Vector3.one);
         }
         
@@ -341,7 +354,11 @@ public abstract class PoseTracker
 
         GCHandle gcI = GCHandle.Alloc(requestImageTexture, GCHandleType.Weak);
 
-        LocationInfo locationInfo = m_GeoCoordProvider.info;
+        LocationInfo locationInfo = new LocationInfo(0, 0);
+        
+        if(m_GeoCoordProvider) {
+            locationInfo = m_GeoCoordProvider.info;
+        }
 
         m_Frame.viewMatrix = v;
         m_Frame.projMatrix = p;
@@ -416,12 +433,15 @@ public abstract class PoseTracker
         }
     }
 
-    [MonoPInvokeCallback(typeof(ChangeRegionCodeDelegate))]
-    private static void OnRegionCodeChanged(IntPtr rawRegionCode)
+    [MonoPInvokeCallback(typeof(ChangeLayerInfoDelegate))]
+    private static void OnLayerInfoChanged(IntPtr rawRegionCode)
     {
-        string regionCode = Marshal.PtrToStringAnsi(rawRegionCode);
+        string layerInfo = Marshal.PtrToStringAnsi(rawRegionCode);
         if(s_Instance.onRegionCodeChanged != null) {
-            s_Instance.onRegionCodeChanged.Invoke(regionCode);
+            s_Instance.onRegionCodeChanged.Invoke(layerInfo);
+        }
+        if(s_Instance.onLayerInfoChanged != null) {
+            s_Instance.onLayerInfoChanged.Invoke(layerInfo);
         }
     }
     

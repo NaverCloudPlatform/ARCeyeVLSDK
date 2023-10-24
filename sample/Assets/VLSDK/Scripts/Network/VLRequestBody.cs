@@ -71,12 +71,13 @@ public class VLRequestBody
         body.authorization = requestInfo.secretKey;
         body.filename = requestInfo.filename;
         body.imageFieldName = "image";
-
+        
         if(VLRequestBody.IsValidCameraParam(requestInfo.cameraParam))
         {
             body.parameters.Add("cameraParameters", requestInfo.cameraParam);
         }
         
+#if !UNITY_EDITOR
         if(requestInfo.requestWithPosition) {
             body.parameters.Add("odometry", requestInfo.odometry);
             body.parameters.Add("lastPose", requestInfo.lastPose);
@@ -85,6 +86,7 @@ public class VLRequestBody
                 body.parameters.Add("withGlobal", "true");
             }
         }
+#endif
 
         body.nativeNetworkServiceHandle = requestInfo.nativeNetworkServiceHandle;
 
@@ -110,6 +112,7 @@ public class VLRequestBody
             body.parameters.Add("location", requestInfo.location);
         }
         
+#if !UNITY_EDITOR
         if(requestInfo.requestWithPosition) {
             body.parameters.Add("odometry", requestInfo.odometry);
             body.parameters.Add("last-pose", requestInfo.lastPose);
@@ -118,6 +121,7 @@ public class VLRequestBody
                 body.parameters.Add("withGlobal", "true");
             }
         }
+#endif
 
         body.nativeNetworkServiceHandle = requestInfo.nativeNetworkServiceHandle;
 

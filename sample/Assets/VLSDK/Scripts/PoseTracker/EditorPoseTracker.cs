@@ -19,10 +19,10 @@ public class EditorPoseTracker : PoseTracker
 
     const float MAJOR_AXIS_LENGTH = 640.0f;  // 장축의 길이를 640으로 고정.
 
-    protected const float DEFAULT_FX = 474.457672f;
-    protected const float DEFAULT_FY = 474.457672f;
-    protected const float DEFAULT_CX = 180.000000f;
-    protected const float DEFAULT_CY = 321.5426635f;
+    protected const float DEFAULT_FX = 469.672760f;
+    protected const float DEFAULT_FY = 469.672760f;
+    protected const float DEFAULT_CX = 179.404327f;
+    protected const float DEFAULT_CY = 315.172272f;
 
     private Camera m_MainCamera;
     private MonoBehaviour m_CoroutineRunner;
