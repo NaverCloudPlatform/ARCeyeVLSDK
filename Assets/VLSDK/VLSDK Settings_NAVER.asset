@@ -30,4 +30,5 @@ MonoBehaviour:
     0\n    }\n  ]\n}"
   m_VLIntervalInitial: 500
   m_VLIntervalPassed: 1000
+  m_VLQuality: 0
   m_LogLevel: 0

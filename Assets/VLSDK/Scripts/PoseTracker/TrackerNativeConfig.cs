@@ -5,6 +5,11 @@ using System.Runtime.InteropServices;
 
 namespace ARCeye
 {
+    public enum VLQuality
+    {
+        LOW, MEDIUM, HIGH
+    }
+
     public enum LogLevel
     {
         DEBUG, INFO, WARNING, ERROR, FATAL
@@ -30,6 +35,9 @@ namespace ARCeye
         [System.NonSerialized]
         public int previewHeight = 360;
 
+        /// 기기의 상하 방향을 이용한 VLSDK 세션 리셋 기능을 활성화 하는 플래그.
+        [HideInInspector, MarshalAs(UnmanagedType.U1)]
+        public bool resetByDevicePose = true;
 
         [Header("VL Options")]
         /// VL의 응답 결과가 현재 위치와 비교했을때 5m 이상 차이가 발생하는 경우 VL 응답을 무시하는 기능을 활성화 하는 플래그.
@@ -47,8 +55,13 @@ namespace ARCeye
         [HideInInspector, MarshalAs(UnmanagedType.U1)]
         public bool useInterpolation = true;
 
+        /// 최초 VL 인식 단계에서 GPS를 이용하여 탐색 속도를 증가시키는 기능
+        /// 정확한 GPS 값을 사용하지 못하거나 맵핑 된 지도의 GPS 값에 오류가 발생한 경우 이를 false로 설정한다.
+        [HideInInspector, MarshalAs(UnmanagedType.U1)]
+        public bool useGPSGuide = true;
 
-        [Header("Request Interval")]
+
+        [Header("Request Options")]
         [HideInInspector]
         /// VL Pass 상태가 아닐 경우의 VL 요청 주기. 단위 ms.
         public int requestIntervalBeforeLocalization = 250;
@@ -56,6 +69,9 @@ namespace ARCeye
         /// VL Pass 상태일 경우의 VL 요청 주기. 단위 ms.
         [HideInInspector]
         public int requestIntervalAfterLocalization = 1000;
+
+        [HideInInspector]
+        public VLQuality vlQuality;
 
 
         [Header("Log Option")]

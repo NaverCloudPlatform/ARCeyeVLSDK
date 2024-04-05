@@ -24,11 +24,12 @@ namespace ARCeye
         }
 
         [field:SerializeField]
-        public List<VLURL> urlList { get; set; }
+        private List<VLURL> m_URLList = new List<VLURL>();
+        public List<VLURL> urlList { 
+            get => m_URLList;
+            set => m_URLList = value;
+        }
 
         public string vlAreaGeoJson { get; set; }
-
-
-        public bool useGPSGuide { get; set; }
     }
 }

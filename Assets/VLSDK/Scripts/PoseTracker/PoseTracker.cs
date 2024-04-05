@@ -140,7 +140,7 @@ public abstract class PoseTracker
     private static extern void SetVLSDKConfigNative(TrackerConfig config);
     
     [DllImport(dll)]
-    private static extern void InitVLSDKNative(TrackerConfig config);
+    private static extern void InitVLSDKNative(TrackerConfig config, VLURLNative[] vlURLs, string vlAreaGeoJson, int size);
 
     [DllImport(dll)]
     private static extern TrackerConfig GetVLSDKConfigNative();
@@ -153,6 +153,9 @@ public abstract class PoseTracker
 
     [DllImport(dll, CallingConvention = CallingConvention.Cdecl)]
     private static extern void SetInvokeUrl(string invokeUrl, string secretKey);
+
+    [DllImport(dll)]
+    private static extern void EnableResetByDevicePoseNative(bool active);
 
     [DllImport(dll)]
     private static extern void SetPoseUpdateFuncNative(PoseUpdateDelegate func);
@@ -188,9 +191,6 @@ public abstract class PoseTracker
     private static extern void SetCameraIntrinsicNative(float fx, float fy, float cx, float cy);
 
     [DllImport(dll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void InitVLURLCandidatesNative(VLURLNative[] vlURLs, string vlAreaGeoJson, int size);
-
-    [DllImport(dll, CallingConvention = CallingConvention.Cdecl)]
     private static extern void DetectVLLocationNative(double lat, double lon, double radius, DetectVLLocationNativeDelegate func);
 
     [DllImport(dll)]
@@ -220,7 +220,6 @@ public abstract class PoseTracker
         m_ARCamera = Camera.main.transform;
 
         InitNativeMethods();
-        InitVLURLCandidates(config);
 
         m_IsInitialized = true;
 
@@ -254,16 +253,23 @@ public abstract class PoseTracker
         SetChangeFloorFuncNative(OnFloorChanged);
         SetChangeRegionCodeFuncNative(OnLayerInfoChanged);
 
-        InitVLSDKNative(m_Config.tracker);
+        InitVLSDK(m_Config);
     }
 
-    private void InitVLURLCandidates(Config config)
+    private void InitVLSDK(Config config)
     {
         string geojson = config.vlAreaGeoJson;
-        if(!config.useGPSGuide) {
+        if(!config.tracker.useGPSGuide) {
             geojson = null;
         }
 
+        var nativeURLs = GetVLURLNative(config);
+
+        InitVLSDKNative(m_Config.tracker, nativeURLs.ToArray(), geojson, nativeURLs.Count);
+    }
+
+    private List<VLURLNative> GetVLURLNative(Config config)
+    {
         List<VLURLNative> nativeURLs = new List<VLURLNative>();
         for(int i=0 ; i<config.urlList.Count ; i++) {
             VLURL url = config.urlList[i];
@@ -273,13 +279,12 @@ public abstract class PoseTracker
             }
 
             var nativeUrl = new VLURLNative();
-            nativeUrl.location = url.location;
+            nativeUrl.location = string.IsNullOrEmpty(url.location) ? "_" : url.location;
             nativeUrl.invokeUrl = url.invokeUrl;
             nativeUrl.secretKey = url.secretKey;
             nativeURLs.Add(nativeUrl);
         }
-
-        InitVLURLCandidatesNative(nativeURLs.ToArray(), geojson, nativeURLs.Count);
+        return nativeURLs;
     }
 
     public void Reset()
@@ -301,6 +306,10 @@ public abstract class PoseTracker
 
     public void DetectVLLocation(double lat, double lon, double radius) {
         DetectVLLocationNative(lat, lon, radius, OnVLLocationDetected);
+    }
+
+    public void EnableResetByDevicePose(bool value) {
+        EnableResetByDevicePoseNative(value);
     }
 
     /// <summary>

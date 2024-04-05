@@ -17,4 +17,5 @@ MonoBehaviour:
   m_LocationGeoJson: 
   m_VLIntervalInitial: 500
   m_VLIntervalPassed: 1000
+  m_VLQuality: 1
   m_LogLevel: 1

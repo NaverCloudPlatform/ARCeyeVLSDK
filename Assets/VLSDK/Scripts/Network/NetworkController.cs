@@ -8,12 +8,13 @@ using UnityEngine.Networking;
 using AOT;
 using ARCeye;
 
+
 public class NetworkController : MonoBehaviour
 {
     private static NetworkController s_Instance;
     private static TextureProvider s_TextureProvider;
 
-    public delegate void RequestVLDelegate(ARCeye.RequestVLInfo requestInfo);
+    public delegate void RequestVLDelegate(int key, ARCeye.RequestVLInfo requestInfo);
     
 
 #if UNITY_IOS && !UNITY_EDITOR
@@ -29,7 +30,7 @@ public class NetworkController : MonoBehaviour
     private static extern void SetRequestFuncNative(RequestVLDelegate func);
 
     [DllImport(dll)]
-    private static extern void SendSuccessResponseNative(IntPtr msg);
+    private static extern void SendSuccessResponseNative(int key, IntPtr msg);
 
     [DllImport(dll)]
     private static extern void SendSuccessVLGetResponseNative(IntPtr msg, int code, IntPtr fptr);
@@ -65,7 +66,7 @@ public class NetworkController : MonoBehaviour
 
 
     [MonoPInvokeCallback(typeof(RequestVLDelegate))]
-    unsafe private static void OnRequest(ARCeye.RequestVLInfo requestInfo)
+    unsafe private static void OnRequest(int key, ARCeye.RequestVLInfo requestInfo)
     {
         if(requestInfo.rawImage != IntPtr.Zero && !CreateQueryTexture(requestInfo.rawImage)) {
             return;
@@ -77,12 +78,12 @@ public class NetworkController : MonoBehaviour
             return;
         }
 
-        VLRequestBody body = VLRequestBody.Create(VLRequestBody.Type.ARCEYE, requestInfo);
+        VLRequestBody body = VLRequestBody.Create(requestInfo);
 
         if(body.method == "POST") {
-            s_Instance.OnSendingRequestAsync(body, s_QueryTexture);
+            s_Instance.OnSendingRequestAsync(key, body, s_QueryTexture);
         } else {
-            s_Instance.OnSendingLimitlessRequest(body, s_QueryTexture);
+            s_Instance.OnSendingLimitlessRequest(key, body, s_QueryTexture);
         }
     }
 
@@ -113,19 +114,19 @@ public class NetworkController : MonoBehaviour
         }
     }
 
-    private void OnSendingRequestSync(VLRequestBody body, Texture texture)
+    private void OnSendingRequestSync(int key, VLRequestBody body, Texture texture)
     {
         if (m_RequestCoroutine == null)
         {
-            m_RequestCoroutine = StartCoroutine(Upload(body, texture));
+            m_RequestCoroutine = StartCoroutine(Upload(key, body, texture));
         }
     }
 
-    private void OnSendingRequestAsync(VLRequestBody body, Texture texture, int asyncCount = 20)
+    private void OnSendingRequestAsync(int key, VLRequestBody body, Texture texture, int asyncCount = 20)
     {
         if(m_RequestCoroutines.Count < asyncCount)
         {
-            var c = StartCoroutine(Upload(body, texture));
+            var c = StartCoroutine(Upload(key, body, texture));
             m_RequestCoroutines.Add(c);
         }
         else
@@ -156,12 +157,12 @@ public class NetworkController : MonoBehaviour
         }
     }
 
-    private void OnSendingLimitlessRequest(VLRequestBody body, Texture texture)
+    private void OnSendingLimitlessRequest(int key, VLRequestBody body, Texture texture)
     {
-        StartCoroutine(Upload(body, texture));
+        StartCoroutine(Upload(key, body, texture));
     }
 
-    IEnumerator Upload(VLRequestBody requestBody, Texture texture)
+    IEnumerator Upload(int key, VLRequestBody requestBody, Texture texture)
     {
         UnityWebRequest www = CreateRequest(requestBody, texture);
 
@@ -181,11 +182,11 @@ public class NetworkController : MonoBehaviour
         else
         {
             ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.DEBUG, "[NetworkController] " + www.downloadHandler.text);
-
+            
             IntPtr msgPtr = Marshal.StringToHGlobalAnsi(www.downloadHandler.text);
 
             if(requestBody.method == "POST") {
-                SendSuccessResponseNative(msgPtr);
+                SendSuccessResponseNative(key, msgPtr);
             } else {
                 Debug.LogError($"[NetworkController] Requested method {requestBody.method} is not implemented!");
             }

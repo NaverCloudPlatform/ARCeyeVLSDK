@@ -17,6 +17,7 @@ namespace ARCeye
         private SerializedProperty m_LocationGeoJsonProp;
         private SerializedProperty m_VLIntervalInitialProp;
         private SerializedProperty m_VLIntervalPassedProp;
+        private SerializedProperty m_VLQualityProp;
         private SerializedProperty m_LogLevelProp;
 
 
@@ -29,6 +30,7 @@ namespace ARCeye
             m_LocationGeoJsonProp = serializedObject.FindProperty("m_LocationGeoJson");
             m_VLIntervalInitialProp = serializedObject.FindProperty("m_VLIntervalInitial");
             m_VLIntervalPassedProp = serializedObject.FindProperty("m_VLIntervalPassed");
+            m_VLQualityProp = serializedObject.FindProperty("m_VLQuality");
             m_LogLevelProp = serializedObject.FindProperty("m_LogLevel");
         }
 
@@ -47,6 +49,7 @@ namespace ARCeye
             }
 
             DrawVLInterval();
+            DrawVLQuality();
             DrawLogLevel();
         }
 
@@ -97,6 +100,14 @@ namespace ARCeye
 
             m_VLIntervalInitialProp.serializedObject.ApplyModifiedProperties();
             m_VLIntervalPassedProp.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawVLQuality()
+        {
+            EditorGUILayout.PropertyField(m_VLQualityProp);
+
+            EditorUtility.SetDirty(m_VLQualityProp.serializedObject.targetObject);
+            m_VLQualityProp.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawLogLevel()

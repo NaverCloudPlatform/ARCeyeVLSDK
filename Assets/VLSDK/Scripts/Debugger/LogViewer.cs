@@ -83,7 +83,10 @@ namespace ARCeye
             s_LogList = new LinkedList<LogElem>();
 
             SetDebugLogFuncNative(DebugLog);
+        }
 
+        void Start()
+        {
             m_VLSDKManager = GetComponentInParent<VLSDKManager>();
             m_GeoCoordProvider = m_VLSDKManager.GetComponentInChildren<GeoCoordProvider>();
         }
@@ -109,6 +112,7 @@ namespace ARCeye
 
         public void OnPoseUpdated(Matrix4x4 matrix, Matrix4x4 projMatrix, Matrix4x4 texMatrix) {
             Matrix4x4 poseMatrix = matrix.inverse;
+            m_Position = poseMatrix.GetColumn(3);
 
             Quaternion rotation = Quaternion.LookRotation(poseMatrix.GetColumn(2), poseMatrix.GetColumn(1));
             m_EulerRotation = rotation.eulerAngles;
@@ -213,9 +217,11 @@ namespace ARCeye
 
                 GUILayout.Space(15);
 
-                m_GeoCoordProvider.UseFakeGPSCoordOnDevice = GUILayout.Toggle(m_GeoCoordProvider.UseFakeGPSCoordOnDevice, "Use Fake GPS");
-
-                GUILayout.Label($"GPS : {m_GeoCoordProvider.info.latitude}, {m_GeoCoordProvider.info.longitude}");
+                if(m_GeoCoordProvider)
+                {
+                    m_GeoCoordProvider.UseFakeGPSCoordOnDevice = GUILayout.Toggle(m_GeoCoordProvider.UseFakeGPSCoordOnDevice, "Use Fake GPS");
+                    GUILayout.Label($"GPS : {m_GeoCoordProvider.info.latitude}, {m_GeoCoordProvider.info.longitude}");
+                }
 
                 DrawLogScrollViewArea();
 

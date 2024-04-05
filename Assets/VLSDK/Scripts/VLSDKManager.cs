@@ -53,7 +53,7 @@ namespace ARCeye
 
         [Header("Event")]
         [SerializeField]
-        private ChangedStateEvent m_OnStateChanged;
+        private ChangedStateEvent m_OnStateChanged = new ChangedStateEvent();
         public  ChangedStateEvent OnStateChanged {
             get => m_OnStateChanged;
             set {
@@ -103,7 +103,7 @@ namespace ARCeye
         }
 
         [SerializeField]
-        private ChangedLayerInfoEvent m_OnLayerInfoChanged; 
+        private ChangedLayerInfoEvent m_OnLayerInfoChanged = new ChangedLayerInfoEvent(); 
         public ChangedLayerInfoEvent OnLayerInfoChanged {
             get => m_OnLayerInfoChanged;
             set {
@@ -113,7 +113,7 @@ namespace ARCeye
         }
 
         [SerializeField]
-        private UpdatedPoseEvent m_OnPoseUpdated;
+        private UpdatedPoseEvent m_OnPoseUpdated = new UpdatedPoseEvent();
         public  UpdatedPoseEvent OnPoseUpdated {
             get => m_OnPoseUpdated;
             set {
@@ -123,7 +123,7 @@ namespace ARCeye
         }
 
         [SerializeField]
-        private UpdatedGeoCoordEvent m_OnGeoCoordUpdated;
+        private UpdatedGeoCoordEvent m_OnGeoCoordUpdated = new UpdatedGeoCoordEvent();
         public  UpdatedGeoCoordEvent OnGeoCoordUpdated {
             get => m_OnGeoCoordUpdated;
             set {
@@ -152,70 +152,13 @@ namespace ARCeye
             }
         }
 
+        private bool m_IsInitialized = false;
+
         //// Lifecycle
 
         private void Awake()
         {
             s_Instance = this;
-
-            InitConfig();
-            InitLogViewer();
-            InitCamera();
-            InitPoseTracker();
-        }
-
-        private void InitConfig()
-        {
-            if(m_Config == null) {
-                Debug.LogWarning("[VLSDKManager] Config is null. Use default Config setting");
-                m_Config = new Config();
-            }
-
-            if(m_Settings.URLList.Count == 0) {
-                Debug.LogWarning("[VLSDKManager] URL List is empty.");
-                return;
-            }
-
-            m_Config.tracker.requestIntervalBeforeLocalization = m_Settings.vlIntervalInitial;
-            m_Config.tracker.requestIntervalAfterLocalization = m_Settings.vlIntervalPassed;
-            m_Config.logLevel = m_Settings.logLevel;
-            m_Config.useGPSGuide = m_Settings.GPSGuide;
-            m_Config.urlList = m_Settings.URLList;
-            m_Config.vlAreaGeoJson = m_Settings.locationGeoJson;
-        }
-
-        private void InitLogViewer()
-        {
-            var logViewer = GetComponentInChildren<LogViewer>();
-            if(logViewer) { 
-                logViewer.logLevel = m_Config.logLevel;
-
-                m_OnStateChanged?.AddListener(logViewer.OnStateChanged);
-                // m_OnLocationChanged.AddListener(logViewer.OnLocationChanged);
-                // m_OnBuildingChanged.AddListener(logViewer.OnBuildingChanged);
-                // m_OnFloorChanged.AddListener(logViewer.OnFloorChanged);
-                m_OnRegionCodeChanged?.AddListener(logViewer.OnLayerInfoChanged);
-                m_OnLayerInfoChanged?.AddListener(logViewer.OnLayerInfoChanged);
-                m_OnPoseUpdated?.AddListener(logViewer.OnPoseUpdated);
-            }
-        }
-
-        private void InitCamera()
-        {
-            if(mainCamera == null) {
-                Debug.LogError("Main Camera를 찾을 수 없습니다.");
-            }
-            m_ARCamera = mainCamera.transform;
-            m_Origin = m_ARCamera.parent;
-        }
-
-        private void InitPoseTracker()
-        {
-#if UNITY_EDITOR
-            m_PoseTracker = new EditorPoseTracker();
-#else
-            m_PoseTracker = new DevicePoseTracker();
-#endif
         }
 
         private void OnEnable()
@@ -235,13 +178,29 @@ namespace ARCeye
             {
                 m_TextureProvider = GetComponent<TextureProvider>();
             }
+        }
 
-            m_PoseTracker.SetGeoCoordProvider(m_GeoCoordProvider);
-            m_PoseTracker.Initialize(m_ARCamera, m_Config);
+        /// <summary>
+        ///  VLSDKManager 시스템 초기화. VLSDKManager를 런타임에 생성하는 경우가 아니라면 직접 호출하지 않는다.
+        ///  VLSDKManager를 런타임에 생성하여 VLSDKSettings를 직접 할당하는 경우 VLSDKSettings를 VLSDKManager에 할당한 뒤에 초기화 메서드를 호출해야 한다.
+        /// </summary>
+        public void Initialize()
+        {
+            if(!m_IsInitialized)
+            {
+                InitCamera();
+                InitConfig();
+                InitPoseTracker();
+                InitLogViewer();
+                
+                m_IsInitialized = true;
+            }
         }
 
         private void Start()
         {
+            Initialize();
+
 #if UNITY_EDITOR         
             // Editor 상에서 개발을 할 때 사용할 Texture provider 할당.
             // Texture provider에서 전달하는 값을 이용하여 preview를 렌더링하고 VL 쿼리를 보낸다.
@@ -255,7 +214,7 @@ namespace ARCeye
             preview.SetTexture(textureProvider.textureToSend);
 #endif
 
-            m_OnPoseUpdated.AddListener(UpdateOriginPose);
+            m_OnPoseUpdated?.AddListener(UpdateOriginPose);
 
             m_PoseTracker.onStateChanged = m_OnStateChanged;
             m_PoseTracker.onPoseUpdated = m_OnPoseUpdated;
@@ -271,6 +230,66 @@ namespace ARCeye
             if(m_PlayOnAwake)
             {
                 StartSession();
+            }
+        }
+
+        private void InitCamera()
+        {
+            if(mainCamera == null) {
+                Debug.LogError("Main Camera를 찾을 수 없습니다.");
+            }
+            m_ARCamera = mainCamera.transform;
+            m_Origin = m_ARCamera.parent;
+        }
+
+        private void InitConfig()
+        {
+            if(m_Config == null) {
+                Debug.LogWarning("[VLSDKManager] Config is null. Use default Config setting");
+                m_Config = new Config();
+            }
+
+            if(m_Settings == null || m_Settings.URLList.Count == 0) {
+                Debug.LogWarning("[VLSDKManager] URL List is empty.");
+                return;
+            }
+
+            m_Config.tracker.resetByDevicePose = true;
+
+            m_Config.tracker.requestIntervalBeforeLocalization = m_Settings.vlIntervalInitial;
+            m_Config.tracker.requestIntervalAfterLocalization = m_Settings.vlIntervalPassed;
+            m_Config.tracker.useGPSGuide = m_Settings.GPSGuide;
+            m_Config.tracker.vlQuality = m_Settings.vlQuality;
+
+            m_Config.logLevel = m_Settings.logLevel;
+            m_Config.urlList = m_Settings.URLList;
+            m_Config.vlAreaGeoJson = m_Settings.locationGeoJson;
+        }
+
+        private void InitPoseTracker()
+        {
+#if UNITY_EDITOR
+            m_PoseTracker = new EditorPoseTracker();
+#else
+            m_PoseTracker = new DevicePoseTracker();
+#endif
+            m_PoseTracker.SetGeoCoordProvider(m_GeoCoordProvider);
+            m_PoseTracker.Initialize(m_ARCamera, m_Config);
+        }
+
+        private void InitLogViewer()
+        {
+            var logViewer = GetComponentInChildren<LogViewer>();
+            if(logViewer) { 
+                logViewer.logLevel = m_Config.logLevel;
+
+                m_OnStateChanged?.AddListener(logViewer.OnStateChanged);
+                // m_OnLocationChanged.AddListener(logViewer.OnLocationChanged);
+                // m_OnBuildingChanged.AddListener(logViewer.OnBuildingChanged);
+                // m_OnFloorChanged.AddListener(logViewer.OnFloorChanged);
+                m_OnRegionCodeChanged?.AddListener(logViewer.OnLayerInfoChanged);
+                m_OnLayerInfoChanged?.AddListener(logViewer.OnLayerInfoChanged);
+                m_OnPoseUpdated?.AddListener(logViewer.OnPoseUpdated);
             }
         }
 
@@ -344,7 +363,7 @@ namespace ARCeye
             double longitude = m_GeoCoordProvider.info.longitude;
             double radius = 100;
 
-            if(m_Config.useGPSGuide && (latitude == 0 || longitude == 0)) {
+            if(m_Config.tracker.useGPSGuide && (latitude == 0 || longitude == 0)) {
                 LogViewer.DebugLog(LogLevel.ERROR, "Failed to get GPS coordinate");
             }
 
@@ -356,9 +375,13 @@ namespace ARCeye
             return m_PoseTracker.FindVLLocation(latitude, longitude);
         }
 
+        public void EnableResetByDevicePose(bool active) {
+            m_PoseTracker.EnableResetByDevicePose(active);
+        }
+
         /* -- GPS Location Requester -- */
         public void StartDetectingGPSLocation() {
-            if(!m_Config.useGPSGuide) {
+            if(!m_Config.tracker.useGPSGuide) {
                 return;
             }
 

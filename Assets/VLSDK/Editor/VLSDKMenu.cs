@@ -36,11 +36,7 @@ namespace ARCeye
             }
 
             // Create VLSDKManager
-            GameObject VLSDKManagerObject = ObjectFactory.CreateGameObject("VLSDKManager", typeof(VLSDKManager));
-            VLSDKManager VLSDKManager = VLSDKManagerObject.GetComponent<VLSDKManager>();
-            VLSDKManagerObject.AddComponent<TextureProvider>();
-            VLSDKManagerObject.AddComponent<NetworkController>();
-            VLSDKManagerObject.AddComponent<GeoCoordProvider>();
+            VLSDKManager VLSDKManager = VLSDKManagerFactory.CreateVLSDKManager();
 
             // Assign VLSDKSettings
             string settingGUID = settingGUIDInAssets[0];
@@ -57,7 +53,7 @@ namespace ARCeye
             VLSDKManager.OnPoseUpdated.AddListener((matrix, proj, tex) => logViewer.OnPoseUpdated(matrix, proj, tex));
             VLSDKManager.OnObjectDetected.AddListener(detectedObject => logViewer.OnObjectDetected(detectedObject));
 
-            logViewerObject.transform.parent = VLSDKManagerObject.transform;
+            logViewerObject.transform.parent = VLSDKManager.gameObject.transform;
 
             CreatePreviewImage();
 

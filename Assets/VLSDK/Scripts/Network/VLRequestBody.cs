@@ -6,10 +6,6 @@ using UnityEngine;
 
 public class VLRequestBody
 {
-    public enum Type {
-        ARCEYE, LABS
-    }
-
     public string method;
     public string location;
     public string url;
@@ -47,20 +43,22 @@ public class VLRequestBody
                float.Parse(elems[2]) != 0 && float.Parse(elems[3]) != 0;
     }
 
-    public static VLRequestBody Create(Type type, ARCeye.RequestVLInfo requestInfo) 
+    public static VLRequestBody Create(ARCeye.RequestVLInfo requestInfo) 
     {
-        switch(type) {
-            case Type.ARCEYE : {
-                return CreateARCEyeRequest(requestInfo);
-            }
-            case Type.LABS : {
-                return CreateLABSRequest(requestInfo);
-            }
-            default : {
-                Debug.LogError("Invalid VLRequestBody type is used");
-                return null;
-            }
+        if(IsARCeyeURL(requestInfo.url))
+        {
+            return CreateARCEyeRequest(requestInfo);
         }
+        else
+        {
+            return CreateLABSRequest(requestInfo);
+        }
+    }
+
+    private static bool IsARCeyeURL(string url)
+    {
+        string prefix = "https://vl-arc-eye.ncloud.com/api";
+        return url.Contains(prefix);
     }
 
     private static VLRequestBody CreateARCEyeRequest(ARCeye.RequestVLInfo requestInfo) {
@@ -103,7 +101,7 @@ public class VLRequestBody
 
         if(VLRequestBody.IsValidCameraParam(requestInfo.cameraParam))
         {
-            body.parameters.Add("camparam", requestInfo.cameraParam);
+            body.parameters.Add("camparams", requestInfo.cameraParam);
         }
 
         // LABS 요청에는 location 필드가 필수.
