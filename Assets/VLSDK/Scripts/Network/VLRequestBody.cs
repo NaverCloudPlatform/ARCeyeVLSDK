@@ -28,8 +28,7 @@ public class VLRequestBody
            Method - {method}
            URL - {url}
            filename - {filename}
-           params - 
-           {sb.ToString()}
+           params - {sb.ToString()}
          ";
     }
     
@@ -47,7 +46,7 @@ public class VLRequestBody
     {
         if(IsARCeyeURL(requestInfo.url))
         {
-            return CreateARCEyeRequest(requestInfo);
+            return CreateARCeyeRequest(requestInfo);
         }
         else
         {
@@ -61,7 +60,7 @@ public class VLRequestBody
         return url.Contains(prefix);
     }
 
-    private static VLRequestBody CreateARCEyeRequest(ARCeye.RequestVLInfo requestInfo) {
+    private static VLRequestBody CreateARCeyeRequest(ARCeye.RequestVLInfo requestInfo) {
         VLRequestBody body = new VLRequestBody();
 
         body.method = requestInfo.method;

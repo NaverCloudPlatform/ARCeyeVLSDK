@@ -260,6 +260,7 @@ namespace ARCeye
             m_Config.tracker.requestIntervalAfterLocalization = m_Settings.vlIntervalPassed;
             m_Config.tracker.useGPSGuide = m_Settings.GPSGuide;
             m_Config.tracker.vlQuality = m_Settings.vlQuality;
+            m_Config.tracker.vlSearchRange = 10;
 
             m_Config.logLevel = m_Settings.logLevel;
             m_Config.urlList = m_Settings.URLList;

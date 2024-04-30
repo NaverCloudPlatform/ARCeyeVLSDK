@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Networking;
 using AOT;
 using ARCeye;
@@ -52,6 +53,8 @@ public class NetworkController : MonoBehaviour
     private bool m_CheckQueueFullDuration = false;
     private const int m_FullQueueWaitingSeconds = 5;
 
+    public UnityAction<ARCeye.RequestVLInfo> OnRequestInfoReceived { get; set; }
+
 
     private void Awake()
     {
@@ -68,6 +71,8 @@ public class NetworkController : MonoBehaviour
     [MonoPInvokeCallback(typeof(RequestVLDelegate))]
     unsafe private static void OnRequest(int key, ARCeye.RequestVLInfo requestInfo)
     {
+        s_Instance.OnRequestInfoReceived?.Invoke(requestInfo);
+
         if(requestInfo.rawImage != IntPtr.Zero && !CreateQueryTexture(requestInfo.rawImage)) {
             return;
         }

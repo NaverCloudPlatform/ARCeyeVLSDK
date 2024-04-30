@@ -73,6 +73,9 @@ namespace ARCeye
         [HideInInspector]
         public VLQuality vlQuality;
 
+        [HideInInspector]
+        public int vlSearchRange;
+
 
         [Header("Log Option")]
         [HideInInspector]
