@@ -183,7 +183,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbeecc812605d4a69afe84622d572b96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TextureToSend: {fileID: 8400000, guid: 59b55a5822e324b1192a9668c09d43fa, type: 2}
+  m_TextureToSend: {fileID: 2800000, guid: cb02dcec398084508b726da3ec4711f9, type: 3}
 --- !u!114 &376553744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -618,7 +618,6 @@ MonoBehaviour:
   m_ARCoordRoot: {fileID: 0}
   m_VOTObject: {fileID: 0}
   m_ShowDebugUI: 1
-  m_ShowARCoord: 1
 --- !u!1 &859066906
 GameObject:
   m_ObjectHideFlags: 0
