@@ -5,6 +5,8 @@ using UnityEngine.Events;
 
 namespace ARCeye {
 [System.Serializable]
+public class InitialPoseReceivedEvent : UnityEvent<int> {}
+[System.Serializable]
 public class ChangedStateEvent : UnityEvent<TrackerState> {}
 [System.Serializable]
 public class ChangedLocationEvent : UnityEvent<string> {}

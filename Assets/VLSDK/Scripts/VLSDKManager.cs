@@ -9,6 +9,8 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
+        const string PACKAGE_VERSION = "1.6.3";
+
         private PoseTracker m_PoseTracker;
         private NetworkController m_NetworkController;
         private GeoCoordProvider m_GeoCoordProvider;
@@ -52,6 +54,16 @@ namespace ARCeye
 
 
         [Header("Event")]
+        [SerializeField]
+        private InitialPoseReceivedEvent m_OnInitialPoseReceived = new InitialPoseReceivedEvent();
+        public  InitialPoseReceivedEvent OnInitalPoseReceived {
+            get => m_OnInitialPoseReceived;
+            set {
+                m_PoseTracker.onInitialPoseReceived = value;
+                m_OnInitialPoseReceived = value;
+            }
+        }
+
         [SerializeField]
         private ChangedStateEvent m_OnStateChanged = new ChangedStateEvent();
         public  ChangedStateEvent OnStateChanged {
@@ -132,7 +144,7 @@ namespace ARCeye
             }
         }
 
-        [SerializeField]
+        // [SerializeField]
         private DetectedObjectEvent m_OnObjectDetected;
         public  DetectedObjectEvent OnObjectDetected {
             get => m_OnObjectDetected;
@@ -152,6 +164,12 @@ namespace ARCeye
             }
         }
 
+        public string version {
+            get {
+                return PACKAGE_VERSION;
+            }
+        }
+        
         private bool m_IsInitialized = false;
 
         //// Lifecycle
@@ -191,6 +209,7 @@ namespace ARCeye
                 InitCamera();
                 InitConfig();
                 InitPoseTracker();
+                InitNetworkController();
                 InitLogViewer();
                 
                 m_IsInitialized = true;
@@ -201,21 +220,9 @@ namespace ARCeye
         {
             Initialize();
 
-#if UNITY_EDITOR         
-            // Editor 상에서 개발을 할 때 사용할 Texture provider 할당.
-            // Texture provider에서 전달하는 값을 이용하여 preview를 렌더링하고 VL 쿼리를 보낸다.
-            var textureProvider = GetComponent<TextureProvider>();
-            (m_PoseTracker as EditorPoseTracker).textureProvider = textureProvider;
-
-            DebugPreview preview = m_ARCamera.GetComponentInChildren<DebugPreview>(true);
-            if(preview == null) {
-                Debug.LogError("DebugPreview를 찾을 수 없습니다. 기존에 추가 된 Main Camera가 있을 경우 해당 카메라를 제거해주세요");
-            }
-            preview.SetTexture(textureProvider.textureToSend);
-#endif
-
             m_OnPoseUpdated?.AddListener(UpdateOriginPose);
 
+            m_PoseTracker.onInitialPoseReceived = m_OnInitialPoseReceived;
             m_PoseTracker.onStateChanged = m_OnStateChanged;
             m_PoseTracker.onPoseUpdated = m_OnPoseUpdated;
             m_PoseTracker.onRegionCodeChanged = m_OnRegionCodeChanged;
@@ -276,6 +283,14 @@ namespace ARCeye
 #endif
             m_PoseTracker.SetGeoCoordProvider(m_GeoCoordProvider);
             m_PoseTracker.Initialize(m_ARCamera, m_Config);
+
+            string nativeVersion = m_PoseTracker?.GetVersion();
+            Debug.Log($"<b>VLSDK version {PACKAGE_VERSION}, native {nativeVersion}</b>");
+        }
+
+        private void InitNetworkController()
+        {
+            m_NetworkController.EnableVLPose(m_Settings.showVLPose);
         }
 
         private void InitLogViewer()
@@ -393,6 +408,15 @@ namespace ARCeye
 
         public void StopDetectingGPSLocation() {
             CancelInvoke(nameof(DetectVLLocation));
+        }
+
+
+        /// Debugging
+
+        private void OnDrawGizmos()
+        {
+            Matrix4x4 poseMatrix = mainCamera.transform.localToWorldMatrix;
+            DebugUtility.DrawFrame(poseMatrix, Color.black, 1.5f);
         }
     }
 }

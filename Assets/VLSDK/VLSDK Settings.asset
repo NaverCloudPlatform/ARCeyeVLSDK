@@ -18,4 +18,5 @@ MonoBehaviour:
   m_VLIntervalInitial: 500
   m_VLIntervalPassed: 1000
   m_VLQuality: 1
+  m_ShowVLPose: 0
   m_LogLevel: 1

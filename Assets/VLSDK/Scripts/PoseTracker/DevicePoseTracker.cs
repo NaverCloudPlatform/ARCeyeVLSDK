@@ -46,10 +46,20 @@ public class DevicePoseTracker : PoseTracker
 
         // m_Config = config;
         Initialize(config);
+        InitComponents();
 
         int t = m_Config.tracker.previewWidth;
         m_Config.tracker.previewWidth = m_Config.tracker.previewHeight;
         m_Config.tracker.previewHeight = t;
+    }
+
+    private void InitComponents()
+    {
+        Dataset.ARDatasetManager datasetManager = GameObject.FindObjectOfType<Dataset.ARDatasetManager>();
+        if(datasetManager != null)
+        {
+            GameObject.Destroy(datasetManager);
+        }
     }
 
     public override void RegisterFrameLoop()

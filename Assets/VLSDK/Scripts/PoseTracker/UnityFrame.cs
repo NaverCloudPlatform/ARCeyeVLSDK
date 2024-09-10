@@ -17,6 +17,8 @@ public struct UnityFrame {
     public float[] texTrans;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
     public float[] geoCoord;
+
+    public float realHeight;
     
     public IntPtr  imageBuffer;
 }

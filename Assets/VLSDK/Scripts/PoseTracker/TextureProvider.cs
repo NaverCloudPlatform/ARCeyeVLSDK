@@ -7,7 +7,6 @@ namespace ARCeye
 {
     public class TextureProvider : MonoBehaviour
     {
-        [SerializeField]
         private Texture m_TextureToSend;
         public Texture textureToSend {
             get => m_TextureToSend;

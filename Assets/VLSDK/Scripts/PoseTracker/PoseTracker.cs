@@ -15,6 +15,7 @@ public abstract class PoseTracker
     /* -- Delegates -- */
 
     public delegate void PoseUpdateDelegate(IntPtr viewMatrix, IntPtr projMatrix, IntPtr image, IntPtr texTrans);
+    public delegate void InitialPoseReceivedDelegate(int count);
     public delegate void ChangeStateDelegate(int state);
     public delegate void ChangeLocationDelegate(IntPtr rawLocation);
     public delegate void ChangeBuildingDelegate(IntPtr rawBuilding);
@@ -56,6 +57,12 @@ public abstract class PoseTracker
     protected Config m_Config;
     protected UnityFrame m_Frame;
     protected bool m_IsInitialized = false;
+
+    protected InitialPoseReceivedEvent m_OnInitialPoseReceived;
+    public InitialPoseReceivedEvent onInitialPoseReceived {
+        get => m_OnInitialPoseReceived;
+        set => m_OnInitialPoseReceived = value;
+    }
 
     protected ChangedStateEvent m_OnStateChanged;
     public ChangedStateEvent onStateChanged {
@@ -161,6 +168,9 @@ public abstract class PoseTracker
     private static extern void SetPoseUpdateFuncNative(PoseUpdateDelegate func);
 
     [DllImport(dll)]
+    private static extern void SetInitialPoseReceivedFuncNative(InitialPoseReceivedDelegate func);
+
+    [DllImport(dll)]
     private static extern void SetChangeStateFuncNative(ChangeStateDelegate func);
 
     [DllImport(dll)]
@@ -222,8 +232,6 @@ public abstract class PoseTracker
         InitNativeMethods();
 
         m_IsInitialized = true;
-
-        Debug.Log($"<b>VLSDK Native version : <color=#FF0000>{GetVersion()}</color></b>");
     }
 
     public string GetVersion()
@@ -243,6 +251,7 @@ public abstract class PoseTracker
     private void InitNativeMethods()
     {
         SetPoseUpdateFuncNative(OnPoseUpdated);
+        SetInitialPoseReceivedFuncNative(OnInitialPoseReceived);
         SetChangeStateFuncNative(OnStateChanged);
         SetChangeLayerInfoFuncNative(OnLayerInfoChanged);
         SetDetectObjectFuncNative(OnObjectDetected);
@@ -274,7 +283,7 @@ public abstract class PoseTracker
         for(int i=0 ; i<config.urlList.Count ; i++) {
             VLURL url = config.urlList[i];
 
-            if(url.isInactivated) {
+            if(url.Inactive) {
                 continue;
             }
 
@@ -349,8 +358,7 @@ public abstract class PoseTracker
         {
             Transform camTrans = m_ARCamera;
             lhCamModelMatrix = Matrix4x4.TRS(camTrans.localPosition, camTrans.localRotation, Vector3.one);
-        }
-        
+        }        
 
         Matrix4x4 camModelMatrix = PoseUtility.ConvertLHRH(lhCamModelMatrix);
         Matrix4x4 viewMatrix = Matrix4x4.Inverse(camModelMatrix).transpose;
@@ -373,6 +381,7 @@ public abstract class PoseTracker
         m_Frame.projMatrix = p;
         m_Frame.texTrans = trans;
         m_Frame.imageBuffer = GCHandle.ToIntPtr(gcI);
+        m_Frame.realHeight = 1.5f;
         m_Frame.geoCoord = new float[]{locationInfo.latitude, locationInfo.longitude};
 
         UpdateUnityFrameNative(m_Frame);
@@ -399,6 +408,14 @@ public abstract class PoseTracker
 
 
     /* -- Callbacks from native -- */
+
+    [MonoPInvokeCallback(typeof(InitialPoseReceivedDelegate))]
+    private static void OnInitialPoseReceived(int count) 
+    {
+        if(s_Instance.onInitialPoseReceived != null) {
+            s_Instance.onInitialPoseReceived.Invoke(count);
+        }
+    }
 
     [MonoPInvokeCallback(typeof(ChangeStateDelegate))]
     private static void OnStateChanged(int state) 
@@ -461,11 +478,11 @@ public abstract class PoseTracker
         // X = M_loc * M_vio^-1
         // X^-1 = M_vio * M_loc^-1
 
-        Matrix4x4 rhLocalizedViewMatrix = PoseUtility.UnmanagedToMatrix4x4(vm);
+        Matrix4x4 rhLocalizedViewMatrix = PoseUtility.UnmanagedToMatrix4x4<double>(vm);
         Matrix4x4 localizedViewMatrix = PoseUtility.ConvertLHRHView(rhLocalizedViewMatrix);
         Matrix4x4 localizedPoseMatrix = Matrix4x4.Inverse(localizedViewMatrix);
 
-        Matrix4x4 projectionMatrix = PoseUtility.UnmanagedToMatrix4x4(pm);
+        Matrix4x4 projectionMatrix = PoseUtility.UnmanagedToMatrix4x4<float>(pm);
 
         Matrix4x4 texMatrix = PoseUtility.UnmanagedToMatrix4x4From3x3(tx);
 

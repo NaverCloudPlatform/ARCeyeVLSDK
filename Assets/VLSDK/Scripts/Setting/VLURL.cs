@@ -29,10 +29,10 @@ namespace ARCeye
         }
 
         [SerializeField]
-        private bool m_IsInactivated;
-        public bool isInactivated { 
-            get => m_IsInactivated; 
-            set => m_IsInactivated = value;
+        private bool m_Inactive;
+        public bool Inactive { 
+            get => m_Inactive; 
+            set => m_Inactive = value;
         }
     }
 }

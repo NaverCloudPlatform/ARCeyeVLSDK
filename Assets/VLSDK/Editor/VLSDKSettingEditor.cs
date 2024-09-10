@@ -18,6 +18,7 @@ namespace ARCeye
         private SerializedProperty m_VLIntervalInitialProp;
         private SerializedProperty m_VLIntervalPassedProp;
         private SerializedProperty m_VLQualityProp;
+        private SerializedProperty m_ShowVLPoseProp;
         private SerializedProperty m_LogLevelProp;
 
 
@@ -31,6 +32,7 @@ namespace ARCeye
             m_VLIntervalInitialProp = serializedObject.FindProperty("m_VLIntervalInitial");
             m_VLIntervalPassedProp = serializedObject.FindProperty("m_VLIntervalPassed");
             m_VLQualityProp = serializedObject.FindProperty("m_VLQuality");
+            m_ShowVLPoseProp = serializedObject.FindProperty("m_ShowVLPose");
             m_LogLevelProp = serializedObject.FindProperty("m_LogLevel");
         }
 
@@ -50,6 +52,7 @@ namespace ARCeye
 
             DrawVLInterval();
             DrawVLQuality();
+            DrawShowVLPose();
             DrawLogLevel();
         }
 
@@ -108,6 +111,14 @@ namespace ARCeye
 
             EditorUtility.SetDirty(m_VLQualityProp.serializedObject.targetObject);
             m_VLQualityProp.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawShowVLPose()
+        {
+            EditorGUILayout.PropertyField(m_ShowVLPoseProp);
+
+            EditorUtility.SetDirty(m_ShowVLPoseProp.serializedObject.targetObject);
+            m_ShowVLPoseProp.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawLogLevel()

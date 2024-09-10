@@ -16,8 +16,8 @@ MonoBehaviour:
   - m_Location: amco
     m_InvokeUrl: https://vl-arc-eye.ncloud.com/api/v1/96/7b1a278f5abe8e9da907fc9c29dfd432d60dc76e17b0fabab659d2a508bc65c4/location
     m_SecretKey: ZUpCdlJHVUZmWG9hVWJkZXJnZW94aWhiV3BGU0VPR2E=
-    m_IsInactivated: 0
-  m_GPSGuide: 0
+    m_Inactive: 0
+  m_GPSGuide: 1
   m_LocationGeoJson: "{\n  \"type\": \"FeatureCollection\",\n  \"features\": [\n   
     {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"location\":
     \"amco\"\n      },\n      \"geometry\": {\n        \"coordinates\": [\n         
@@ -31,4 +31,5 @@ MonoBehaviour:
   m_VLIntervalInitial: 500
   m_VLIntervalPassed: 1000
   m_VLQuality: 0
+  m_ShowVLPose: 1
   m_LogLevel: 0

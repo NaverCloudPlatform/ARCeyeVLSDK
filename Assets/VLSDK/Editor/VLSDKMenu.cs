@@ -51,11 +51,8 @@ namespace ARCeye
             // Register VLSDKManager events to LogViewer
             VLSDKManager.OnStateChanged.AddListener(trackerState => logViewer.OnStateChanged(trackerState));
             VLSDKManager.OnPoseUpdated.AddListener((matrix, proj, tex) => logViewer.OnPoseUpdated(matrix, proj, tex));
-            VLSDKManager.OnObjectDetected.AddListener(detectedObject => logViewer.OnObjectDetected(detectedObject));
 
             logViewerObject.transform.parent = VLSDKManager.gameObject.transform;
-
-            CreatePreviewImage();
 
             // Assign camera components
             VLSDKManager.arCamera = m_ARCameraManager.transform;
@@ -81,39 +78,6 @@ namespace ARCeye
             var obj3 = arCameraManagerType != null ? GameObject.FindObjectOfType(arCameraManagerType) : null;
 
             return obj1 != null && (obj2 != null || obj3 != null);
-        }
-
-        private static void CreatePreviewImage()
-        {
-            Canvas previewCanvas = m_ARCameraManager.GetComponentInChildren<Canvas>();
-
-            // Add debug preview texture.
-            if(previewCanvas == null)
-            {
-                previewCanvas = ObjectFactory.CreateGameObject("Canvas", typeof(Canvas)).GetComponent<Canvas>();
-                previewCanvas.transform.SetParent(m_ARCameraManager.transform);
-            }
-
-            previewCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-            previewCanvas.worldCamera = m_ARCameraManager.GetComponent<Camera>();
-            previewCanvas.planeDistance = previewCanvas.worldCamera.farClipPlane - 0.1f;
-
-            DebugPreview debugPreview = previewCanvas.GetComponentInChildren<DebugPreview>();
-            if(debugPreview == null)
-            {
-                GameObject debugPreviewObject = ObjectFactory.CreateGameObject("DebugPreview", typeof(DebugPreview));
-                debugPreviewObject.transform.SetParent(previewCanvas.transform);
-                
-                RectTransform debugPreviewRT = debugPreviewObject.AddComponent<RectTransform>();
-
-                debugPreviewRT.anchorMin = Vector2.zero;
-                debugPreviewRT.anchorMax = Vector2.one;
-                debugPreviewRT.offsetMin = Vector3.zero;
-                debugPreviewRT.offsetMax = Vector3.zero;
-
-                debugPreviewRT.localPosition = Vector3.zero;
-                debugPreviewRT.localScale = Vector3.one;
-            }
         }
 
         public static Type GetTypeFromAssemblies( string TypeName )

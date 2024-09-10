@@ -37,18 +37,21 @@ namespace ARCeye
         private static extern void ReleaseLoggerNative();
 
 
+        [SerializeField]
         public VLSDKManager m_VLSDKManager;
-        private GeoCoordProvider m_GeoCoordProvider;
-        public Transform m_ARCoordRoot;
-        public Transform m_VOTObject;
 
         [SerializeField]
-        private bool m_ShowDebugUI = true;
+        private bool m_UseDebugUI = true;
+        private bool m_ShowDebugUI = false;
+
+        private GeoCoordProvider m_GeoCoordProvider;
+        private MultiTouchDetector m_MultiTouchDetector;
 
 
         ///// GUI Layout /////
         private float m_TargetScreenWidth = 720.0f * 1.0f;
         private float m_TargetScreenHeight = 1280.0f * 1.0f;
+
         private Vector3 m_GUIScale = Vector3.zero;
         private Matrix4x4 m_PrevGUIMat = Matrix4x4.identity;
         private Vector2 m_ScrollPosition;
@@ -64,14 +67,15 @@ namespace ARCeye
 
         private static string m_Location = "";
         private static string m_Building = "";
-        private static string m_CurrState = "";
+        private static string m_CurrState = "INITIAL";
         private static string m_Floor = "";
-        private static string m_LayerInfo = "";
+        private static string m_LayerInfo = "none";
 
         private Vector3 m_Position;
         private Vector3 m_EulerRotation;
 
-        private GUIStyle style = new GUIStyle();
+        private GUIStyle m_TitleStyle = new GUIStyle();
+        private GUIStyle m_ContentsStyle = new GUIStyle();
         private int m_LineHeight = 25;
         private int m_LogBoxHeight = 0;
         private static bool s_IsLogScrollUpdated = false;
@@ -81,6 +85,14 @@ namespace ARCeye
         void Awake()
         {
             s_LogList = new LinkedList<LogElem>();
+            m_MultiTouchDetector = new MultiTouchDetector();
+
+            m_TitleStyle.normal.textColor = Color.white;
+            m_TitleStyle.fontSize = 25;
+            m_TitleStyle.fontStyle = FontStyle.Bold;
+
+            m_ContentsStyle.normal.textColor = Color.white;
+            m_ContentsStyle.fontSize = 20;
 
             SetDebugLogFuncNative(DebugLog);
         }
@@ -91,10 +103,200 @@ namespace ARCeye
             m_GeoCoordProvider = m_VLSDKManager.GetComponentInChildren<GeoCoordProvider>();
         }
 
+        void Update()
+        {
+            if(m_UseDebugUI && m_MultiTouchDetector.CheckMultiTouch())
+            {
+                m_ShowDebugUI = !m_ShowDebugUI;
+            }
+        }
+
         void OnDestroy()
         {
             ReleaseLoggerNative();
         }
+
+        void OnGUI()
+        {
+            // Scale GUI to target
+            m_GUIScale.x = Screen.width / m_TargetScreenWidth;
+            m_GUIScale.y = Screen.height / m_TargetScreenHeight;
+            m_GUIScale.z = 1.0f;
+
+            m_PrevGUIMat = GUI.matrix;
+            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, m_GUIScale);
+
+            GUI.changed = false; // 이 처리를 하지 않으면 아래의 ChangeLocation이 항상 실행.
+
+            if (m_ShowDebugUI)
+            {
+                float windowWidth = 600;
+                float windowHeight = 900;
+                float windowX = (m_TargetScreenWidth - windowWidth) / 2;
+                float windowY = (m_TargetScreenHeight - windowHeight) / 2;
+                float topMargin = 15;
+                float leftMargin = 30;
+
+                Rect windowArea = new Rect(windowX, windowY, windowWidth, windowHeight);
+                Rect viewArea = new Rect(windowX + leftMargin, windowY + topMargin, windowWidth - leftMargin, windowHeight - topMargin);
+
+                GUI.Box(windowArea, "");
+                
+                GUILayout.BeginArea(viewArea);
+                GUILayout.BeginVertical();
+
+                DrawVLSDKTitle();
+
+                GUILayout.Space(20);
+
+                DrawStateInfo();                
+
+                GUILayout.Space(20);
+
+                DrawLayerInfo();
+
+                GUILayout.Space(20);
+
+                DrawGPSInfo();
+
+                GUILayout.Space(20);
+
+                DrawPoseInfo();
+
+                GUILayout.Space(20);
+
+                DrawLogScrollViewArea(viewArea);
+
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
+            }
+
+            GUI.matrix = m_PrevGUIMat;
+        }
+
+        private void DrawVLSDKTitle()
+        {
+            GUIStyle titleStyle = new GUIStyle();
+            titleStyle.fontSize = 50;
+            titleStyle.alignment = TextAnchor.MiddleCenter;
+            titleStyle.fontStyle = FontStyle.BoldAndItalic;
+            titleStyle.normal.textColor = Color.white;
+            GUILayout.Label("VLSDK", titleStyle);
+
+            GUIStyle versionStyle = new GUIStyle();
+            versionStyle.fontSize = 25;
+            versionStyle.alignment = TextAnchor.MiddleCenter;
+            versionStyle.fontStyle = FontStyle.BoldAndItalic;
+            versionStyle.normal.textColor = Color.white;
+            GUILayout.Label($"v{m_VLSDKManager?.version}", versionStyle);
+        }
+
+        private void DrawStateInfo()
+        {
+            GUILayout.Label("State", m_TitleStyle);
+            GUILayout.Space(10);
+            GUILayout.Label(m_CurrState, m_ContentsStyle);
+        }
+
+        private void DrawLayerInfo()
+        {
+            GUILayout.Label("Layer Info", m_TitleStyle);
+            GUILayout.Space(10);
+            GUILayout.Label(m_LayerInfo, m_ContentsStyle);
+        }
+
+        private void DrawGPSInfo()
+        {
+            GUILayout.Label("GPS", m_TitleStyle);
+            GUILayout.Space(10);
+
+            if(m_GeoCoordProvider)
+            {
+                GUILayout.Label($"{m_GeoCoordProvider.info.latitude}, {m_GeoCoordProvider.info.longitude}", m_ContentsStyle);
+            }
+            else
+            {
+                GUILayout.Label("GeoCoordProvider is not detected", m_ContentsStyle);
+            }
+        }
+
+        private void DrawPoseInfo()
+        {
+            GUILayout.Label("Pose", m_TitleStyle);
+            GUILayout.Space(10);
+            GUILayout.Label($"Position (x:{m_Position.x.ToString("N1")} y:{m_Position.y.ToString("N1")} z:{m_Position.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Label($"Rotation (x:{m_EulerRotation.x.ToString("N1")} y:{m_EulerRotation.y.ToString("N1")} z:{m_EulerRotation.z.ToString("N1")})", m_ContentsStyle);
+        }
+
+        private void DrawLogScrollViewArea(Rect viewRect)
+        {
+            GUILayout.Label("Log", m_TitleStyle);
+
+            GUILayout.Space(10);
+
+            if (!m_LockLogScrollUpdate && s_IsLogScrollUpdated)
+            {
+                m_ScrollPosition = new Vector2(m_ScrollPosition.x, m_LogBoxHeight);
+                s_IsLogScrollUpdated = false;
+            }
+
+            m_ScrollPosition = GUILayout.BeginScrollView(m_ScrollPosition, GUILayout.Width(viewRect.width - 10), GUILayout.Height(350));
+
+            foreach (var elem in s_LogList)
+            {
+                DrawLogs(elem);
+            }
+
+            GUILayout.EndScrollView();
+
+            m_LockLogScrollUpdate = GUILayout.Toggle(m_LockLogScrollUpdate, "Lock Log View");
+        }
+
+        private void DrawLogs(LogElem elem)
+        {
+            GUIStyle logStyle = new GUIStyle();
+
+            switch (elem.level)
+            {
+                case LogLevel.DEBUG:
+                case LogLevel.INFO:
+                {
+                    logStyle.normal.textColor = Color.white;
+                    break;
+                }
+                case LogLevel.WARNING:
+                {
+                    logStyle.normal.textColor = Color.yellow;
+                    break;
+                }
+                case LogLevel.ERROR:
+                {
+                    logStyle.normal.textColor = Color.red;
+                    break;
+                }
+                case LogLevel.FATAL:
+                {
+                    logStyle.normal.textColor = Color.red;
+                    break;
+                }
+                default:
+                {
+                    logStyle.normal.textColor = Color.white;
+                    break;
+                }
+            }
+
+            logStyle.fontSize = 18;
+
+            GUILayout.Label(string.Format("{0}", elem.str), logStyle);
+
+            m_LogBoxHeight += m_LineHeight;
+        }
+
+
+        ///
+        ///  Events.
+        ///
 
         public void OnStateChanged(TrackerState state)
         {
@@ -121,6 +323,10 @@ namespace ARCeye
         public void OnObjectDetected(DetectedObject detectedObject) {
             Debug.Log("[LogViewer] OnObjectDetected : " + detectedObject.id);
         }
+
+        ///
+        /// Debug Log 
+        ///
 
         [MonoPInvokeCallback(typeof(DebugLogFuncDelegate))]
         static public void DebugLog(LogLevel logLevel, IntPtr raw)
@@ -180,162 +386,6 @@ namespace ARCeye
                 s_LogList.AddLast(new LogElem(logLevel, msg));
                 s_IsLogScrollUpdated = true;
             }
-        }
-
-        void OnGUI()
-        {
-            // Scale GUI to target
-            m_GUIScale.x = Screen.width / m_TargetScreenWidth;
-            m_GUIScale.y = Screen.height / m_TargetScreenHeight;
-            m_GUIScale.z = 1.0f;
-
-            m_PrevGUIMat = GUI.matrix;
-            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, m_GUIScale);
-
-            m_ShowDebugUI = GUILayout.Toggle(m_ShowDebugUI, "Show Debug View");
-            GUI.changed = false; // 이 처리를 하지 않으면 아래의 ChangeLocation이 항상 실행.
-
-            if (m_ShowDebugUI)
-            {
-                GUILayout.BeginVertical();
-
-                float debugViewHeight = 800.0f;
-                GUI.Box(new Rect(0, 0, m_TargetScreenWidth, debugViewHeight), "");
-
-                string poseStr =  $"Pose : {m_Position}, {m_EulerRotation}";
-                GUILayout.Label(poseStr);
-
-                GUILayout.Space(15);
-
-                GUILayout.BeginHorizontal();
-                string stateStr = "State : " + m_CurrState;
-                GUILayout.Label(stateStr);
-                
-                GUILayout.Label($"Layer Info : {m_LayerInfo}");
-
-                GUILayout.EndHorizontal();
-
-                GUILayout.Space(15);
-
-                if(m_GeoCoordProvider)
-                {
-                    m_GeoCoordProvider.UseFakeGPSCoordOnDevice = GUILayout.Toggle(m_GeoCoordProvider.UseFakeGPSCoordOnDevice, "Use Fake GPS");
-                    GUILayout.Label($"GPS : {m_GeoCoordProvider.info.latitude}, {m_GeoCoordProvider.info.longitude}");
-                }
-
-                DrawLogScrollViewArea();
-
-                GUILayout.EndVertical();
-            }
-
-            // Restore original GUIScale.
-            GUI.matrix = m_PrevGUIMat;
-        }
-
-        private void DrawPoseTrackerControls()
-        {
-            GUILayout.BeginHorizontal();
-
-            if(GUILayout.Button("Set Config Test")) {
-                TrackerConfig config = new TrackerConfig();
-                config.useInterpolation = false;
-                config.logLevel = 0;
-                m_VLSDKManager.SetTrackerConfig(config);
-            }
-
-            GUILayout.EndHorizontal();
-        }
-
-        private void DrawStateControls()
-        {
-            GUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Initial"))
-            {
-                m_VLSDKManager.ChangeState(TrackerState.INITIAL);
-            }
-            if (GUILayout.Button("VL Pass"))
-            {
-                m_VLSDKManager.ChangeState(TrackerState.VL_PASS);
-            }
-            if (GUILayout.Button("VL FAIL"))
-            {
-                m_VLSDKManager.ChangeState(TrackerState.VL_FAIL);
-            }
-
-            GUILayout.EndHorizontal();
-
-            if (GUILayout.Button("Reset"))
-            {
-                m_VLSDKManager.ResetSession();
-            }
-        }
-
-        private void DrawLogScrollViewArea()
-        {
-            GUILayout.Label("Log");
-
-            if (!m_LockLogScrollUpdate && s_IsLogScrollUpdated)
-            {
-                m_ScrollPosition = new Vector2(m_ScrollPosition.x, m_LogBoxHeight);
-                s_IsLogScrollUpdated = false;
-            }
-
-            m_ScrollPosition = GUILayout.BeginScrollView(m_ScrollPosition, GUILayout.Width(m_TargetScreenWidth), GUILayout.Height(350));
-
-            foreach (var elem in s_LogList)
-            {
-                DrawLogs(elem);
-            }
-
-            GUILayout.EndScrollView();
-
-            m_LockLogScrollUpdate = GUILayout.Toggle(m_LockLogScrollUpdate, "Lock Log View");
-        }
-
-        private void DrawLogs(LogElem elem)
-        {
-            // int fontSize = 20;
-
-            switch (elem.level)
-            {
-                case LogLevel.DEBUG:
-                case LogLevel.INFO:
-                {
-                    style.normal.textColor = Color.white;
-                    break;
-                }
-                case LogLevel.WARNING:
-                {
-                    style.normal.textColor = Color.yellow;
-                    break;
-                }
-                case LogLevel.ERROR:
-                {
-                    style.normal.textColor = Color.red;
-                    break;
-                }
-                case LogLevel.FATAL:
-                {
-                    style.normal.textColor = Color.red;
-                    break;
-                }
-                default:
-                {
-                    style.normal.textColor = Color.white;
-                    break;
-                }
-            }
-            // style.fontSize = fontSize;
-
-            GUILayout.Label(string.Format("{0}\n", elem.str), style);
-
-            m_LogBoxHeight += m_LineHeight;
-        }
-
-        public void MoveToPrevScene()
-        {
-            UnityEngine.SceneManagement.SceneManager.LoadScene("Prev");
         }
     }
 

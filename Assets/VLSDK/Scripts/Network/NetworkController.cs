@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.Networking;
 using AOT;
 using ARCeye;
-
+using Newtonsoft.Json.Linq;
 
 public class NetworkController : MonoBehaviour
 {
@@ -84,6 +84,14 @@ public class NetworkController : MonoBehaviour
         }
 
         VLRequestBody body = VLRequestBody.Create(requestInfo);
+
+        bool isValidRequest = VLRequestBody.IsValidRequest(body, s_QueryTexture);
+
+        if(!isValidRequest)
+        {
+            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.ERROR, "유효하지 않은 VL 요청입니다. " + body.ToString());
+            return;
+        }
 
         if(body.method == "POST") {
             s_Instance.OnSendingRequestAsync(key, body, s_QueryTexture);
@@ -190,6 +198,8 @@ public class NetworkController : MonoBehaviour
             
             IntPtr msgPtr = Marshal.StringToHGlobalAnsi(www.downloadHandler.text);
 
+            ExtractRawVLPose(www.downloadHandler.text);
+
             if(requestBody.method == "POST") {
                 SendSuccessResponseNative(key, msgPtr);
             } else {
@@ -271,5 +281,133 @@ public class NetworkController : MonoBehaviour
     private DownloadHandler GenerateDownloadHandler()
     {
         return new DownloadHandlerBuffer();
+    }
+
+
+    // pose 디버깅용.
+
+    private List<Matrix4x4> m_VLResponses = new List<Matrix4x4>();
+    private List<int> m_Inliers = new List<int>();
+    private bool m_ShowVLPose = false;
+
+    public void EnableVLPose(bool value)
+    {
+        m_ShowVLPose = value;
+    }
+
+    private void ExtractRawVLPose(string response)
+    {
+        JObject jsonObject = JObject.Parse(response);
+
+        var ARCeyeResponseObject = jsonObject["result"];
+
+        if(ARCeyeResponseObject != null)
+        {
+            ExtractARCeyeRawVLPose(jsonObject);
+        }
+        else
+        {
+            ExtractDevRawVLPose(jsonObject);
+        }
+    }
+
+    private void ExtractARCeyeRawVLPose(JObject jsonObject)
+    {
+        string result = jsonObject["result"].ToString();
+        if (result == "FAILURE")
+        {
+            return;
+        }
+
+        string pose = jsonObject["pose"].ToString();
+        string[] parts = pose.Split(',');
+
+        // tx, ty, tz, qw, qx, qy, qz 값을 추출
+        float tx = float.Parse(parts[2]);
+        float ty = float.Parse(parts[3]);
+        float tz = float.Parse(parts[4]);
+        float qw = float.Parse(parts[5]);
+        float qx = float.Parse(parts[6]);
+        float qy = float.Parse(parts[7]);
+        float qz = float.Parse(parts[8]);
+
+        // 위치와 회전을 나타내는 Vector3와 Quaternion 생성
+        Vector3 position = new Vector3(tx, ty, 1.5f);
+        Quaternion rotation = new Quaternion(qx, qy, qz, qw);
+
+        // 이를 사용하여 Matrix4x4 생성
+        Matrix4x4 vlMatrix = Matrix4x4.TRS(position, rotation, Vector3.one);
+        Matrix4x4 glMatrix = PoseUtility.ConvertVLtoGLCoord(vlMatrix);
+        Matrix4x4 lhMatrix = PoseUtility.ConvertLHRH(glMatrix);
+
+        Matrix4x4 unityMatrix = lhMatrix;
+        m_VLResponses.Add(unityMatrix);
+
+        int inlier = int.Parse(jsonObject["inlier"].ToString());
+        m_Inliers.Add(inlier);
+    }
+
+    private void ExtractDevRawVLPose(JObject jsonObject)
+    {
+        string result = jsonObject["Pose"].ToString();
+        if (result == "failed")
+        {
+            return;
+        }
+
+        string pose = jsonObject["Pose"].ToString();
+        string[] parts = pose.Split(',');
+
+        // tx, ty, tz, qw, qx, qy, qz 값을 추출
+        float tx = float.Parse(parts[2]);
+        float ty = float.Parse(parts[3]);
+        float tz = float.Parse(parts[4]);
+        float qw = float.Parse(parts[5]);
+        float qx = float.Parse(parts[6]);
+        float qy = float.Parse(parts[7]);
+        float qz = float.Parse(parts[8]);
+
+        // 위치와 회전을 나타내는 Vector3와 Quaternion 생성
+        Vector3 position = new Vector3(tx, ty, 1.5f);
+        Quaternion rotation = new Quaternion(qx, qy, qz, qw);
+
+        // 이를 사용하여 Matrix4x4 생성
+        Matrix4x4 vlMatrix = Matrix4x4.TRS(position, rotation, Vector3.one);
+        Matrix4x4 glMatrix = PoseUtility.ConvertVLtoGLCoord(vlMatrix);
+        Matrix4x4 lhMatrix = PoseUtility.ConvertLHRH(glMatrix);
+
+        Matrix4x4 unityMatrix = lhMatrix;
+        m_VLResponses.Add(unityMatrix);
+
+        int inlier = int.Parse(jsonObject["Inlier"].ToString());
+        m_Inliers.Add(inlier);
+    }
+
+    void OnDrawGizmos()
+    {
+        if(!m_ShowVLPose)
+        {
+            return;
+        }
+
+        for (int i = 0; i < m_VLResponses.Count; i++)
+        {
+            Color frameColor = Color.red;
+
+            if (m_Inliers[i] > 500)
+            {
+                frameColor = Color.green;
+            }
+            else if (m_Inliers[i] > 200)
+            {
+                frameColor = Color.blue;
+            }
+            else
+            {
+                frameColor = Color.red;
+            }
+
+            DebugUtility.DrawFrame(m_VLResponses[i], frameColor, 1.0f);
+        }
     }
 }

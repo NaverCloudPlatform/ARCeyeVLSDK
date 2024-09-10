@@ -7,25 +7,25 @@ namespace ARCeye
     [System.Serializable]
     public class VLSDKSettings : ScriptableObject
     {
-        [field:SerializeField, Tooltip("ARC eye의 API 연동을 통해 생성된 요청 주소")]
+        [field:SerializeField, Tooltip("The request URL generated through the integration of ARC eye's API")]
         private List<VLURL> m_URLList = new List<VLURL>();
         public List<VLURL> URLList { get => m_URLList; }
         
-        [field:SerializeField, Tooltip("GPS를 활용한 invokeUrl 추정 및 초기화 가이드 기능 사용")]
+        [field:SerializeField, Tooltip("Estimate which invoke URL to use based on GPS location")]
         private bool m_GPSGuide = true;
         public bool GPSGuide { 
             get => m_GPSGuide;
             set => m_GPSGuide = value;
         }
 
-        [SerializeField, Tooltip("GPS를 기반으로 추정할 영역들에 대한 geojson 내용")]
+        [SerializeField, Tooltip("GeoJSON content for the areas to be estimated based on GPS location")]
         [TextArea(5, 20)]
         private string m_LocationGeoJson;
         public string locationGeoJson { 
             get => m_LocationGeoJson; 
         }
 
-        [SerializeField, Tooltip("VL Pass 상태가 되기 전의 요청 주기. (단위 : ms)")]
+        [SerializeField, Tooltip("Request interval before entering VL Pass state (unit: ms)")]
         [Range(250, 3000)]
         private int m_VLIntervalInitial = 250;
         public int vlIntervalInitial
@@ -33,7 +33,7 @@ namespace ARCeye
             get => m_VLIntervalInitial;
         }
 
-        [SerializeField, Tooltip("VL Pass 상태가 된 이후의 요청 주기. (단위 : ms)")]
+        [SerializeField, Tooltip("Request interval after entering VL Pass state (unit: ms)")]
         [Range(500, 3000)]
         private int m_VLIntervalPassed = 1000;
         public int vlIntervalPassed
@@ -41,7 +41,7 @@ namespace ARCeye
             get => m_VLIntervalPassed;
         }
 
-        [SerializeField, Tooltip("VL 품질. LOW - VL Pass로 인식하는 응답이 더 자주 들어옴. 잘못된 위치를 추정할 가능성이 높음. HIGH - VL Pass로 인식하는 응답이 적게 들어옴. 잘못된 위치를 추정할 가능성이 낮음")]
+        [SerializeField, Tooltip("VL Quality. LOW - Responses recognized as VL Pass occur more frequently, with a higher likelihood of estimating incorrect locations. HIGH - Responses recognized as VL Pass occur less frequently, with a lower likelihood of estimating incorrect locations.")]
         private VLQuality m_VLQuality = VLQuality.MEDIUM;
         public VLQuality vlQuality
         {
@@ -49,7 +49,15 @@ namespace ARCeye
             set => m_VLQuality = value;
         }
 
-        [SerializeField, Tooltip("콘솔에 출력할 로그 레벨 설정")]
+        [SerializeField, Tooltip("Visualize the responsed VL poses")]
+        private bool m_ShowVLPose = false;
+        public bool showVLPose
+        {
+            get => m_ShowVLPose;
+            set => m_ShowVLPose = value;
+        }
+
+        [SerializeField, Tooltip("Set the log level for console output")]
         private LogLevel m_LogLevel = LogLevel.DEBUG;
         public LogLevel logLevel
         {

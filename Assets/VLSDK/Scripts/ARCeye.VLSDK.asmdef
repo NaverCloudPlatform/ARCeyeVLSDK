@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "Unity.XR.ARFoundation",
-        "Unity.XR.ARSubsystems"
+        "Unity.XR.ARSubsystems",
+        "ARCeye.Dataset.Decoder"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
