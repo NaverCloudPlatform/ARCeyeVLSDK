@@ -2,8 +2,9 @@
     "name": "ARCeye.VLSDK.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:e27c65c44dfc1422a93ade7e48f908f0",
-        "GUID:a9420e37d7990b54abdef6688edbe313"
+        "ARCeye.VLSDK",
+        "ARCeye.Dataset.Decoder",
+        "Unity.XR.ARFoundation"
     ],
     "includePlatforms": [
         "Editor"
@@ -13,7 +14,10 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "VLSDK_ARFOUNDATION",
+        "VLSDK_NEWTONSOFT_JSON"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

@@ -64,5 +64,8 @@ namespace ARCeye
             get => m_LogLevel;
             set => m_LogLevel = value;
         }
+
+
+        public bool testMode { get; set; } = false;
     }
 }

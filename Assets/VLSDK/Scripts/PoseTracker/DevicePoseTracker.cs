@@ -36,11 +36,6 @@ public class DevicePoseTracker : PoseTracker
             Debug.LogError("Failed to find ARCameraManager. Please check AR Session Origin is placed in a scene.");
         }
 
-
-        config.tracker.useTranslationFilter = true;
-        config.tracker.useRotationFilter = true;
-        config.tracker.useInterpolation = true;
-
         m_IsPortrait = (Screen.orientation == ScreenOrientation.Portrait) || 
                        (Screen.orientation == ScreenOrientation.PortraitUpsideDown);
 
@@ -87,6 +82,72 @@ public class DevicePoseTracker : PoseTracker
         Matrix4x4 projMatrix = eventArgs.projectionMatrix ?? Camera.main.projectionMatrix;
         Matrix4x4 transMatrix = eventArgs.displayMatrix ?? Matrix4x4.identity;
         UpdateFrame(projMatrix, transMatrix);
+    }
+
+    unsafe public override void AcquireRequestedFrame(out UnityYuvCpuImage? image) {
+        if(!m_CameraManager.TryAcquireLatestCpuImage(out XRCpuImage cpuImage)) 
+        {
+            image = null;
+            return;
+        }
+        
+        var format = cpuImage.format;
+
+        if(format == XRCpuImage.Format.AndroidYuv420_888) {
+            UnityYuvCpuImage videoImage = new UnityYuvCpuImage();
+
+            var yPlane      = cpuImage.GetPlane(0);
+            var uPlane      = cpuImage.GetPlane(1); 
+            var vPlane      = cpuImage.GetPlane(2); 
+
+            videoImage.width             = cpuImage.width;
+            videoImage.height            = cpuImage.height;
+            videoImage.format            = (int) format;
+            videoImage.numberOfPlanes    = cpuImage.planeCount;
+
+            videoImage.yPixels           = new IntPtr(yPlane.data.GetUnsafePtr());
+            videoImage.yLength           = yPlane.data.Length;
+            videoImage.yRowStride        = yPlane.rowStride;
+            videoImage.yPixelStride      = yPlane.pixelStride;
+
+            videoImage.uPixels           = new IntPtr(uPlane.data.GetUnsafePtr());
+            videoImage.uLength           = uPlane.data.Length;    
+            videoImage.uRowStride        = uPlane.rowStride;     
+            videoImage.uPixelStride      = uPlane.pixelStride;   
+
+            videoImage.vPixels           = new IntPtr(vPlane.data.GetUnsafePtr());
+            videoImage.vLength           = vPlane.data.Length;   
+            videoImage.vRowStride        = vPlane.rowStride;     
+            videoImage.vPixelStride      = vPlane.pixelStride;
+
+            image = videoImage;
+        } else if (format == XRCpuImage.Format.IosYpCbCr420_8BiPlanarFullRange) {
+            UnityYuvCpuImage videoImage = new UnityYuvCpuImage();
+
+            var yPlane      = cpuImage.GetPlane(0);
+            var uvPlane     = cpuImage.GetPlane(1); 
+
+            videoImage.width             = cpuImage.width;
+            videoImage.height            = cpuImage.height;
+            videoImage.format            = (int) format;
+            videoImage.numberOfPlanes    = cpuImage.planeCount;
+
+            videoImage.yPixels           = new IntPtr(yPlane.data.GetUnsafePtr());
+            videoImage.yLength           = yPlane.data.Length;
+            videoImage.yRowStride        = yPlane.rowStride;
+            videoImage.yPixelStride      = yPlane.pixelStride;
+
+            videoImage.uPixels           = new IntPtr(uvPlane.data.GetUnsafePtr());
+            videoImage.uLength           = uvPlane.data.Length;    
+            videoImage.uRowStride        = uvPlane.rowStride;     
+            videoImage.uPixelStride      = uvPlane.pixelStride;
+            
+            image = videoImage;
+        } else {
+            image = null;
+        }
+
+        cpuImage.Dispose(); // TODO: Is it ok to dispose earlier..?
     }
 
 

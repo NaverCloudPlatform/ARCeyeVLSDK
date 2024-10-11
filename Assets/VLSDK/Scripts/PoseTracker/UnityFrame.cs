@@ -20,6 +20,8 @@ public struct UnityFrame {
 
     public float realHeight;
     
-    public IntPtr  imageBuffer;
+    public UnityYuvCpuImage yuvBuffer;
+    
+    public IntPtr  textureBuffer;
 }
 }

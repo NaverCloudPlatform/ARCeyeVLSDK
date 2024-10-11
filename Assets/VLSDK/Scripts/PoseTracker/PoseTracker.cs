@@ -209,6 +209,8 @@ public abstract class PoseTracker
     public abstract void Initialize(Transform arCamera, Config config);
     public abstract void RegisterFrameLoop();
     public abstract void UnregisterFrameLoop();
+
+    public abstract void AcquireRequestedFrame(out UnityYuvCpuImage? image);
     public abstract bool AcquireRequestedTexture(out Texture texture);
     public abstract void AquireCameraIntrinsic(out float fx, out float fy, out float cx, out float cy);
     public abstract float[] MakeDisplayRotationMatrix(Matrix4x4 rawDispRotMatrix);
@@ -339,12 +341,24 @@ public abstract class PoseTracker
 
     unsafe protected void UpdateFrame(Matrix4x4 projMatrix, Matrix4x4 transMatrix)
     {
+    #if UNITY_IOS && !UNITY_EDITOR
+        UnityYuvCpuImage? videoImage = new UnityYuvCpuImage();
+        AcquireRequestedFrame(out videoImage);
+
+        if(videoImage == null) 
+        {
+            Debug.LogError("Failed to acquire a requested video image");
+            return;
+        }
+        
+    #else
         Texture requestImageTexture;
         if(!AcquireRequestedTexture(out requestImageTexture)) 
         {
             Debug.LogError("Failed to acquire a requested texture");
             return;
         }
+    #endif
 
         AssignCameraIntrinsicToNative();
 
@@ -368,9 +382,6 @@ public abstract class PoseTracker
         p[14] = 1;  // Left Handed to Right Handed.
 
         float[] trans = MakeDisplayRotationMatrix(transMatrix);
-
-        GCHandle gcI = GCHandle.Alloc(requestImageTexture, GCHandleType.Weak);
-
         LocationInfo locationInfo = new LocationInfo(0, 0);
         
         if(m_GeoCoordProvider) {
@@ -380,13 +391,18 @@ public abstract class PoseTracker
         m_Frame.viewMatrix = v;
         m_Frame.projMatrix = p;
         m_Frame.texTrans = trans;
-        m_Frame.imageBuffer = GCHandle.ToIntPtr(gcI);
         m_Frame.realHeight = 1.5f;
         m_Frame.geoCoord = new float[]{locationInfo.latitude, locationInfo.longitude};
 
+    #if UNITY_IOS && !UNITY_EDITOR
+        m_Frame.yuvBuffer = (UnityYuvCpuImage) videoImage; 
         UpdateUnityFrameNative(m_Frame);
-
+    #else
+        GCHandle gcI = GCHandle.Alloc(requestImageTexture, GCHandleType.Weak);
+        m_Frame.textureBuffer = GCHandle.ToIntPtr(gcI);
+        UpdateUnityFrameNative(m_Frame);
         gcI.Free();
+    #endif
     }
 
     private void AssignCameraIntrinsicToNative() {

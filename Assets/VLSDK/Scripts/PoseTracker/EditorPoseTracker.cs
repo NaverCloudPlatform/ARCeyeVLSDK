@@ -19,44 +19,60 @@ public class EditorPoseTracker : PoseTracker
     protected const float DEFAULT_FY = 469.672760f;
     protected const float DEFAULT_CX = 179.404327f;
     protected const float DEFAULT_CY = 315.172272f;
-
+    
     private Camera m_MainCamera;
+
+    private bool m_IsLoopRunning;
+    private Coroutine m_LoopCoroutine;
+    private MonoBehaviour m_CoroutineRunner;
+    private DebugPreview m_DebugPreview;
 
 
     public override void Initialize(Transform coroutineRunner, Config config)
     {
         ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.INFO, "Initialize EditorPoseTracker");
-        
-        config.tracker.useTranslationFilter = true;
-        config.tracker.useRotationFilter = true;
-        config.tracker.useInterpolation = true;
 
         m_MainCamera = Camera.main;
+        m_CoroutineRunner = coroutineRunner.GetComponent<MonoBehaviour>();
 
-        Initialize(config);
-        InitDatasetManager();
+        InitDatasetManager(ref config);
         InitComponents();
+        Initialize(config);
+
+        PlayDatasetManager();
     }
 
-    private void InitDatasetManager()
+    private void InitDatasetManager(ref Config config)
     {
         if(m_ARDatasetManager == null)
         {
             m_ARDatasetManager = GameObject.FindObjectOfType<ARDatasetManager>();
         }
 
-        if(m_ARDatasetManager != null && m_ARDatasetManager.datasetPath == "")
+        if(m_ARDatasetManager != null)
         {
-            Debug.LogError("Dataset path is empty!");
+            if(m_ARDatasetManager.datasetPath == "")
+            {
+                Debug.LogError("Dataset path is empty!");
+            }
         }
+        else
+        {
+            Debug.LogWarning("Failed to find ARDatasetManager. Using ARDatasetManager is highly recommended in editor mode");
 
-        PlayDatasetManager();
+            // ARDatasetManager가 없을 경우에는 TextureProvider 기반 요청.
+            // TextureProvider만 사용하는 경우에는 필터를 모두 비활성화 한다.
+            config.tracker.useTranslationFilter = false;
+            config.tracker.useRotationFilter = false;
+            config.tracker.useInterpolation = false;
+        }
     }
 
     private void InitComponents()
     {
         m_TextureProvider = GameObject.FindObjectOfType<TextureProvider>();
         m_GeoCoordProvider = GameObject.FindObjectOfType<GeoCoordProvider>();
+        m_DebugPreview = GameObject.FindObjectOfType<DebugPreview>();
     }
 
     private void PlayDatasetManager()
@@ -74,6 +90,11 @@ public class EditorPoseTracker : PoseTracker
         {
             m_ARDatasetManager.frameReceived += OnCameraFrameReceived;
         }
+        else
+        {
+            m_IsLoopRunning = true;
+            m_LoopCoroutine = m_CoroutineRunner.StartCoroutine( CaptureFrame() );
+        }
     }
 
     public override void UnregisterFrameLoop()
@@ -81,6 +102,11 @@ public class EditorPoseTracker : PoseTracker
         if(m_ARDatasetManager != null)
         {
             m_ARDatasetManager.frameReceived -= OnCameraFrameReceived;
+        }
+        else if(m_CoroutineRunner != null && m_LoopCoroutine != null)
+        {
+            m_IsLoopRunning = false;
+            m_CoroutineRunner.StopCoroutine(m_LoopCoroutine);
         }
     }
 
@@ -115,6 +141,22 @@ public class EditorPoseTracker : PoseTracker
         UpdateFrame(projMatrix, transMatrix);
     }
 
+    /// <summary>
+    ///   ARDatasetManager를 사용하지 않을 경우 실행되는 루프.
+    /// </summary>
+    private IEnumerator CaptureFrame()
+    {
+        while(m_IsLoopRunning)
+        {
+            yield return new WaitForEndOfFrame();
+
+            if(!m_IsInitialized)
+                continue;
+
+            UpdateFrame(m_MainCamera.projectionMatrix, Matrix4x4.identity);
+        }
+    }
+
     private float CalculateFOV(Matrix4x4 projMatrix)
     {
         float f = projMatrix.m11;
@@ -122,17 +164,22 @@ public class EditorPoseTracker : PoseTracker
         return verticalFOV;
     }
 
+    public override void AcquireRequestedFrame(out UnityYuvCpuImage? image) {
+        image = null;
+    }
+
     public override bool AcquireRequestedTexture(out Texture texture)
     {
-        if(!m_ARDatasetManager.TryAcquireFrameImage(out Texture frameTexture)) 
+        if(m_ARDatasetManager != null && m_ARDatasetManager.TryAcquireFrameImage(out Texture frameTexture))
         {
-            texture = m_TextureProvider.textureToSend;
+            texture = frameTexture;
         }
         else
         {
-            // m_ARDatasetManager.SetPreviewTexture(frameTexture);
-            texture = frameTexture;
+            texture = m_TextureProvider.textureToSend;
+            m_DebugPreview.SetTexture(texture);
         }
+
         return true;
     }
 
@@ -153,12 +200,36 @@ public class EditorPoseTracker : PoseTracker
 
     public override void AquireCameraIntrinsic(out float fx, out float fy, out float cx, out float cy) {
         // VLSDKDatasetRecorder로 기록한 데이터는 transpose를 한 상태에서 저장한다.
-        ARDatasetIntrinsic intrinsic = m_ARDatasetManager.GetIntrinsic();
+        if(m_ARDatasetManager != null)
+        {
+            ARDatasetIntrinsic intrinsic = m_ARDatasetManager.GetIntrinsic();
 
-        fx = intrinsic.fx;
-        fy = intrinsic.fy;
-        cx = intrinsic.cx;
-        cy = intrinsic.cy;
+            fx = intrinsic.fx;
+            fy = intrinsic.fy;
+            cx = intrinsic.cx;
+            cy = intrinsic.cy;
+        }
+        else
+        {
+            float scale;
+
+            // Editor 모드는 데이터셋 이미지에 맞춰서 기본 파라매터들의 스케일을 변경한다.
+            // width가 장축인 경우.
+            if(m_Config.tracker.previewWidth > m_Config.tracker.previewHeight)
+            {
+                scale = (float) m_Config.tracker.previewWidth / (float) MAJOR_AXIS_LENGTH;
+            }
+            // height가 장축인 경우.
+            else
+            {
+                scale = (float) m_Config.tracker.previewHeight / (float) MAJOR_AXIS_LENGTH;
+            }
+            
+            fx = DEFAULT_FX * scale;
+            fy = DEFAULT_FY * scale;
+            cx = DEFAULT_CX * scale;
+            cy = DEFAULT_CY * scale;
+        }
     }
 }
 }

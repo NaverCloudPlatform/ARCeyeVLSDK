@@ -9,6 +9,7 @@ namespace ARCeye.Dataset
     {
         public static void DrawFrame(Matrix4x4 matrix, Color frameColor, float size)
         {
+#if UNITY_EDITOR            
             float width = 9 * 0.05f * size;
             float height = 16 * 0.05f * size;
             float depth = 10 * 0.05f * size; // 원점에서 사각형까지의 거리
@@ -48,6 +49,7 @@ namespace ARCeye.Dataset
             Handles.DrawBezier(bottomLeft, topLeft, bottomLeft, topLeft, frameColor, null, thickness);
 
             Gizmos.DrawSphere(origin, 0.1f);
+#endif 
         }
     }
 }

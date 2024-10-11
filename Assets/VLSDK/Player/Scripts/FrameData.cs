@@ -45,10 +45,10 @@ namespace ARCeye.Dataset
             this.projMatrix = Matrix4x4.identity;   // 사용되지 않는 값.
             this.transMatrix = Matrix4x4.identity;
             intrinsic = new ARDatasetIntrinsic();   // landscape 기준.
-            intrinsic.fx = 500.062f;
-            intrinsic.fy = 500.054f;
-            intrinsic.cx = 318.824f;
-            intrinsic.cy = 239.626f;
+            intrinsic.fx = 480.062f;
+            intrinsic.fy = 480.054f;
+            intrinsic.cx = 180.626f;
+            intrinsic.cy = 318.824f;
             latitude = 0;
             longitude = 0;
         }

@@ -37,7 +37,7 @@ public class NetworkController : MonoBehaviour
     private static extern void SendSuccessVLGetResponseNative(IntPtr msg, int code, IntPtr fptr);
 
     [DllImport(dll)]
-    private static extern void SendFailureResponseNative(IntPtr msg, int code);
+    private static extern void SendFailureResponseNative(int key, IntPtr msg, int code);
 
 
     static private Texture2D s_QueryTexture = null;
@@ -73,13 +73,35 @@ public class NetworkController : MonoBehaviour
     {
         s_Instance.OnRequestInfoReceived?.Invoke(requestInfo);
 
-        if(requestInfo.rawImage != IntPtr.Zero && !CreateQueryTexture(requestInfo.rawImage)) {
+    #if UNITY_IOS && !UNITY_EDITOR
+        if(requestInfo.imageBuffer.pixels == IntPtr.Zero || requestInfo.imageBuffer.length == 0) {
             return;
         }
 
         if(Application.internetReachability == NetworkReachability.NotReachable)
         {
-            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.ERROR, "네트워크에 접속할 수 없습니다. 네트워크 설정을 확인해주세요");
+            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.ERROR, "Network is disconnected");
+            return;
+        }
+
+        VLRequestBody body = VLRequestBody.Create(requestInfo);
+
+        byte[] imageBuffer = new byte[requestInfo.imageBuffer.length];
+        Marshal.Copy(requestInfo.imageBuffer.pixels, imageBuffer, 0, requestInfo.imageBuffer.length);
+
+        if(body.method == "POST") {
+            s_Instance.OnSendingRequestAsync(key, body, imageBuffer);
+        } else {
+            s_Instance.OnSendingLimitlessRequest(key, body, imageBuffer);
+        }
+    #else
+        if(requestInfo.texture != IntPtr.Zero && !CreateQueryTexture(requestInfo.texture)) {
+            return;
+        }
+
+        if(Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.ERROR, "Network is disconnected");
             return;
         }
 
@@ -89,7 +111,7 @@ public class NetworkController : MonoBehaviour
 
         if(!isValidRequest)
         {
-            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.ERROR, "유효하지 않은 VL 요청입니다. " + body.ToString());
+            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.ERROR, "Invalid VL request body. " + body.ToString());
             return;
         }
 
@@ -98,6 +120,7 @@ public class NetworkController : MonoBehaviour
         } else {
             s_Instance.OnSendingLimitlessRequest(key, body, s_QueryTexture);
         }
+    #endif
     }
 
     private static bool CreateQueryTexture(IntPtr rawImage) {
@@ -127,11 +150,33 @@ public class NetworkController : MonoBehaviour
         }
     }
 
+    private void OnSendingRequestSync(int key, VLRequestBody body, byte[] imageBuffer)
+    {
+        if (m_RequestCoroutine == null)
+        {
+            m_RequestCoroutine = StartCoroutine(Upload(key, body, imageBuffer));
+        }
+    }
+
     private void OnSendingRequestSync(int key, VLRequestBody body, Texture texture)
     {
         if (m_RequestCoroutine == null)
         {
             m_RequestCoroutine = StartCoroutine(Upload(key, body, texture));
+        }
+    }
+
+    private void OnSendingRequestAsync(int key, VLRequestBody body, byte[] imageBuffer, int asyncCount = 20)
+    {
+        if(m_RequestCoroutines.Count < asyncCount)
+        {
+            var c = StartCoroutine(Upload(key, body, imageBuffer));
+            m_RequestCoroutines.Add(c);
+        }
+        else
+        {
+            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.WARNING, $"VL request queue is full. Current request is ignored. (Queue size = {asyncCount})");
+            CheckRequestQueueCapacity();   
         }
     }
 
@@ -144,7 +189,7 @@ public class NetworkController : MonoBehaviour
         }
         else
         {
-            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.DEBUG, $"VL 요청 대기열이 가득 찼습니다. 현재 요청을 무시됩니다. (대기열 크기 = {asyncCount})");
+            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.WARNING, $"VL request queue is full. Current request is ignored. (Queue size = {asyncCount})");
             CheckRequestQueueCapacity();   
         }
     }
@@ -163,11 +208,16 @@ public class NetworkController : MonoBehaviour
             TimeSpan diff = currTime - m_FirstQueueFullTime.TimeOfDay;
             if(diff.Seconds >= m_FullQueueWaitingSeconds) 
             {
-                ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.DEBUG, $"VL 요청 대기열을 초기화합니다.");
+                ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.INFO, $"VL request queue is cleared");
                 m_CheckQueueFullDuration = false;
                 m_RequestCoroutines.Clear();
             }
         }
+    }
+
+    private void OnSendingLimitlessRequest(int key, VLRequestBody body, byte[] imageBuffer)
+    {
+        StartCoroutine(Upload(key, body, imageBuffer));
     }
 
     private void OnSendingLimitlessRequest(int key, VLRequestBody body, Texture texture)
@@ -175,24 +225,15 @@ public class NetworkController : MonoBehaviour
         StartCoroutine(Upload(key, body, texture));
     }
 
-    IEnumerator Upload(int key, VLRequestBody requestBody, Texture texture)
+    IEnumerator Upload(int key, VLRequestBody requestBody, byte[] imageBuffer)
     {
-        UnityWebRequest www = CreateRequest(requestBody, texture);
-
-        if(m_SaveQueryImage)
-        {
-            ImageUtility.Save(requestBody.filename, requestBody.image);
-        }
+        UnityWebRequest www = CreateRequest(requestBody, imageBuffer);
 
         ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.DEBUG, "[NetworkController] " + requestBody.ToString());
 
         yield return www.SendWebRequest();
 
-        if (www.isNetworkError || www.isHttpError)
-        {
-            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.WARNING, "[NetworkController] " + www.error);
-        }
-        else
+        if (www.result == UnityWebRequest.Result.Success)
         {
             ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.DEBUG, "[NetworkController] " + www.downloadHandler.text);
             
@@ -206,6 +247,16 @@ public class NetworkController : MonoBehaviour
                 Debug.LogError($"[NetworkController] Requested method {requestBody.method} is not implemented!");
             }
         }
+        else
+        {
+            IntPtr msgPtr = Marshal.StringToHGlobalAnsi(www.downloadHandler.text);
+
+            if(requestBody.method == "POST") {
+                SendFailureResponseNative(key, msgPtr, (int) www.responseCode);
+            } else {
+                Debug.LogError($"[NetworkController] Requested method {requestBody.method} is not implemented!");
+            }
+        }
 
         m_RequestCoroutine = null;
         www.Dispose();
@@ -214,6 +265,72 @@ public class NetworkController : MonoBehaviour
         {
             m_RequestCoroutines.RemoveAt(0);
         }
+    }
+
+    IEnumerator Upload(int key, VLRequestBody requestBody, Texture texture)
+    {
+        UnityWebRequest www = CreateRequest(requestBody, texture);
+        
+        if(m_SaveQueryImage)
+        {
+            ImageUtility.Save(requestBody.filename, requestBody.image);
+        }
+
+        ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.DEBUG, "[NetworkController] " + requestBody.ToString());
+
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            ARCeye.LogViewer.DebugLog(ARCeye.LogLevel.DEBUG, "[NetworkController] " + www.downloadHandler.text);
+            
+            IntPtr msgPtr = Marshal.StringToHGlobalAnsi(www.downloadHandler.text);
+
+            ExtractRawVLPose(www.downloadHandler.text);
+
+            if(requestBody.method == "POST") {
+                SendSuccessResponseNative(key, msgPtr);
+            } else {
+                Debug.LogError($"[NetworkController] Requested method {requestBody.method} is not implemented!");
+            }
+        }
+        else
+        {
+            IntPtr msgPtr = Marshal.StringToHGlobalAnsi(www.downloadHandler.text);
+
+            if(requestBody.method == "POST") {
+                SendFailureResponseNative(key, msgPtr, (int) www.responseCode);
+            } else {
+                Debug.LogError($"[NetworkController] Requested method {requestBody.method} is not implemented!");
+            }
+        }
+
+        m_RequestCoroutine = null;
+        www.Dispose();
+
+        if(m_RequestCoroutines.Count > 0)
+        {
+            m_RequestCoroutines.RemoveAt(0);
+        }
+    }
+
+    private UnityWebRequest CreateRequest(VLRequestBody requestBody, byte[] imageBuffer) {
+        UnityWebRequest www = new UnityWebRequest();
+        www.url = requestBody.url;
+        www.SetRequestHeader("X-ARCEYE-SECRET", requestBody.authorization);
+
+        if(requestBody.method == "POST") {
+            requestBody.image = imageBuffer;
+
+            www.method = "POST";
+            www.uploadHandler = GenerateUploadHandler(requestBody);
+        } else {
+            www.method = "GET";
+        }        
+
+        www.downloadHandler = GenerateDownloadHandler();
+
+        return www;
     }
 
     private UnityWebRequest CreateRequest(VLRequestBody requestBody, Texture texture) {

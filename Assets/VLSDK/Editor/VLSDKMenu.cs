@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.XR.ARFoundation;
 using UnityEditor.SceneManagement;
+using ARCeye.Dataset;
 
 namespace ARCeye
 {
@@ -57,6 +58,9 @@ namespace ARCeye
             // Assign camera components
             VLSDKManager.arCamera = m_ARCameraManager.transform;
             VLSDKManager.origin = m_ARCameraManager.transform;
+
+            // Debug Preview 추가.
+            CreatePreviewImage();
         }
 
         private static bool CheckIsVLSDKManagerExisting()
@@ -100,6 +104,39 @@ namespace ARCeye
             }
 
             return null;
+        }
+
+        private static void CreatePreviewImage()
+        {
+            Canvas previewCanvas = m_ARCameraManager.GetComponentInChildren<Canvas>();
+
+            // Add debug preview texture.
+            if(previewCanvas == null)
+            {
+                previewCanvas = ObjectFactory.CreateGameObject("Canvas", typeof(Canvas)).GetComponent<Canvas>();
+                previewCanvas.transform.SetParent(m_ARCameraManager.transform);
+            }
+
+            previewCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+            previewCanvas.worldCamera = m_ARCameraManager.GetComponent<Camera>();
+            previewCanvas.planeDistance = previewCanvas.worldCamera.farClipPlane - 0.1f;
+
+            DebugPreview debugPreview = previewCanvas.GetComponentInChildren<DebugPreview>();
+            if(debugPreview == null)
+            {
+                GameObject debugPreviewObject = ObjectFactory.CreateGameObject("DebugPreview", typeof(DebugPreview));
+                debugPreviewObject.transform.SetParent(previewCanvas.transform);
+                
+                RectTransform debugPreviewRT = debugPreviewObject.AddComponent<RectTransform>();
+
+                debugPreviewRT.anchorMin = Vector2.zero;
+                debugPreviewRT.anchorMax = Vector2.one;
+                debugPreviewRT.offsetMin = Vector3.zero;
+                debugPreviewRT.offsetMax = Vector3.zero;
+
+                debugPreviewRT.localPosition = Vector3.zero;
+                debugPreviewRT.localScale = Vector3.one;
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ARCeye.Dataset;
 
 public class VLRequestBody
 {
@@ -119,12 +120,15 @@ public class VLRequestBody
 
     private static bool IsARCeyeURL(string url)
     {
-        string prefix = "https://vl-arc-eye.ncloud.com/api";
-        return url.Contains(prefix);
+        string prefix1 = "https://vl-arc-eye.ncloud.com/api";
+        string prefix2 = "https://api-arc-eye.ncloud.com";
+        return url.Contains(prefix1) || url.Contains(prefix2);
     }
 
     private static VLRequestBody CreateARCeyeRequest(ARCeye.RequestVLInfo requestInfo) {
         VLRequestBody body = new VLRequestBody();
+
+        Debug.Log(requestInfo.url);
 
         body.method = requestInfo.method;
         body.url = requestInfo.url;
@@ -137,8 +141,7 @@ public class VLRequestBody
             body.parameters.Add("cameraParameters", requestInfo.cameraParam);
         }
         
-#if !UNITY_EDITOR
-        if(requestInfo.requestWithPosition) {
+        if(requestInfo.requestWithPosition && IsPositionBasedRequestValid()) {
             body.parameters.Add("odometry", requestInfo.odometry);
             body.parameters.Add("lastPose", requestInfo.lastPose);
 
@@ -146,7 +149,6 @@ public class VLRequestBody
                 body.parameters.Add("withGlobal", "true");
             }
         }
-#endif
 
         body.nativeNetworkServiceHandle = requestInfo.nativeNetworkServiceHandle;
 
@@ -172,8 +174,7 @@ public class VLRequestBody
             body.parameters.Add("location", requestInfo.location);
         }
         
-#if !UNITY_EDITOR
-        if(requestInfo.requestWithPosition) {
+        if(requestInfo.requestWithPosition && IsPositionBasedRequestValid()) {
             body.parameters.Add("odometry", requestInfo.odometry);
             body.parameters.Add("last-pose", requestInfo.lastPose);
 
@@ -181,10 +182,20 @@ public class VLRequestBody
                 body.parameters.Add("withGlobal", "true");
             }
         }
-#endif
 
         body.nativeNetworkServiceHandle = requestInfo.nativeNetworkServiceHandle;
 
         return body;
+    }
+
+    /// <summary>
+    ///   현재 위치를 기반으로 요청을 보낼 수 있는지 확인.
+    ///   Editor 모드에서 ARDatasetManager를 사용하지 않는 경우 항상 false가 리턴된다.
+    /// </summary>
+    private static bool IsPositionBasedRequestValid() 
+    {
+        // 코드 구조를 깔끔하게 하기 위해 여기에서 FindObjectOfType 실행.
+        ARDatasetManager datasetManager = GameObject.FindObjectOfType<ARDatasetManager>();
+        return datasetManager != null;
     }
 }

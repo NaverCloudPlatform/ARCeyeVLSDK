@@ -9,7 +9,7 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
-        const string PACKAGE_VERSION = "1.6.3";
+        const string PACKAGE_VERSION = "1.6.5";
 
         private PoseTracker m_PoseTracker;
         private NetworkController m_NetworkController;
@@ -25,7 +25,7 @@ namespace ARCeye
         private static VLSDKManager s_Instance;
 
         [SerializeField]
-        private bool m_PlayOnAwake;
+        private bool m_PlayOnAwake = true;
         public bool playOnAwake {
             get => m_PlayOnAwake;
             set => m_PlayOnAwake = value;
@@ -278,6 +278,11 @@ namespace ARCeye
         {
 #if UNITY_EDITOR
             m_PoseTracker = new EditorPoseTracker();
+            
+            // unit test일 경우에는 모든 필터 비활성화.
+            m_Config.tracker.useTranslationFilter = !settings.testMode;
+            m_Config.tracker.useRotationFilter = !settings.testMode;
+            m_Config.tracker.useInterpolation = !settings.testMode;
 #else
             m_PoseTracker = new DevicePoseTracker();
 #endif

@@ -40,22 +40,24 @@ namespace ARCeye.Dataset
         private bool m_IsPlaying = false;
 
         private Camera m_MainCamera;
+        private Texture2D m_DatasetTexture;
 
 
         private void Awake()
         {
             isUpdating = true;
             m_Progress = 0;
-            m_DebugPreview = FindObjectOfType<DebugPreview>();
-            if(m_DebugPreview == null)
-            {
-                Debug.LogError("Cannot find DebugPreivew in scene");
-            }
             m_MainCamera = Camera.main;
         }
 
         private void Start()
         {
+            m_DebugPreview = FindObjectOfType<DebugPreview>();
+            if(m_DebugPreview == null)
+            {
+                Debug.LogError("Cannot find DebugPreivew in scene");
+            }
+            
             StartCoroutine( UpdateFrame() );
         }
 
@@ -159,10 +161,14 @@ namespace ARCeye.Dataset
             if (File.Exists(frameImagePath))
             {
                 byte[] fileData = File.ReadAllBytes(frameImagePath);
-                Texture2D datasetTexture = new Texture2D(2, 2, TextureFormat.RGB24, false);
-                datasetTexture.LoadImage(fileData);
+                
+                if(m_DatasetTexture == null)
+                {
+                    m_DatasetTexture = new Texture2D(2, 2, TextureFormat.RGB24, false);
+                }
+                m_DatasetTexture.LoadImage(fileData);
 
-                texture = datasetTexture;
+                texture = m_DatasetTexture;
                 return true;
             }
             else

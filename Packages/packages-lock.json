@@ -40,7 +40,7 @@
     },
     "com.unity.editorcoroutines": {
       "version": "1.0.0",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -84,7 +84,7 @@
     },
     "com.unity.inputsystem": {
       "version": "1.7.0",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.uielements": "1.0.0"
@@ -165,7 +165,7 @@
     },
     "com.unity.xr.arcore": {
       "version": "5.1.5",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.xr.core-utils": "2.1.0",
@@ -178,7 +178,7 @@
     },
     "com.unity.xr.arfoundation": {
       "version": "5.1.5",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.ugui": "1.0.0",
@@ -196,7 +196,7 @@
     },
     "com.unity.xr.arkit": {
       "version": "5.1.5",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.xr.core-utils": "2.1.0",
@@ -208,7 +208,7 @@
     },
     "com.unity.xr.core-utils": {
       "version": "2.3.0",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.xr": "1.0.0"
@@ -226,7 +226,7 @@
     },
     "com.unity.xr.legacyinputhelpers": {
       "version": "2.1.10",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.vr": "1.0.0",
@@ -252,7 +252,7 @@
     },
     "com.unity.xr.management": {
       "version": "4.4.0",
-      "depth": 2,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.vr": "1.0.0",

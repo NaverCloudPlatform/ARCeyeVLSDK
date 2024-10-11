@@ -139,7 +139,7 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 1.6.0
+  bundleVersion: 1.6.5
   preloadedAssets:
   - {fileID: 0}
   - {fileID: 0}
@@ -885,9 +885,21 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: 
-    Standalone: UNITY_XR_ARKIT_LOADER_ENABLED
-    iPhone: UNITY_XR_ARKIT_LOADER_ENABLED
+    Android: UNITY_XR_ARKIT_LOADER_ENABLED;VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    EmbeddedLinux: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    GameCoreXboxOne: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    Nintendo Switch: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    PS4: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    PS5: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    QNX: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    Server: 
+    Stadia: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    Standalone: UNITY_XR_ARKIT_LOADER_ENABLED;VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    VisionOS: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    WebGL: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    XboxOne: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    iPhone: UNITY_XR_ARKIT_LOADER_ENABLED;VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
+    tvOS: VLSDK_ARFOUNDATION;VLSDK_NEWTONSOFT_JSON
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
@@ -946,7 +958,7 @@ PlayerSettings:
   syncCapabilities: 0
   platformCapabilities:
     WindowsStoreApps:
-      CodeGeneration: False
+      EnterpriseAuthentication: False
       OfflineMapsManagement: False
       HumanInterfaceDevice: False
       Location: False
@@ -980,10 +992,10 @@ PlayerSettings:
       PointOfService: False
       RecordedCallsFolder: False
       Contacts: False
-      Proximity: False
       InternetClient: True
+      CodeGeneration: False
       BackgroundMediaPlayback: False
-      EnterpriseAuthentication: False
+      Proximity: False
   metroTargetDeviceFamilies:
     Desktop: False
     Holographic: False

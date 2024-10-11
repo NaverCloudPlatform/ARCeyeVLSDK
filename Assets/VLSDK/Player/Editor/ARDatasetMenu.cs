@@ -1,3 +1,4 @@
+#if ARFOUNDATION
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -134,3 +135,4 @@ namespace ARCeye.Dataset
         }
     }
 }
+#endif

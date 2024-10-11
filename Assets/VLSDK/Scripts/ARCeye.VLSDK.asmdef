@@ -12,7 +12,10 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "VLSDK_ARFOUNDATION",
+        "VLSDK_NEWTONSOFT_JSON"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

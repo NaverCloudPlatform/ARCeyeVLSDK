@@ -20,6 +20,11 @@
             "name": "com.unity.xr.arfoundation",
             "expression": "5.0.0",
             "define": "ARFOUNDATION_VERSION_5"
+        },
+        {
+            "name": "com.unity.xr.arfoundation",
+            "expression": "1.0.0",
+            "define": "ARFOUNDATION"
         }
     ],
     "noEngineReferences": false

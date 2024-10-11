@@ -20,7 +20,10 @@ public class RequestVLInfo {
     public string fieldName;
     [MarshalAs(UnmanagedType.LPStr)]
     public string filename;
-    public IntPtr rawImage;
+
+    public UnityImageBuffer imageBuffer;
+    
+    public IntPtr texture;
     [MarshalAs(UnmanagedType.LPStr)]
     public string cameraParam;
     [MarshalAs(UnmanagedType.LPStr)]
