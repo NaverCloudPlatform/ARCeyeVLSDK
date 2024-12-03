@@ -19,7 +19,7 @@ namespace ARCeye.Dataset
             var rectTransform = GetComponent<RectTransform>();
             SetAnchorsToCenter(rectTransform);
 
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             gameObject.SetActive(false);
 #endif
         }

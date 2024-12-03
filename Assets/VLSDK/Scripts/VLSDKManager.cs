@@ -9,13 +9,12 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
-        const string PACKAGE_VERSION = "1.6.5";
+        const string PACKAGE_VERSION = "1.7.0";
 
         private PoseTracker m_PoseTracker;
         private NetworkController m_NetworkController;
         private GeoCoordProvider m_GeoCoordProvider;
         private TextureProvider m_TextureProvider;
-
 
 #if UNITY_IOS
         const string dll = "__Internal";
@@ -144,6 +143,16 @@ namespace ARCeye
             }
         }
 
+        [SerializeField]
+        private UpdatedRelAltitudeEvent m_OnRelativeAltitudeUpdated = new UpdatedRelAltitudeEvent();
+        public  UpdatedRelAltitudeEvent OnRelativeAltitudeUpdated {
+            get => m_OnRelativeAltitudeUpdated;
+            set {
+                m_PoseTracker.onRelAltitudeUpdated = value;
+                m_OnRelativeAltitudeUpdated = value;
+            }
+        }
+
         // [SerializeField]
         private DetectedObjectEvent m_OnObjectDetected;
         public  DetectedObjectEvent OnObjectDetected {
@@ -171,6 +180,7 @@ namespace ARCeye
         }
         
         private bool m_IsInitialized = false;
+
 
         //// Lifecycle
 
@@ -225,6 +235,7 @@ namespace ARCeye
             m_PoseTracker.onInitialPoseReceived = m_OnInitialPoseReceived;
             m_PoseTracker.onStateChanged = m_OnStateChanged;
             m_PoseTracker.onPoseUpdated = m_OnPoseUpdated;
+            m_PoseTracker.onRelAltitudeUpdated = m_OnRelativeAltitudeUpdated;
             m_PoseTracker.onRegionCodeChanged = m_OnRegionCodeChanged;
             m_PoseTracker.onLayerInfoChanged = m_OnLayerInfoChanged;
             m_PoseTracker.onObjectDetected = m_OnObjectDetected;
@@ -276,7 +287,7 @@ namespace ARCeye
 
         private void InitPoseTracker()
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
             m_PoseTracker = new EditorPoseTracker();
             
             // unit test일 경우에는 모든 필터 비활성화.
@@ -311,6 +322,7 @@ namespace ARCeye
                 m_OnRegionCodeChanged?.AddListener(logViewer.OnLayerInfoChanged);
                 m_OnLayerInfoChanged?.AddListener(logViewer.OnLayerInfoChanged);
                 m_OnPoseUpdated?.AddListener(logViewer.OnPoseUpdated);
+                m_OnRelativeAltitudeUpdated?.AddListener(logViewer.OnRelAltitudeUpdated);
             }
         }
 
@@ -338,7 +350,7 @@ namespace ARCeye
             m_PoseTracker.Release();
         }
 
-        private void UpdateOriginPose(Matrix4x4 localizedViewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 texMatrix)
+        private void UpdateOriginPose(Matrix4x4 localizedViewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 texMatrix, double relativeAltitude)
         {
             // VL 수신 결과의 WC Transform Matrix 계산.
             Matrix4x4 localizedPoseMatrix = Matrix4x4.Inverse(localizedViewMatrix);

@@ -73,6 +73,7 @@ namespace ARCeye
 
         private Vector3 m_Position;
         private Vector3 m_EulerRotation;
+        private double m_RelAltitude;
 
         private GUIStyle m_TitleStyle = new GUIStyle();
         private GUIStyle m_ContentsStyle = new GUIStyle();
@@ -105,7 +106,7 @@ namespace ARCeye
 
         void Update()
         {
-            if(m_UseDebugUI && m_MultiTouchDetector.CheckMultiTouch())
+            if(Debug.isDebugBuild && m_UseDebugUI && m_MultiTouchDetector.CheckMultiTouch())
             {
                 m_ShowDebugUI = !m_ShowDebugUI;
             }
@@ -226,6 +227,7 @@ namespace ARCeye
             GUILayout.Space(10);
             GUILayout.Label($"Position (x:{m_Position.x.ToString("N1")} y:{m_Position.y.ToString("N1")} z:{m_Position.z.ToString("N1")})", m_ContentsStyle);
             GUILayout.Label($"Rotation (x:{m_EulerRotation.x.ToString("N1")} y:{m_EulerRotation.y.ToString("N1")} z:{m_EulerRotation.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Label($"Altitude: {m_RelAltitude}", m_ContentsStyle);
         }
 
         private void DrawLogScrollViewArea(Rect viewRect)
@@ -312,12 +314,17 @@ namespace ARCeye
             m_LayerInfo = layerInfo;
         }
 
-        public void OnPoseUpdated(Matrix4x4 matrix, Matrix4x4 projMatrix, Matrix4x4 texMatrix) {
+        public void OnPoseUpdated(Matrix4x4 matrix, Matrix4x4 projMatrix, Matrix4x4 texMatrix, double ra) {
             Matrix4x4 poseMatrix = matrix.inverse;
             m_Position = poseMatrix.GetColumn(3);
 
             Quaternion rotation = Quaternion.LookRotation(poseMatrix.GetColumn(2), poseMatrix.GetColumn(1));
             m_EulerRotation = rotation.eulerAngles;
+        }
+
+        public void OnRelAltitudeUpdated(double value)
+        {
+            m_RelAltitude = value;
         }
 
         public void OnObjectDetected(DetectedObject detectedObject) {

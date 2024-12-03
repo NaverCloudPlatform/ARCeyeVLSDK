@@ -35,7 +35,7 @@ namespace ARCeye {
 
         public LocationInfo info {
             get {
-    #if UNITY_EDITOR
+    #if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
                 return new LocationInfo(latitude, longitude);
     #else
                 if(m_UseFakeGPSCoordOnDevice) {
@@ -117,13 +117,13 @@ namespace ARCeye {
         }
 
         private void StartGPS() {
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             StartCoroutine( InitLocationService() );
 #endif
         }
 
         private void ReceiveGPSPermission(string permissionName) {
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             StartGPS();
 #endif
         }

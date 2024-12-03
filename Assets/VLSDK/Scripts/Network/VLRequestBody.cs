@@ -46,7 +46,7 @@ public class VLRequestBody
     public static bool IsValidRequest(VLRequestBody body, Texture texture)
     {
         // landscape 모드는 지원하지 않음.
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
         float texWidth = texture.width;
         float texHeight = texture.height;
 #else
@@ -122,14 +122,13 @@ public class VLRequestBody
     {
         string prefix1 = "https://vl-arc-eye.ncloud.com/api";
         string prefix2 = "https://api-arc-eye.ncloud.com";
-        return url.Contains(prefix1) || url.Contains(prefix2);
+        string prefix3 = "arc-eye.ncloud.com";
+        return url.Contains(prefix1) || url.Contains(prefix2) || url.Contains(prefix3);
     }
 
     private static VLRequestBody CreateARCeyeRequest(ARCeye.RequestVLInfo requestInfo) {
         VLRequestBody body = new VLRequestBody();
-
-        Debug.Log(requestInfo.url);
-
+        
         body.method = requestInfo.method;
         body.url = requestInfo.url;
         body.authorization = requestInfo.secretKey;

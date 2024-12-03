@@ -14,7 +14,7 @@ public abstract class PoseTracker
 
     /* -- Delegates -- */
 
-    public delegate void PoseUpdateDelegate(IntPtr viewMatrix, IntPtr projMatrix, IntPtr image, IntPtr texTrans);
+    public delegate void PoseUpdateDelegate(IntPtr viewMatrix, IntPtr projMatrix, IntPtr image, IntPtr texTrans, double relativeAltitude);
     public delegate void InitialPoseReceivedDelegate(int count);
     public delegate void ChangeStateDelegate(int state);
     public delegate void ChangeLocationDelegate(IntPtr rawLocation);
@@ -112,6 +112,12 @@ public abstract class PoseTracker
         set => m_OnGeoCoordUpdated = value;
     }
 
+    protected UpdatedRelAltitudeEvent m_OnRelAltitudeUpdated;
+    public  UpdatedRelAltitudeEvent onRelAltitudeUpdated {
+        get => m_OnRelAltitudeUpdated;
+        set => m_OnRelAltitudeUpdated = value;
+    }
+
     protected DetectedObjectEvent m_OnObjectDetected;
     public DetectedObjectEvent onObjectDetected {
         get => m_OnObjectDetected;
@@ -130,6 +136,7 @@ public abstract class PoseTracker
 
     private bool m_IsIntrinsicAssigned = false;
     private float m_PrevFx, m_PrevFy, m_PrevCx, m_PrevCy;
+    protected double m_CurrRelAltitude = Double.MinValue;
 
 
     /* -- Native method -- */
@@ -210,7 +217,7 @@ public abstract class PoseTracker
     public abstract void RegisterFrameLoop();
     public abstract void UnregisterFrameLoop();
 
-    public abstract void AcquireRequestedFrame(out UnityYuvCpuImage? image);
+    public abstract bool TryAcquireLatestImage(out UnityYuvCpuImage? image, out Action disposable);
     public abstract bool AcquireRequestedTexture(out Texture texture);
     public abstract void AquireCameraIntrinsic(out float fx, out float fy, out float cx, out float cy);
     public abstract float[] MakeDisplayRotationMatrix(Matrix4x4 rawDispRotMatrix);
@@ -341,15 +348,16 @@ public abstract class PoseTracker
 
     unsafe protected void UpdateFrame(Matrix4x4 projMatrix, Matrix4x4 transMatrix)
     {
-    #if UNITY_IOS && !UNITY_EDITOR
-        UnityYuvCpuImage? videoImage = new UnityYuvCpuImage();
-        AcquireRequestedFrame(out videoImage);
+    #if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        UnityYuvCpuImage? videoImage = null;
+        Action disposable = null;
 
-        if(videoImage == null) 
+        if(!TryAcquireLatestImage(out videoImage, out disposable)) 
         {
             Debug.LogError("Failed to acquire a requested video image");
             return;
         }
+
         
     #else
         Texture requestImageTexture;
@@ -394,9 +402,10 @@ public abstract class PoseTracker
         m_Frame.realHeight = 1.5f;
         m_Frame.geoCoord = new float[]{locationInfo.latitude, locationInfo.longitude};
 
-    #if UNITY_IOS && !UNITY_EDITOR
-        m_Frame.yuvBuffer = (UnityYuvCpuImage) videoImage; 
+    #if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+        m_Frame.yuvBuffer = (UnityYuvCpuImage) videoImage;
         UpdateUnityFrameNative(m_Frame);
+        disposable?.Invoke();
     #else
         GCHandle gcI = GCHandle.Alloc(requestImageTexture, GCHandleType.Weak);
         m_Frame.textureBuffer = GCHandle.ToIntPtr(gcI);
@@ -488,7 +497,7 @@ public abstract class PoseTracker
     }
     
     [MonoPInvokeCallback(typeof(PoseUpdateDelegate))]
-    private static void OnPoseUpdated(IntPtr vm, IntPtr pm, IntPtr im, IntPtr tx)
+    private static void OnPoseUpdated(IntPtr vm, IntPtr pm, IntPtr im, IntPtr tx, double ra)
     {
         // M_loc = X * M_vio
         // X = M_loc * M_vio^-1
@@ -502,7 +511,24 @@ public abstract class PoseTracker
 
         Matrix4x4 texMatrix = PoseUtility.UnmanagedToMatrix4x4From3x3(tx);
 
-        s_Instance.onPoseUpdated?.Invoke(localizedViewMatrix, projectionMatrix, texMatrix);
+        double relativeAltitude = ra;
+
+        s_Instance.onPoseUpdated?.Invoke(localizedViewMatrix, projectionMatrix, texMatrix, relativeAltitude);
+        
+        // relativeAltitude 값이 갱신 될때마다 이벤트 호출.
+        if(s_Instance.m_CurrRelAltitude != relativeAltitude) {
+            // 데이터셋인 경우. Native 영역에서 항상 값이 0으로 전달되고 m_CurrRelAltitude 값은 EditorPoseTracker에서 갱신됨.
+            if(relativeAltitude == 0)
+            {
+                s_Instance.onRelAltitudeUpdated?.Invoke(s_Instance.m_CurrRelAltitude);
+            }
+            // 실제 기기인 경우. Native 영역에서 항상 값이 갱신됨.
+            else
+            {
+                s_Instance.m_CurrRelAltitude = relativeAltitude;
+                s_Instance.onRelAltitudeUpdated?.Invoke(relativeAltitude);
+            }
+        }
     }
 
     [MonoPInvokeCallback(typeof(DetectObjectDelegate))]

@@ -116,6 +116,20 @@ namespace ARCeye.Dataset
 
             GUILayout.BeginHorizontal();
 
+            GUILayout.Label("Play Speed");
+
+            float speed = datasetManager.playSpeed;
+
+            if(GUILayout.Button($"x{speed.ToString("N0")}"))
+            {
+                datasetManager.TogglePlaySpeed();
+            }
+
+            GUILayout.EndHorizontal();
+
+
+            GUILayout.BeginHorizontal();
+
             GUI.enabled = !datasetManager.isUpdating;
 
             if(GUILayout.Button("Play"))

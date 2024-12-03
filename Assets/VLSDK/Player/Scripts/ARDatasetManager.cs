@@ -30,6 +30,14 @@ namespace ARCeye.Dataset
 
         public bool isUpdating { get; set; }
 
+        private float[] m_PlaySpeeds = new[] { 1.0f, 2.0f, 5.0f, 10.0f };
+        private int m_PlaySpeedIndex = 0;
+        public float playSpeed { 
+            get {
+                return m_PlaySpeeds[m_PlaySpeedIndex];
+            }
+         }
+
         public event Action<FrameData> frameReceived;
         private List<FrameData> m_FrameDataList;
         private FrameData m_CurrFrameData;
@@ -57,7 +65,7 @@ namespace ARCeye.Dataset
             {
                 Debug.LogError("Cannot find DebugPreivew in scene");
             }
-            
+
             StartCoroutine( UpdateFrame() );
         }
 
@@ -84,6 +92,8 @@ namespace ARCeye.Dataset
 
                     float interval = (nextFrameData.timestamp - currFrameData.timestamp) * 0.001f;
 
+                    interval /= m_PlaySpeeds[m_PlaySpeedIndex];
+
                     yield return new WaitForSeconds(interval);
 
                     frameReceived?.Invoke(currFrameData);
@@ -93,7 +103,7 @@ namespace ARCeye.Dataset
             }
         }
 
-        private void UpdateProgress()
+        public void UpdateProgress()
         {
             if(isUpdating)
             {
@@ -241,6 +251,26 @@ namespace ARCeye.Dataset
             m_TotalFrameCount = m_FrameDataList.Count;
 
             Debug.Log("Finish loading dataset!");
+        }
+
+        public float GetTotalSeconds()
+        {
+            if(m_FrameDataList == null)
+            {
+                Debug.LogError("아직 데이터셋이 로드되지 않았음");
+                return 0;
+            }
+
+            FrameData firstFrame = m_FrameDataList[0];
+            FrameData lastFrame = m_FrameDataList[m_FrameDataList.Count - 1];
+
+            float totalSeconds = (lastFrame.timestamp - firstFrame.timestamp) * 0.001f;
+            return totalSeconds;
+        }
+
+        public void TogglePlaySpeed()
+        {
+            m_PlaySpeedIndex = ++m_PlaySpeedIndex % m_PlaySpeeds.Length;
         }
 
 

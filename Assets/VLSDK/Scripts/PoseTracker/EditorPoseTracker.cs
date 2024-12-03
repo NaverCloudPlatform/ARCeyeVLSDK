@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using ARCeye.Dataset;
+using System;
 
 namespace ARCeye
 {
@@ -138,6 +139,8 @@ public class EditorPoseTracker : PoseTracker
 
         Matrix4x4 projMatrix = frameData.projMatrix;
         Matrix4x4 transMatrix = frameData.transMatrix;
+        m_CurrRelAltitude = frameData.relAltitude;
+
         UpdateFrame(projMatrix, transMatrix);
     }
 
@@ -164,8 +167,10 @@ public class EditorPoseTracker : PoseTracker
         return verticalFOV;
     }
 
-    public override void AcquireRequestedFrame(out UnityYuvCpuImage? image) {
+    public override bool TryAcquireLatestImage(out UnityYuvCpuImage? image, out Action disposable) {
         image = null;
+        disposable = null;
+        return false;
     }
 
     public override bool AcquireRequestedTexture(out Texture texture)

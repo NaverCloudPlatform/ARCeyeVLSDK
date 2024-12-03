@@ -26,49 +26,7 @@ public class VLSDKImportPreprocess
     static VLSDKImportPreprocess()
     {
         AddPackagesToManifest();
-
-        // Always included shader 체크.
-        string[] guids = AssetDatabase.FindAssets("VLSDK t:shader");
-
-        if (guids.Length == 0)
-        {
-            UnityEngine.Debug.LogWarning("VLSDK 쉐이더 파일을 경로를 찾을 수 없습니다. 이 메시지가 지속적으로 출력된다면 VLSDK > Shaders 경로에 VLSDKPreviewRotation.shader가 있는지 확인해주세요.");
-            return;
-        }
-
-        SerializedObject graphicsSettings = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/GraphicsSettings.asset")[0]);
-        SerializedProperty alwaysIncludedShaders = graphicsSettings.FindProperty("m_AlwaysIncludedShaders");
-
-        int shadersCount = alwaysIncludedShaders.arraySize;
-
-        List<string> shaderNames = new List<string>();
-
-        for(int i=0 ; i<shadersCount ; i++)
-        {
-            Object obj = alwaysIncludedShaders.GetArrayElementAtIndex(i).objectReferenceValue;
-            shaderNames.Add(obj.name);
-        }
-
-        foreach (string guid in guids)
-        {
-            string shaderPath = AssetDatabase.GUIDToAssetPath(guid);
-            Shader shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderPath);
-            string shaderName = shader.name;
-
-            if(shaderNames.Contains(shaderName))
-            {
-                continue;
-            }
-
-            alwaysIncludedShaders.InsertArrayElementAtIndex(alwaysIncludedShaders.arraySize);
-            alwaysIncludedShaders.GetArrayElementAtIndex(alwaysIncludedShaders.arraySize - 1).objectReferenceValue = shader;
-        }
-
-        graphicsSettings.ApplyModifiedProperties();
-
-
         AddDefineSymbols();
-
 
         // 1.6.3 이하 버전을 사용하는 경우 iOS plugin으로 *.a을 사용.
         // 1.6.5 버전 이후부터는 *.framework를 사용.
@@ -99,11 +57,6 @@ public class VLSDKImportPreprocess
             {
                 dependencies[package.Key] = package.Value;
                 manifestChanged = true;
-                // Debug.Log($"{package} package is added");
-            }
-            else
-            {
-                // Debug.Log($"{package} package is already installed");
             }
         }
 
@@ -176,47 +129,25 @@ public class VLSDKImportPreprocess
         foreach(var packages in packagesToDefineSymbols)
         {
             string defineSymbol = packages.Value;
-            AddDefineSymbol(defineSymbol);
+            
+            AddDefineSymbol(BuildTargetGroup.Standalone, defineSymbol);
+            AddDefineSymbol(BuildTargetGroup.Android, defineSymbol);
+            AddDefineSymbol(BuildTargetGroup.iOS, defineSymbol);
         }
     }
 
-    private static void AddDefineSymbol(string defineSymbol)
+    private static void AddDefineSymbol(BuildTargetGroup group, string defineSymbol)
     {
-        foreach (BuildTargetGroup group in GetBuildTargetGroups())
+        var symbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group);
+
+        // Define Symbol이 이미 포함되어 있는지 확인
+        if (!symbols.Contains(defineSymbol))
         {
-            if (group == BuildTargetGroup.Unknown)
-                continue;
-
-            var symbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(group);
-
-            // Define Symbol이 이미 포함되어 있는지 확인
-            if (!symbols.Contains(defineSymbol))
-            {
-                symbols += ";" + defineSymbol;
-                PlayerSettings.SetScriptingDefineSymbolsForGroup(group, symbols);
-            }
+            symbols += ";" + defineSymbol;
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(group, symbols);
         }
     }
     
-    private static IEnumerable<BuildTargetGroup> GetBuildTargetGroups()
-    {
-        foreach (BuildTargetGroup group in (BuildTargetGroup[])System.Enum.GetValues(typeof(BuildTargetGroup)))
-        {
-            // Unity가 지원하는 BuildTargetGroup만 반환
-            if (group != BuildTargetGroup.Unknown && !IsObsolete(group))
-            {
-                yield return group;
-            }
-        }
-    }
-    
-    private static bool IsObsolete(BuildTargetGroup group)
-    {
-        var attributes = typeof(BuildTargetGroup).GetField(group.ToString())
-            .GetCustomAttributes(typeof(System.ObsoleteAttribute), false);
-        return attributes.Length > 0;
-    }
-
     private static void RemoveDeprecatedNativePlugins()
     {
         // 구버전 iOS 플러그인 제거.

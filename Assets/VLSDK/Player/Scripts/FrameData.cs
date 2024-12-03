@@ -13,17 +13,12 @@ namespace ARCeye.Dataset
         public ARDatasetIntrinsic intrinsic;
         public double latitude;
         public double longitude;
+        public double relAltitude;
 
         public FrameData(string frameCode)
         {
             frameCode = frameCode.TrimEnd('|');
             string[] elems = frameCode.Split("&");
-
-            if(elems.Length != 10)
-            {
-                Debug.LogError("frameCode is not valid : " + frameCode);
-                return;
-            }
 
             timestamp = long.Parse(elems[0]);
             modelMatrix = Matrix4x4Parse(elems[1]);
@@ -36,6 +31,11 @@ namespace ARCeye.Dataset
             intrinsic.cy = float.Parse(elems[7]);
             latitude = double.Parse(elems[8]);
             longitude = double.Parse(elems[9]);
+
+            if(elems.Length == 11)
+            {
+                relAltitude = double.Parse(elems[10]);
+            }
         }
 
         public FrameData()
@@ -51,6 +51,7 @@ namespace ARCeye.Dataset
             intrinsic.cy = 318.824f;
             latitude = 0;
             longitude = 0;
+            relAltitude = 0;
         }
 
         private Matrix4x4 Matrix4x4Parse(string str)

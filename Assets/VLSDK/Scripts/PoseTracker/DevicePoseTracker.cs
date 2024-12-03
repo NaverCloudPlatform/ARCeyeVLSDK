@@ -16,6 +16,8 @@ public class DevicePoseTracker : PoseTracker
     private ARCameraManager m_CameraManager;
     private Texture2D m_CameraRequestTexture;
 
+    private UnityYuvCpuImage currVideoImage = new UnityYuvCpuImage();
+
     private const int MAJOR_AXIS_LENGTH = 640;  // 장축의 길이를 640으로 고정.
     private float[] m_DisplayMatrix = new float[9];
     private bool m_IsPortrait;
@@ -84,71 +86,79 @@ public class DevicePoseTracker : PoseTracker
         UpdateFrame(projMatrix, transMatrix);
     }
 
-    unsafe public override void AcquireRequestedFrame(out UnityYuvCpuImage? image) {
+    unsafe public override bool TryAcquireLatestImage(out UnityYuvCpuImage? image, out Action disposable) {
         if(!m_CameraManager.TryAcquireLatestCpuImage(out XRCpuImage cpuImage)) 
         {
             image = null;
-            return;
+            disposable = null;
+            return false;
         }
         
         var format = cpuImage.format;
-
         if(format == XRCpuImage.Format.AndroidYuv420_888) {
-            UnityYuvCpuImage videoImage = new UnityYuvCpuImage();
-
             var yPlane      = cpuImage.GetPlane(0);
             var uPlane      = cpuImage.GetPlane(1); 
             var vPlane      = cpuImage.GetPlane(2); 
 
-            videoImage.width             = cpuImage.width;
-            videoImage.height            = cpuImage.height;
-            videoImage.format            = (int) format;
-            videoImage.numberOfPlanes    = cpuImage.planeCount;
+            currVideoImage.width             = cpuImage.width;
+            currVideoImage.height            = cpuImage.height;
+            currVideoImage.format            = (int) format;
+            currVideoImage.numberOfPlanes    = cpuImage.planeCount;
 
-            videoImage.yPixels           = new IntPtr(yPlane.data.GetUnsafePtr());
-            videoImage.yLength           = yPlane.data.Length;
-            videoImage.yRowStride        = yPlane.rowStride;
-            videoImage.yPixelStride      = yPlane.pixelStride;
+            currVideoImage.yPixels           = new IntPtr(yPlane.data.GetUnsafePtr());
+            currVideoImage.yLength           = yPlane.data.Length;
+            currVideoImage.yRowStride        = yPlane.rowStride;
+            currVideoImage.yPixelStride      = yPlane.pixelStride;
 
-            videoImage.uPixels           = new IntPtr(uPlane.data.GetUnsafePtr());
-            videoImage.uLength           = uPlane.data.Length;    
-            videoImage.uRowStride        = uPlane.rowStride;     
-            videoImage.uPixelStride      = uPlane.pixelStride;   
+            currVideoImage.uPixels           = new IntPtr(uPlane.data.GetUnsafePtr());
+            currVideoImage.uLength           = uPlane.data.Length;    
+            currVideoImage.uRowStride        = uPlane.rowStride;     
+            currVideoImage.uPixelStride      = uPlane.pixelStride;   
 
-            videoImage.vPixels           = new IntPtr(vPlane.data.GetUnsafePtr());
-            videoImage.vLength           = vPlane.data.Length;   
-            videoImage.vRowStride        = vPlane.rowStride;     
-            videoImage.vPixelStride      = vPlane.pixelStride;
+            currVideoImage.vPixels           = new IntPtr(vPlane.data.GetUnsafePtr());
+            currVideoImage.vLength           = vPlane.data.Length;   
+            currVideoImage.vRowStride        = vPlane.rowStride;     
+            currVideoImage.vPixelStride      = vPlane.pixelStride;
 
-            image = videoImage;
+            image = currVideoImage;
+            disposable = () => {
+                cpuImage.Dispose();
+            };
+            return true;
         } else if (format == XRCpuImage.Format.IosYpCbCr420_8BiPlanarFullRange) {
-            UnityYuvCpuImage videoImage = new UnityYuvCpuImage();
+
 
             var yPlane      = cpuImage.GetPlane(0);
             var uvPlane     = cpuImage.GetPlane(1); 
 
-            videoImage.width             = cpuImage.width;
-            videoImage.height            = cpuImage.height;
-            videoImage.format            = (int) format;
-            videoImage.numberOfPlanes    = cpuImage.planeCount;
+            currVideoImage.width             = cpuImage.width;
+            currVideoImage.height            = cpuImage.height;
+            currVideoImage.format            = (int) format;
+            currVideoImage.numberOfPlanes    = cpuImage.planeCount;
 
-            videoImage.yPixels           = new IntPtr(yPlane.data.GetUnsafePtr());
-            videoImage.yLength           = yPlane.data.Length;
-            videoImage.yRowStride        = yPlane.rowStride;
-            videoImage.yPixelStride      = yPlane.pixelStride;
+            currVideoImage.yPixels           = new IntPtr(yPlane.data.GetUnsafePtr());
+            currVideoImage.yLength           = yPlane.data.Length;
+            currVideoImage.yRowStride        = yPlane.rowStride;
+            currVideoImage.yPixelStride      = yPlane.pixelStride;
 
-            videoImage.uPixels           = new IntPtr(uvPlane.data.GetUnsafePtr());
-            videoImage.uLength           = uvPlane.data.Length;    
-            videoImage.uRowStride        = uvPlane.rowStride;     
-            videoImage.uPixelStride      = uvPlane.pixelStride;
+            currVideoImage.uPixels           = new IntPtr(uvPlane.data.GetUnsafePtr());
+            currVideoImage.uLength           = uvPlane.data.Length;    
+            currVideoImage.uRowStride        = uvPlane.rowStride;     
+            currVideoImage.uPixelStride      = uvPlane.pixelStride;
             
-            image = videoImage;
+            image = currVideoImage;
+            disposable = () => {
+                cpuImage.Dispose();
+            };
+            return true;
         } else {
             image = null;
+            disposable = null;
+            cpuImage.Dispose();
+            return false;
         }
-
-        cpuImage.Dispose(); // TODO: Is it ok to dispose earlier..?
     }
+
 
 
     unsafe public override bool AcquireRequestedTexture(out Texture texture)

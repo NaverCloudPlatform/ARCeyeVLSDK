@@ -51,7 +51,7 @@ namespace ARCeye
 
             // Register VLSDKManager events to LogViewer
             VLSDKManager.OnStateChanged.AddListener(trackerState => logViewer.OnStateChanged(trackerState));
-            VLSDKManager.OnPoseUpdated.AddListener((matrix, proj, tex) => logViewer.OnPoseUpdated(matrix, proj, tex));
+            VLSDKManager.OnPoseUpdated.AddListener((matrix, proj, tex, altitude) => logViewer.OnPoseUpdated(matrix, proj, tex, altitude));
 
             logViewerObject.transform.parent = VLSDKManager.gameObject.transform;
 
