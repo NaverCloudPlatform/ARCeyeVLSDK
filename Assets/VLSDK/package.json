@@ -1,6 +1,6 @@
 {
     "name": "com.naverlabs.vlsdk",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "displayName": "VLSDK",
     "description": "ARC eye의 VL api를 Unity에서 쉽게 사용할 수 있도록 하는 패키지입니다.",
     "unity": "2021.3",

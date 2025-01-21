@@ -11,7 +11,6 @@ TagManager:
   - 
   - Water
   - UI
-  - Map
   - 
   - 
   - 
@@ -36,7 +35,8 @@ TagManager:
   - 
   - 
   - 
-  - Spatial Awareness
+  - 
+  - 
   m_SortingLayers:
   - name: Default
     uniqueID: 0
