@@ -49,6 +49,9 @@ namespace ARCeye
         private string m_ResponseBody;
         public string ResponseBody => m_ResponseBody;
 
+        // 최대 Inlier 개수. 최대 Inlier 개수 이상은 Confidence를 1로 간주.
+        private float kMaxInliers = 1000;
+
 
         protected abstract bool GetVLResult(JObject jobject);
         protected abstract string PoseKey();
@@ -114,7 +117,11 @@ namespace ARCeye
             m_Rotation = Quaternion.LookRotation(unityMatrix.GetColumn(2), unityMatrix.GetColumn(1));
 
             // 응답 정확도 계산. confidence 값 사용.
-            m_Confidence = GetFloat(m_RootObject, ConfidenceKey(), 0.0f);;
+            // m_Confidence = GetFloat(m_RootObject, ConfidenceKey(), 0.0f);;
+
+            // 응답 정확도 계산. inlier 값 사용.
+            m_Confidence = Mathf.Clamp01(GetFloat(m_RootObject, InlierKey(), 0.0f) / kMaxInliers);
+
 
             // DatasetInfo
             m_DatasetInfo = GetString(m_RootObject, DatasetInfoKey(), "");

@@ -55,6 +55,10 @@ namespace ARCeye
 
             m_Tracker.requestIntervalBeforeLocalization = 250;
             m_Tracker.requestIntervalAfterLocalization = 1000;
+
+            m_Tracker.inliersLow = 50;
+            m_Tracker.inliersMedium = 300;
+            m_Tracker.inliersHigh = 500;
         }
     }
 }

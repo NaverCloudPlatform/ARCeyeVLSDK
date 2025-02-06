@@ -13,13 +13,6 @@ public class EditorPoseTracker : PoseTracker
     private TextureProvider m_TextureProvider;
 
     private float[] m_DisplayMatrix = new float[9];
-
-    const float MAJOR_AXIS_LENGTH = 640.0f;  // 장축의 길이를 640으로 고정.
-
-    protected const float DEFAULT_FX = 469.672760f;
-    protected const float DEFAULT_FY = 469.672760f;
-    protected const float DEFAULT_CX = 179.404327f;
-    protected const float DEFAULT_CY = 315.172272f;
     
     private Camera m_MainCamera;
 
@@ -216,24 +209,11 @@ public class EditorPoseTracker : PoseTracker
         }
         else
         {
-            float scale;
-
-            // Editor 모드는 데이터셋 이미지에 맞춰서 기본 파라매터들의 스케일을 변경한다.
-            // width가 장축인 경우.
-            if(m_Config.tracker.previewWidth > m_Config.tracker.previewHeight)
-            {
-                scale = (float) m_Config.tracker.previewWidth / (float) MAJOR_AXIS_LENGTH;
-            }
-            // height가 장축인 경우.
-            else
-            {
-                scale = (float) m_Config.tracker.previewHeight / (float) MAJOR_AXIS_LENGTH;
-            }
-            
-            fx = DEFAULT_FX * scale;
-            fy = DEFAULT_FY * scale;
-            cx = DEFAULT_CX * scale;
-            cy = DEFAULT_CY * scale;
+            // TextureProvider에 할당한 이미지로 요청한 경우에는 camera param 없이 VL 요청을 보낸다.
+            fx = 0;
+            fy = 0;
+            cx = 0;
+            cy = 0;
         }
     }
 }

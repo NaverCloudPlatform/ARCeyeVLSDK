@@ -1,0 +1,19 @@
+{
+    "name": "ARCeye.VLSDK.Example",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e27c65c44dfc1422a93ade7e48f908f0"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "VLSDK_ARFOUNDATION",
+        "VLSDK_NEWTONSOFT_JSON"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

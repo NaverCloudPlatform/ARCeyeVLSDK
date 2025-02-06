@@ -1,5 +1,10 @@
 # ChangeLog
 
+## [1.8.1] - 2025-02-04
+* TextureProvider의 이미지 기반 VL 요청 테스트 시 사용하는 카메라 파라메터 비활성화.
+* New Input System 지원
+* VL Quality 임계치 설정 관련 버그 수정
+
 ## [1.8.0] - 2025-01-21
 * 초기 위치 추정 시 여러 개의 VL pose 정보를 사용하는 기능 추가.
 * `OnVLPoseRequested(VLRequestEventData)` 이벤트 추가.

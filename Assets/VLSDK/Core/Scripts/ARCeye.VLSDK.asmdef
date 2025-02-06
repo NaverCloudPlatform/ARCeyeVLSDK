@@ -4,6 +4,7 @@
     "references": [
         "Unity.XR.ARFoundation",
         "Unity.XR.ARSubsystems",
+        "Unity.InputSystem",
         "ARCeye.Dataset.Decoder"
     ],
     "includePlatforms": [],

@@ -231,11 +231,12 @@ namespace ARCeye
         {
             if(!m_IsInitialized)
             {
-                InitCamera();
                 InitConfig();
+                InitLogger();
+                
+                InitCamera();
                 InitPoseTracker();
                 InitNetworkController();
-                InitLogger();
                 
                 m_IsInitialized = true;
             }
