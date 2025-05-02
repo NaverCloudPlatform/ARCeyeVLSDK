@@ -7,10 +7,11 @@ using AOT;
 
 namespace ARCeye
 {
-[StructLayout(LayoutKind.Sequential)]
-public struct UnityImageBuffer {
-    public IntPtr pixels;
-    public int length;
-}
+    [StructLayout(LayoutKind.Sequential)]
+    public struct UnityImageBuffer
+    {
+        public IntPtr pixels;
+        public int length;
+    }
 
 }

@@ -11,20 +11,23 @@ namespace ARCeye
     {
         [HideInInspector]
         private TrackerConfig m_Tracker;
-        public ref TrackerConfig tracker {
+        public ref TrackerConfig tracker
+        {
             get => ref m_Tracker;
         }
 
         [HideInInspector]
         private LogLevel m_LogLevel;
-        public LogLevel logLevel {
+        public LogLevel logLevel
+        {
             get => m_LogLevel;
             set => m_LogLevel = value;
         }
 
-        [field:SerializeField]
+        [field: SerializeField]
         private List<VLURL> m_URLList = new List<VLURL>();
-        public List<VLURL> urlList { 
+        public List<VLURL> urlList
+        {
             get => m_URLList;
             set => m_URLList = value;
         }
@@ -39,7 +42,7 @@ namespace ARCeye
         private void CreateDefaultTrackerConfig()
         {
             m_Tracker = new TrackerConfig();
-            m_Tracker.previewWidth  = 640;
+            m_Tracker.previewWidth = 640;
             m_Tracker.previewHeight = 360;
 
             m_Tracker.resetByDevicePose = true;
@@ -48,6 +51,7 @@ namespace ARCeye
             m_Tracker.useRotationFilter = true;
             m_Tracker.useInterpolation = true;
             m_Tracker.useGPSGuide = true;
+            m_Tracker.useFaceBlurring = true;
             m_Tracker.vlSearchRange = 10;
 
             m_Tracker.originPoseCount = 1;
@@ -56,9 +60,9 @@ namespace ARCeye
             m_Tracker.requestIntervalBeforeLocalization = 250;
             m_Tracker.requestIntervalAfterLocalization = 1000;
 
-            m_Tracker.inliersLow = 50;
-            m_Tracker.inliersMedium = 300;
-            m_Tracker.inliersHigh = 500;
+            m_Tracker.confidenceLow = 0.4f;
+            m_Tracker.confidenceMedium = 0.6f;
+            m_Tracker.confidenceHigh = 0.8f;
         }
     }
 }

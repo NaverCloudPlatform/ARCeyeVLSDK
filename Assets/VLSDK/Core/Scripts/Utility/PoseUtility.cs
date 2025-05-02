@@ -33,12 +33,12 @@ namespace ARCeye
 
         static public Matrix4x4 UnmanagedToMatrix4x4<T>(IntPtr ptr)
         {
-            if(typeof(T) != typeof(float) && typeof(T) != typeof(double))  
+            if (typeof(T) != typeof(float) && typeof(T) != typeof(double))
             {
                 throw new ArgumentException("T must be either int, float, or double");
             }
 
-            if(typeof(T) != typeof(float))
+            if (typeof(T) != typeof(float))
             {
                 float[] m = new float[16];
                 Marshal.Copy(ptr, m, 0, 16);
@@ -54,10 +54,10 @@ namespace ARCeye
                 double[] m = new double[16];
                 Marshal.Copy(ptr, m, 0, 16);
                 return new Matrix4x4(
-                    new Vector4((float) m[0], (float) m[1], (float) m[2], (float) m[3]),
-                    new Vector4((float) m[4], (float) m[5], (float) m[6], (float) m[7]),
-                    new Vector4((float) m[8], (float) m[9], (float) m[10], (float) m[11]),
-                    new Vector4((float) m[12], (float) m[13], (float) m[14], (float) m[15])
+                    new Vector4((float)m[0], (float)m[1], (float)m[2], (float)m[3]),
+                    new Vector4((float)m[4], (float)m[5], (float)m[6], (float)m[7]),
+                    new Vector4((float)m[8], (float)m[9], (float)m[10], (float)m[11]),
+                    new Vector4((float)m[12], (float)m[13], (float)m[14], (float)m[15])
                 );
             }
         }

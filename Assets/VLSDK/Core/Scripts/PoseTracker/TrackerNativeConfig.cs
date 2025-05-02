@@ -17,7 +17,7 @@ namespace ARCeye
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     [System.Serializable]
-    public struct TrackerConfig 
+    public struct TrackerConfig
     {
         [HideInInspector]
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 1024)]
@@ -64,14 +64,17 @@ namespace ARCeye
         [HideInInspector, MarshalAs(UnmanagedType.U1)]
         public bool useWithGlobal;
 
-        [HideInInspector, MarshalAs(UnmanagedType.I4)]
-        public int inliersLow;
+        [HideInInspector, MarshalAs(UnmanagedType.U1)]
+        public bool useFaceBlurring;
 
-        [HideInInspector, MarshalAs(UnmanagedType.I4)]
-        public int inliersMedium;
+        [HideInInspector, MarshalAs(UnmanagedType.R4)]
+        public float confidenceLow;
 
-        [HideInInspector, MarshalAs(UnmanagedType.I4)]
-        public int inliersHigh;
+        [HideInInspector, MarshalAs(UnmanagedType.R4)]
+        public float confidenceMedium;
+
+        [HideInInspector, MarshalAs(UnmanagedType.R4)]
+        public float confidenceHigh;
 
 
         [Header("Request Options")]

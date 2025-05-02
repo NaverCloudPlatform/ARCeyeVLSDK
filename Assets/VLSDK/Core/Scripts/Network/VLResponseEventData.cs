@@ -46,12 +46,12 @@ namespace ARCeye
         public static VLResponseEventData Create(NativeVLResponseEventData nativeEventData)
         {
             VLResponseEventData eventData = new VLResponseEventData();
-            
-            eventData.m_Status = (ResponseStatus) nativeEventData.statusCode;
+
+            eventData.m_Status = (ResponseStatus)nativeEventData.statusCode;
             eventData.m_Message = Marshal.PtrToStringAnsi(nativeEventData.message);
             eventData.m_ResponseBody = Marshal.PtrToStringAnsi(nativeEventData.responseBody);
 
-            if(VLResponseParser.IsARCeyeResponse(eventData.m_ResponseBody))
+            if (VLResponseParser.IsARCeyeResponse(eventData.m_ResponseBody))
             {
                 eventData.m_VLResponseParser = new ARCeyeResponseParser(eventData.m_ResponseBody);
             }

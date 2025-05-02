@@ -18,7 +18,6 @@ namespace ARCeye.Example
         public RawImage m_RequestedTexture;
         private RectTransform m_RequestedTextureRT;
 
-        private const int k_PosePrintInterval = 10;
         private int m_PosePrintCount = 0;
 
         private int m_RequestCount = 0;
@@ -32,7 +31,7 @@ namespace ARCeye.Example
         }
 
         // 각종 VLSDKManager 이벤트 수신.
-        
+
         ///
         /// VLSDKManager의 OnVLPoseRequested(VLRequestEventData) 이벤트를 통해 실행되는 메서드. 
         /// VL 요청을 보낼때마다 호출됩니다.
@@ -50,7 +49,7 @@ namespace ARCeye.Example
             m_RequestCountText.text = $"Request Count: {m_RequestCount}";
 
             // VL 요청 이미지 시각화.
-            float ratio = (float) eventData.RequestTexture.width / (float) eventData.RequestTexture.height;
+            float ratio = (float)eventData.RequestTexture.width / (float)eventData.RequestTexture.height;
             float height = m_RequestedTextureRT.sizeDelta.y;
             float width = height * ratio;
 
@@ -79,7 +78,7 @@ namespace ARCeye.Example
         /// 
         public void OnVLPoseResponded(VLResponseEventData eventData)
         {
-            if(eventData.Status != ResponseStatus.Success)
+            if (eventData.Status != ResponseStatus.Success)
             {
                 m_VLFailCount++;
                 m_VLFailCountText.text = $"VL Fail: {m_VLFailCount}";
@@ -102,6 +101,7 @@ namespace ARCeye.Example
         ///
         /// TrackerState:
         ///   * INITIAL: 모든 세션이 초기화 된 상태. VL 초기화가 긴 시간동안 계속 실패한 경우.
+        ///   * NOT_RECOGNIZED: INITIAL 상태에서 VL 요청에 20번 실패한 경우.
         ///   * VL_RECEIVED: VL 성공 응답을 수신한 상태. 아직 localizedPose가 계산되지 않음.
         ///   * VL_PASS: VL 초기화가 한 번이라도 성공한 경우.
         ///   * VL_FAIL: 40번 연속 VL 요청에 실패하는 경우.
@@ -124,17 +124,17 @@ namespace ARCeye.Example
             Debug.Log($"OnLayerInfoChanged: " + layerInfo);
 
             // Ground가 인식 된 경우. 
-            if(layerInfo.Contains("GND")) 
+            if (layerInfo.Contains("GND"))
             {
                 Debug.Log("Load GND Stage in amproj file");
             }
             // 2층이 인식 된 경우.
-            else if(layerInfo.Contains("2F")) 
+            else if (layerInfo.Contains("2F"))
             {
                 Debug.Log("Load 2F Stage in amproj file");
             }
         }
-        
+
         /// 
         /// 매 프레임마다 호출되는 이벤트
         /// 
@@ -145,11 +145,7 @@ namespace ARCeye.Example
         /// 
         public void OnPoseUpdated(Matrix4x4 viewMatrix, Matrix4x4 projMatrix, Matrix4x4 texMatrix, double relativeAltitude)
         {
-            if(m_PosePrintCount++ > k_PosePrintInterval)
-            {
-                Debug.Log($"OnPoseUpdated: \n  viewMatrix: {viewMatrix}, \n  projMatrix: {projMatrix}, \n  texMatrix: {texMatrix} \n  relativeAltitude: {relativeAltitude}");
-                m_PosePrintCount = 0;
-            }
+
         }
 
         /// 
@@ -158,7 +154,7 @@ namespace ARCeye.Example
         /// 
         public void OnGeoCoordUpdated(double latitude, double longitude)
         {
-            Debug.Log($"OnGeoCoordUpdated: latitude:{latitude}, longitude: {longitude}");
+
         }
     }
 }

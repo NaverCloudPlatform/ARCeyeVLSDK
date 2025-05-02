@@ -20,13 +20,14 @@ namespace ARCeye
         private SerializedProperty m_VLQualityProp;
         private SerializedProperty m_InitialPoseCountProp;
         private SerializedProperty m_InitialPoseDegreeProp;
+        private SerializedProperty m_FaceBlurringProp;
         private SerializedProperty m_ShowVLPoseProp;
         private SerializedProperty m_LogLevelProp;
 
 
         void OnEnable()
         {
-            m_VLSDKSettings = (VLSDKSettings) target;
+            m_VLSDKSettings = (VLSDKSettings)target;
 
             m_URLListProp = serializedObject.FindProperty("m_URLList");
             m_GPSGuideProp = serializedObject.FindProperty("m_GPSGuide");
@@ -36,6 +37,7 @@ namespace ARCeye
             m_VLQualityProp = serializedObject.FindProperty("m_VLQuality");
             m_InitialPoseCountProp = serializedObject.FindProperty("m_InitialPoseCount");
             m_InitialPoseDegreeProp = serializedObject.FindProperty("m_InitialPoseDegree");
+            m_FaceBlurringProp = serializedObject.FindProperty("m_FaceBlurring");
             m_ShowVLPoseProp = serializedObject.FindProperty("m_ShowVLPose");
             m_LogLevelProp = serializedObject.FindProperty("m_LogLevel");
         }
@@ -49,7 +51,7 @@ namespace ARCeye
             DrawVLURLList();
             DrawGPSGuide();
 
-            if(m_VLSDKSettings.GPSGuide)
+            if (m_VLSDKSettings.GPSGuide)
             {
                 DrawLocationGeoJsonField();
             }
@@ -57,6 +59,7 @@ namespace ARCeye
             DrawVLInterval();
             DrawVLQuality();
             DrawInitialPoseInfo();
+            DrawFaceBlurring();
             DrawShowVLPose();
             DrawLogLevel();
         }
@@ -128,6 +131,14 @@ namespace ARCeye
 
             m_InitialPoseCountProp.serializedObject.ApplyModifiedProperties();
             m_InitialPoseDegreeProp.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawFaceBlurring()
+        {
+            EditorGUILayout.PropertyField(m_FaceBlurringProp);
+
+            EditorUtility.SetDirty(m_FaceBlurringProp.serializedObject.targetObject);
+            m_FaceBlurringProp.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawShowVLPose()

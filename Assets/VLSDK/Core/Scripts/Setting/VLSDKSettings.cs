@@ -7,13 +7,14 @@ namespace ARCeye
     [System.Serializable]
     public class VLSDKSettings : ScriptableObject
     {
-        [field:SerializeField, Tooltip("The request URL generated through the integration of ARC eye's API")]
+        [field: SerializeField, Tooltip("The request URL generated through the integration of ARC eye's API")]
         private List<VLURL> m_URLList = new List<VLURL>();
         public List<VLURL> URLList { get => m_URLList; }
-        
-        [field:SerializeField, Tooltip("Estimate which invoke URL to use based on GPS location")]
+
+        [field: SerializeField, Tooltip("Estimate which invoke URL to use based on GPS location")]
         private bool m_GPSGuide = true;
-        public bool GPSGuide { 
+        public bool GPSGuide
+        {
             get => m_GPSGuide;
             set => m_GPSGuide = value;
         }
@@ -21,8 +22,9 @@ namespace ARCeye
         [SerializeField, Tooltip("GeoJSON content for the areas to be estimated based on GPS location")]
         [TextArea(5, 20)]
         private string m_LocationGeoJson;
-        public string locationGeoJson { 
-            get => m_LocationGeoJson; 
+        public string locationGeoJson
+        {
+            get => m_LocationGeoJson;
         }
 
         [SerializeField, Tooltip("Request interval before entering VL Pass state (unit: ms)")]
@@ -63,6 +65,14 @@ namespace ARCeye
         {
             get => m_InitialPoseDegree;
             set => m_InitialPoseDegree = value;
+        }
+
+        [SerializeField, Tooltip("Blur the faces in the request image")]
+        private bool m_FaceBlurring = false;
+        public bool faceBlurring
+        {
+            get => m_FaceBlurring;
+            set => m_FaceBlurring = value;
         }
 
         [SerializeField, Tooltip("Visualize the responsed VL poses")]

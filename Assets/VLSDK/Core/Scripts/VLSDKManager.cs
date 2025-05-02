@@ -10,9 +10,11 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
-        const string PACKAGE_VERSION = "1.8.0";
+        const string PACKAGE_VERSION = "1.9.0";
 
         private PoseTracker m_PoseTracker;
+        public PoseTracker poseTracker => m_PoseTracker;
+
         private NetworkController m_NetworkController;
         private GeoCoordProvider m_GeoCoordProvider;
         private TextureProvider m_TextureProvider;
@@ -26,26 +28,30 @@ namespace ARCeye
 
         [SerializeField]
         private bool m_PlayOnAwake = true;
-        public bool playOnAwake {
+        public bool playOnAwake
+        {
             get => m_PlayOnAwake;
             set => m_PlayOnAwake = value;
         }
-        
+
         [SerializeField]
         private VLSDKSettings m_Settings;
-        public  VLSDKSettings settings {
+        public VLSDKSettings settings
+        {
             get => m_Settings;
             set => m_Settings = value;
         }
 
         private Transform m_ARCamera;
-        public Transform arCamera {
+        public Transform arCamera
+        {
             get => m_ARCamera;
             set => m_ARCamera = value;
         }
 
         private Transform m_Origin;
-        public Transform origin {
+        public Transform origin
+        {
             get => m_Origin;
             set => m_Origin = value;
         }
@@ -56,9 +62,11 @@ namespace ARCeye
         [Header("Event")]
         [SerializeField]
         private VLRequestEvent m_OnVLPoseRequested = new VLRequestEvent();
-        public  VLRequestEvent OnVLPoseRequested {
+        public VLRequestEvent OnVLPoseRequested
+        {
             get => m_OnVLPoseRequested;
-            set {
+            set
+            {
                 m_NetworkController.OnVLPoseRequested = value;
                 m_OnVLPoseRequested = value;
             }
@@ -66,9 +74,11 @@ namespace ARCeye
 
         [SerializeField]
         private VLRespondedEvent m_OnVLPoseResponded = new VLRespondedEvent();
-        public  VLRespondedEvent OnVLPoseResponded {
+        public VLRespondedEvent OnVLPoseResponded
+        {
             get => m_OnVLPoseResponded;
-            set {
+            set
+            {
                 m_NetworkController.OnVLPoseResponded = value;
                 m_OnVLPoseResponded = value;
             }
@@ -76,9 +86,11 @@ namespace ARCeye
 
         [SerializeField]
         private ChangedStateEvent m_OnStateChanged = new ChangedStateEvent();
-        public  ChangedStateEvent OnStateChanged {
+        public ChangedStateEvent OnStateChanged
+        {
             get => m_OnStateChanged;
-            set {
+            set
+            {
                 m_PoseTracker.onStateChanged = value;
                 m_OnStateChanged = value;
             }
@@ -86,49 +98,59 @@ namespace ARCeye
 
         // [SerializeField]
         private ChangedLocationEvent m_OnLocationChanged;
-        public  ChangedLocationEvent OnLocationChanged {
+        public ChangedLocationEvent OnLocationChanged
+        {
             get => m_OnLocationChanged;
-            set {
+            set
+            {
                 m_PoseTracker.onLocationChanged = value;
                 m_OnLocationChanged = value;
             }
         }
 
         // [SerializeField]
-        private ChangedBuildingEvent m_OnBuildingChanged; 
-        public ChangedBuildingEvent OnBuildingChanged {
+        private ChangedBuildingEvent m_OnBuildingChanged;
+        public ChangedBuildingEvent OnBuildingChanged
+        {
             get => m_OnBuildingChanged;
-            set {
+            set
+            {
                 m_PoseTracker.onBuildingChanged = value;
                 m_OnBuildingChanged = value;
             }
         }
 
         // [SerializeField]
-        private ChangedFloorEvent m_OnFloorChanged; 
-        public ChangedFloorEvent OnFloorChanged {
+        private ChangedFloorEvent m_OnFloorChanged;
+        public ChangedFloorEvent OnFloorChanged
+        {
             get => m_OnFloorChanged;
-            set {
+            set
+            {
                 m_PoseTracker.onFloorChanged = value;
                 m_OnFloorChanged = value;
             }
         }
 
         // [SerializeField]
-        private ChangedRegionCodeEvent m_OnRegionCodeChanged; 
-        public ChangedRegionCodeEvent OnRegionCodeChanged {
+        private ChangedRegionCodeEvent m_OnRegionCodeChanged;
+        public ChangedRegionCodeEvent OnRegionCodeChanged
+        {
             get => m_OnRegionCodeChanged;
-            set {
+            set
+            {
                 m_PoseTracker.onRegionCodeChanged = value;
                 m_OnRegionCodeChanged = value;
             }
         }
 
         [SerializeField]
-        private ChangedLayerInfoEvent m_OnLayerInfoChanged = new ChangedLayerInfoEvent(); 
-        public ChangedLayerInfoEvent OnLayerInfoChanged {
+        private ChangedLayerInfoEvent m_OnLayerInfoChanged = new ChangedLayerInfoEvent();
+        public ChangedLayerInfoEvent OnLayerInfoChanged
+        {
             get => m_OnLayerInfoChanged;
-            set {
+            set
+            {
                 m_PoseTracker.onLayerInfoChanged = value;
                 m_OnLayerInfoChanged = value;
             }
@@ -136,9 +158,11 @@ namespace ARCeye
 
         [SerializeField]
         private UpdatedPoseEvent m_OnPoseUpdated = new UpdatedPoseEvent();
-        public  UpdatedPoseEvent OnPoseUpdated {
+        public UpdatedPoseEvent OnPoseUpdated
+        {
             get => m_OnPoseUpdated;
-            set {
+            set
+            {
                 m_PoseTracker.onPoseUpdated = value;
                 m_OnPoseUpdated = value;
             }
@@ -146,9 +170,11 @@ namespace ARCeye
 
         [SerializeField]
         private UpdatedGeoCoordEvent m_OnGeoCoordUpdated = new UpdatedGeoCoordEvent();
-        public  UpdatedGeoCoordEvent OnGeoCoordUpdated {
+        public UpdatedGeoCoordEvent OnGeoCoordUpdated
+        {
             get => m_OnGeoCoordUpdated;
-            set {
+            set
+            {
                 m_PoseTracker.onGeoCoordUpdated = value;
                 m_OnGeoCoordUpdated = value;
             }
@@ -156,9 +182,11 @@ namespace ARCeye
 
         [SerializeField]
         private UpdatedRelAltitudeEvent m_OnRelativeAltitudeUpdated = new UpdatedRelAltitudeEvent();
-        public  UpdatedRelAltitudeEvent OnRelativeAltitudeUpdated {
+        public UpdatedRelAltitudeEvent OnRelativeAltitudeUpdated
+        {
             get => m_OnRelativeAltitudeUpdated;
-            set {
+            set
+            {
                 m_PoseTracker.onRelAltitudeUpdated = value;
                 m_OnRelativeAltitudeUpdated = value;
             }
@@ -166,18 +194,23 @@ namespace ARCeye
 
         // [SerializeField]
         private DetectedObjectEvent m_OnObjectDetected;
-        public  DetectedObjectEvent OnObjectDetected {
+        public DetectedObjectEvent OnObjectDetected
+        {
             get => m_OnObjectDetected;
-            set {
+            set
+            {
                 m_PoseTracker.onObjectDetected = value;
                 m_OnObjectDetected = value;
             }
         }
 
         private Camera m_MainCamera;
-        public Camera mainCamera {
-            get {
-                if(m_MainCamera == null) {
+        public Camera mainCamera
+        {
+            get
+            {
+                if (m_MainCamera == null)
+                {
                     m_MainCamera = Camera.main;
                 }
                 return m_MainCamera;
@@ -186,12 +219,14 @@ namespace ARCeye
 
         public TrackerState trackerState => m_PoseTracker.state;
 
-        public string version {
-            get {
+        public string version
+        {
+            get
+            {
                 return PACKAGE_VERSION;
             }
         }
-        
+
         private bool m_IsInitialized = false;
 
         private NativeLogger m_NativeLogger;
@@ -206,18 +241,18 @@ namespace ARCeye
 
         private void OnEnable()
         {
-            if(m_NetworkController == null)
+            if (m_NetworkController == null)
             {
                 m_NetworkController = GetComponent<NetworkController>();
             }
             m_NetworkController.Initialize();
 
-            if(m_GeoCoordProvider == null)
+            if (m_GeoCoordProvider == null)
             {
                 m_GeoCoordProvider = GetComponent<GeoCoordProvider>();
             }
 
-            if(m_TextureProvider == null)
+            if (m_TextureProvider == null)
             {
                 m_TextureProvider = GetComponent<TextureProvider>();
             }
@@ -229,15 +264,15 @@ namespace ARCeye
         /// </summary>
         public void Initialize()
         {
-            if(!m_IsInitialized)
+            if (!m_IsInitialized)
             {
                 InitConfig();
                 InitLogger();
-                
+
                 InitCamera();
                 InitPoseTracker();
                 InitNetworkController();
-                
+
                 m_IsInitialized = true;
             }
         }
@@ -247,7 +282,7 @@ namespace ARCeye
             Initialize();
 
             m_OnPoseUpdated?.AddListener(UpdateOriginPose);
-            
+
             m_PoseTracker.onStateChanged = m_OnStateChanged;
             m_PoseTracker.onPoseUpdated = m_OnPoseUpdated;
             m_PoseTracker.onRelAltitudeUpdated = m_OnRelativeAltitudeUpdated;
@@ -263,7 +298,7 @@ namespace ARCeye
             m_PoseTracker.SetGPSLocationRequester(this);
             StartDetectingGPSLocation();
 
-            if(m_PlayOnAwake)
+            if (m_PlayOnAwake)
             {
                 StartSession();
             }
@@ -271,7 +306,8 @@ namespace ARCeye
 
         private void InitCamera()
         {
-            if(mainCamera == null) {
+            if (mainCamera == null)
+            {
                 Debug.LogError("Main Camera를 찾을 수 없습니다.");
             }
             m_ARCamera = mainCamera.transform;
@@ -280,12 +316,14 @@ namespace ARCeye
 
         private void InitConfig()
         {
-            if(m_Config == null) {
+            if (m_Config == null)
+            {
                 Debug.LogWarning("[VLSDKManager] Config is null. Use default Config setting");
                 m_Config = new Config();
             }
 
-            if(m_Settings == null || m_Settings.URLList.Count == 0) {
+            if (m_Settings == null || m_Settings.URLList.Count == 0)
+            {
                 Debug.LogWarning("[VLSDKManager] URL List is empty.");
                 return;
             }
@@ -293,6 +331,7 @@ namespace ARCeye
             m_Config.tracker.requestIntervalBeforeLocalization = m_Settings.vlIntervalInitial;
             m_Config.tracker.requestIntervalAfterLocalization = m_Settings.vlIntervalPassed;
             m_Config.tracker.useGPSGuide = m_Settings.GPSGuide;
+            m_Config.tracker.useFaceBlurring = m_Settings.faceBlurring;
             m_Config.tracker.vlQuality = m_Settings.vlQuality;
 
             m_Config.tracker.originPoseCount = m_Settings.initialPoseCount;
@@ -305,18 +344,41 @@ namespace ARCeye
 
         private void InitPoseTracker()
         {
+            // PoseTracker를 초기화. CustomPoseTrackerAdaptor가 등록 되어 있다면
+            // CustomPoseTrackerAdaptor에서 설정한 PoseTracker를 사용한다.
+            CustomPoseTrackerAdaptor customPoseTracker = GetComponent<CustomPoseTrackerAdaptor>();
+
 #if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
-            m_PoseTracker = new EditorPoseTracker();
-            
-            // unit test일 경우에는 모든 필터 비활성화.
-            m_Config.tracker.useTranslationFilter = !settings.testMode;
-            m_Config.tracker.useRotationFilter = !settings.testMode;
-            m_Config.tracker.useInterpolation = !settings.testMode;
+            if (customPoseTracker != null && customPoseTracker.UseCustomEditorPoseTracker)
+            {
+                customPoseTracker.Initialize();
+
+                m_PoseTracker = customPoseTracker.CustomEditorPoseTracker;
+            }
+            else
+            {
+                m_PoseTracker = new ARDatasetPoseTracker();
+
+                // unit test일 경우에는 모든 필터 비활성화.
+                m_Config.tracker.useTranslationFilter = !settings.testMode;
+                m_Config.tracker.useRotationFilter = !settings.testMode;
+                m_Config.tracker.useInterpolation = !settings.testMode;
+            }
 #else
-            m_PoseTracker = new DevicePoseTracker();
+            if (customPoseTracker != null && customPoseTracker.UseCustomDevicePoseTracker)
+            {
+                customPoseTracker.Initialize();
+
+                m_PoseTracker = customPoseTracker.CustomDevicePoseTracker;
+            }
+            else
+            {
+                m_PoseTracker = new ARFoundationPoseTracker();
+            }
 #endif
+
             m_PoseTracker.SetGeoCoordProvider(m_GeoCoordProvider);
-            m_PoseTracker.Initialize(m_ARCamera, m_Config);
+            m_PoseTracker.Initialize(m_Config);
 
             string nativeVersion = m_PoseTracker?.GetVersion();
             Debug.Log($"<b>VLSDK version {PACKAGE_VERSION}, native {nativeVersion}</b>");
@@ -324,7 +386,15 @@ namespace ARCeye
 
         private void InitNetworkController()
         {
-            m_NetworkController.EnableVLPose(m_Settings.showVLPose);
+            if (m_Settings == null)
+            {
+                Debug.LogWarning("[VLSDKManager] VLSDKSettings is null. Hide VL pose gizmo.");
+                m_NetworkController.EnableVLPose(false);
+            }
+            else
+            {
+                m_NetworkController.EnableVLPose(m_Settings.showVLPose);
+            }
         }
 
         private void InitLogger()
@@ -334,8 +404,10 @@ namespace ARCeye
             m_NativeLogger.Initialize();
 
             var logViewer = GetComponentInChildren<LogViewer>();
-            if(logViewer) { 
-                m_NativeLogger.onLogAdded.AddListener(logElem => {
+            if (logViewer)
+            {
+                m_NativeLogger.onLogAdded.AddListener(logElem =>
+                {
                     logViewer.AddLogElem(logElem);
                 });
 
@@ -347,22 +419,28 @@ namespace ARCeye
             }
         }
 
-        private void CheckObsoleteEvents() {
-            if(m_OnLocationChanged?.GetPersistentEventCount() > 0) {
+        private void CheckObsoleteEvents()
+        {
+            if (m_OnLocationChanged?.GetPersistentEventCount() > 0)
+            {
                 Debug.LogWarning("[VLSDKManager] OnLocationChanged 이벤트는 삭제 될 예정입니다. OnLayerInfoChanged 이벤트를 사용해주세요");
             }
-            if(m_OnBuildingChanged?.GetPersistentEventCount() > 0) {
+            if (m_OnBuildingChanged?.GetPersistentEventCount() > 0)
+            {
                 Debug.LogWarning("[VLSDKManager] OnBuildingChanged 이벤트는 삭제 될 예정입니다. OnLayerInfoChanged 이벤트를 사용해주세요");
             }
-            if(m_OnFloorChanged?.GetPersistentEventCount() > 0) {
+            if (m_OnFloorChanged?.GetPersistentEventCount() > 0)
+            {
                 Debug.LogWarning("[VLSDKManager] OnFloorChanged 이벤트는 삭제 될 예정입니다. OnLayerInfoChanged 이벤트를 사용해주세요");
             }
-            if(m_OnRegionCodeChanged?.GetPersistentEventCount() > 0) {
+            if (m_OnRegionCodeChanged?.GetPersistentEventCount() > 0)
+            {
                 Debug.LogWarning("[VLSDKManager] OnRegionCodeChanged 이벤트는 삭제 될 예정입니다. OnLayerInfoChanged 이벤트를 사용해주세요");
             }
         }
 
-        private void OnDisable() {
+        private void OnDisable()
+        {
             StopSession();
         }
 
@@ -387,42 +465,51 @@ namespace ARCeye
             m_TextureProvider.texMatrix = texMatrix;
 
             // 계산 된 Origin의 Transform Matrix를 이용해 OriginTransform의 position, rotation 설정.
-            if(originModelMatrix.ValidTRS()) {
+            if (originModelMatrix.ValidTRS())
+            {
                 m_Origin.localPosition = originModelMatrix.GetColumn(3);
                 m_Origin.localRotation = originModelMatrix.rotation;
             }
         }
 
-        public void StartSession() {
+        public void StartSession()
+        {
             m_PoseTracker.RegisterFrameLoop();
         }
 
-        public void StopSession() {
+        public void StopSession()
+        {
             m_PoseTracker.UnregisterFrameLoop();
         }
-        
-        public void ResetSession() {
+
+        public void ResetSession()
+        {
             m_PoseTracker.Reset();
         }
 
-        public void ChangeState(TrackerState state) {
+        public void ChangeState(TrackerState state)
+        {
             m_PoseTracker.ChangeState(state);
         }
 
-        public void SetTrackerConfig(TrackerConfig config) {
+        public void SetTrackerConfig(TrackerConfig config)
+        {
             m_PoseTracker.SetTrackerConfig(config);
         }
 
-        public TrackerConfig GetTrackerConfig() {
+        public TrackerConfig GetTrackerConfig()
+        {
             return m_PoseTracker.GetTrackerConfig();
         }
 
-        private void DetectVLLocation() {
+        private void DetectVLLocation()
+        {
             double latitude = m_GeoCoordProvider.info.latitude;
             double longitude = m_GeoCoordProvider.info.longitude;
             double radius = 100;
 
-            if(m_Config.tracker.useGPSGuide && (latitude == 0 || longitude == 0)) {
+            if (m_Config.tracker.useGPSGuide && (latitude == 0 || longitude == 0))
+            {
                 NativeLogger.DebugLog(LogLevel.ERROR, "Failed to get GPS coordinate");
             }
 
@@ -430,17 +517,21 @@ namespace ARCeye
             m_OnGeoCoordUpdated.Invoke(latitude, longitude);
         }
 
-        public string FindLocation(double latitude, double longitude) {
+        public string FindLocation(double latitude, double longitude)
+        {
             return m_PoseTracker.FindVLLocation(latitude, longitude);
         }
 
-        public void EnableResetByDevicePose(bool active) {
+        public void EnableResetByDevicePose(bool active)
+        {
             m_PoseTracker.EnableResetByDevicePose(active);
         }
 
         /* -- GPS Location Requester -- */
-        public void StartDetectingGPSLocation() {
-            if(!m_Config.tracker.useGPSGuide) {
+        public void StartDetectingGPSLocation()
+        {
+            if (!m_Config.tracker.useGPSGuide)
+            {
                 return;
             }
 
@@ -449,7 +540,8 @@ namespace ARCeye
             InvokeRepeating(nameof(DetectVLLocation), 1.0f, 1.0f);
         }
 
-        public void StopDetectingGPSLocation() {
+        public void StopDetectingGPSLocation()
+        {
             CancelInvoke(nameof(DetectVLLocation));
         }
 
@@ -458,10 +550,11 @@ namespace ARCeye
 
         private void OnDrawGizmos()
         {
-            if(mainCamera == null) {
+            if (mainCamera == null)
+            {
                 return;
             }
-            
+
             Matrix4x4 poseMatrix = mainCamera.transform.localToWorldMatrix;
             DebugUtility.DrawFrame(poseMatrix, Color.black, 1.5f);
         }

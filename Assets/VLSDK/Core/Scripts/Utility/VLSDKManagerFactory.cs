@@ -13,7 +13,7 @@ namespace ARCeye
             // Create VLSDKManager
 #if UNITY_EDITOR
             GameObject VLSDKManagerObject;
-            if(EditorApplication.isPlaying)
+            if (EditorApplication.isPlaying)
             {
                 VLSDKManagerObject = new GameObject("VLSDKManager");
 

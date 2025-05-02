@@ -33,5 +33,6 @@ MonoBehaviour:
   m_VLQuality: 1
   m_InitialPoseCount: 1
   m_InitialPoseDegree: 3
+  m_FaceBlurring: 0
   m_ShowVLPose: 1
   m_LogLevel: 1

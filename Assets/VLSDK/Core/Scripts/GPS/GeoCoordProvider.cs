@@ -6,56 +6,62 @@ using UnityEngine;
 using UnityEngine.Android;
 #endif
 
-namespace ARCeye {
+namespace ARCeye
+{
     public class GeoCoordProvider : MonoBehaviour
     {
         /// 실제 디바이스에서 Location 필드의 위치에 해당하는 GPS를 사용할지 여부 설정.
         [SerializeField]
         private bool m_UseFakeGPSCoordOnDevice;
-        public  bool UseFakeGPSCoordOnDevice
+        public bool UseFakeGPSCoordOnDevice
         {
             get => m_UseFakeGPSCoordOnDevice;
             set => m_UseFakeGPSCoordOnDevice = value;
         }
 
         // 외부에서 latitude와 longitude를 할당했을 경우 GPSData를 사용하지 않고 입력된 값을 사용함.
-        [field:SerializeField]
+        [field: SerializeField]
         private float m_Latitude;
-        public float latitude { 
-            get => m_Latitude; 
+        public float latitude
+        {
+            get => m_Latitude;
             set => m_Latitude = value;
         }
-        
-        [field:SerializeField]
+
+        [field: SerializeField]
         private float m_Longitude;
-        public float longitude { 
-            get => m_Longitude; 
-            set => m_Longitude = value; 
+        public float longitude
+        {
+            get => m_Longitude;
+            set => m_Longitude = value;
         }
 
-        public LocationInfo info {
-            get {
-    #if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
+        public LocationInfo info
+        {
+            get
+            {
+#if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
                 return new LocationInfo(latitude, longitude);
-    #else
+#else
                 if(m_UseFakeGPSCoordOnDevice) {
                     return new LocationInfo(latitude, longitude);
                 } else {
                     return new LocationInfo(Input.location.lastData);
                 }
-    #endif
+#endif
             }
         }
-        
+
         private GeoCoordInitEvent m_InitEvent;
-        public  GeoCoordInitEvent onInitialized {
+        public GeoCoordInitEvent onInitialized
+        {
             get => m_InitEvent;
             set => m_InitEvent = value;
         }
 
         void Awake()
         {
-            if(m_UseFakeGPSCoordOnDevice)
+            if (m_UseFakeGPSCoordOnDevice)
             {
                 NativeLogger.DebugLog(ARCeye.LogLevel.WARNING, "******** 주의 ********");
                 NativeLogger.DebugLog(ARCeye.LogLevel.WARNING, "Fake GPS를 사용중입니다.\n기기의 GPS 센서값을 사용하기 위해서는 VLSDKManager의 GeoCoordProvider에 설정 된 Use Fake GPS Coord 값을 false로 설정해주세요");
@@ -65,7 +71,7 @@ namespace ARCeye {
 
         void Start()
         {
-    #if PLATFORM_ANDROID
+#if PLATFORM_ANDROID
             if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
             {
                 var callbacks = new PermissionCallbacks();
@@ -76,14 +82,15 @@ namespace ARCeye {
             {
                 StartGPS();
             }
-    #else
+#else
             StartGPS();
-    #endif   
+#endif
         }
 
-        private IEnumerator InitLocationService() 
+        private IEnumerator InitLocationService()
         {
-            if (!Input.location.isEnabledByUser) {
+            if (!Input.location.isEnabledByUser)
+            {
                 NativeLogger.DebugLog(LogLevel.WARNING, "[GeoCoordProvider] InitLocationService - 사용자가 location 서비스를 활성화하지 않음");
                 yield break;
             }
@@ -108,21 +115,24 @@ namespace ARCeye {
                 NativeLogger.DebugLog(LogLevel.WARNING, "[GeoCoordProvider] InitLocationService - Input.location.status == LocationServiceStatus.Failed");
                 yield break;
             }
-            
-            if(m_InitEvent != null) {
+
+            if (m_InitEvent != null)
+            {
                 m_InitEvent.Invoke();
             }
 
             NativeLogger.DebugLog(LogLevel.INFO, "[GeoCoordProvider] GPS module is initialized");
         }
 
-        private void StartGPS() {
+        private void StartGPS()
+        {
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             StartCoroutine( InitLocationService() );
 #endif
         }
 
-        private void ReceiveGPSPermission(string permissionName) {
+        private void ReceiveGPSPermission(string permissionName)
+        {
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             StartGPS();
 #endif

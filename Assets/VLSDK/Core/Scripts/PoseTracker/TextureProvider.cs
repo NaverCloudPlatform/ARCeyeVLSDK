@@ -11,13 +11,15 @@ namespace ARCeye
     {
         [SerializeField]
         private Texture m_TextureToSend;
-        public Texture textureToSend {
+        public Texture textureToSend
+        {
             get => m_TextureToSend;
             set => m_TextureToSend = value;
         }
 
         private Matrix4x4 m_TexMatrix = Matrix4x4.identity;
-        public Matrix4x4 texMatrix {
+        public Matrix4x4 texMatrix
+        {
             get => m_TexMatrix;
             set => m_TexMatrix = value;
         }
@@ -27,16 +29,21 @@ namespace ARCeye
 
         public bool CreateQueryTexture(ARCeye.RequestVLInfo requestInfo, ref Texture2D queryTexture)
         {
-#if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-            return CreateTextureUsingRawBuffer(requestInfo.imageBuffer, ref queryTexture);
-#else
-            if(requestInfo.texture == IntPtr.Zero)
+            // jpeg buffer가 직접 넘어오는 경우.
+            if (requestInfo.imageBuffer.pixels != IntPtr.Zero)
             {
+                return CreateTextureUsingRawBuffer(requestInfo.imageBuffer, ref queryTexture);
+            }
+            // texture2d의 형태로 넘어오는 경우.
+            else if (requestInfo.texture != IntPtr.Zero)
+            {
+                return CreateTextureUsingRawTexture(requestInfo.texture, ref queryTexture);
+            }
+            else
+            {
+                Debug.LogError("Texture in requestInfo is null");
                 return false;
             }
-
-            return CreateTextureUsingRawTexture(requestInfo.texture, ref queryTexture);
-#endif
         }
 
         private bool CreateTextureUsingRawTexture(IntPtr rawImage, ref Texture2D queryTexture)
@@ -78,12 +85,12 @@ namespace ARCeye
             byte[] imageBuffer = new byte[unityImageBuffer.length];
             Marshal.Copy(unityImageBuffer.pixels, imageBuffer, 0, unityImageBuffer.length);
 
-            if(s_RequestTexture == null)
+            if (s_RequestTexture == null)
             {
-                s_RequestTexture = new Texture2D(2, 2, TextureFormat.RGBA32, false);   
+                s_RequestTexture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             }
-            
-            if(s_RequestTexture.LoadImage(imageBuffer))
+
+            if (s_RequestTexture.LoadImage(imageBuffer))
             {
                 queryTexture = s_RequestTexture;
                 return true;

@@ -7,27 +7,38 @@ using AOT;
 
 namespace ARCeye
 {
-[StructLayout(LayoutKind.Sequential)]
-public struct UnityYuvCpuImage {
-    public int width;
-    public int height;
-    public int format;
-    public int numberOfPlanes;
+    public enum YuvRotationMode
+    {
+        YUV_ROTATION_0 = 0,
+        YUV_ROTATION_90 = 90,
+        YUV_ROTATION_180 = 180,
+        YUV_ROTATION_270 = 270
+    }
 
-    public IntPtr yPixels;
-    public int yLength;
-    public int yRowStride;
-    public int yPixelStride;
+    [StructLayout(LayoutKind.Sequential)]
+    public struct UnityYuvCpuImage
+    {
+        public int width;
+        public int height;
+        public int format;
+        public int numberOfPlanes;
 
-    public IntPtr uPixels;
-    public int uLength;
-    public int uRowStride;
-    public int uPixelStride;
+        public IntPtr yPixels;
+        public int yLength;
+        public int yRowStride;
+        public int yPixelStride;
 
-    public IntPtr vPixels;
-    public int vLength;
-    public int vRowStride;
-    public int vPixelStride;
-}
+        public IntPtr uPixels;
+        public int uLength;
+        public int uRowStride;
+        public int uPixelStride;
+
+        public IntPtr vPixels;
+        public int vLength;
+        public int vRowStride;
+        public int vPixelStride;
+
+        public YuvRotationMode rotationMode;
+    }
 
 }

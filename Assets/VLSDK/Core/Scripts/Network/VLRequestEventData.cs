@@ -27,7 +27,7 @@ namespace ARCeye
         {
             Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
 
-            if(texture.LoadImage(imageBuffer))
+            if (texture.LoadImage(imageBuffer))
             {
                 Initialize(requestBody, texture);
             }
@@ -44,11 +44,11 @@ namespace ARCeye
             m_Url = requestBody.url;
             m_SecretKey = requestBody.authorization;
 
-            if(s_RequestTexture == null || s_RequestTexture.width != requestTexture.width)
+            if (s_RequestTexture == null || s_RequestTexture.width != requestTexture.width)
             {
                 s_RequestTexture = new Texture2D(requestTexture.width, requestTexture.height, requestTexture.format, false);
             }
-            
+
             Graphics.CopyTexture(requestTexture, s_RequestTexture);
         }
 

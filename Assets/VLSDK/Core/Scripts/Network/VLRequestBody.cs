@@ -21,7 +21,7 @@ public class VLRequestBody
     public override string ToString()
     {
         StringBuilder sb = new StringBuilder();
-        foreach(var elem in parameters)
+        foreach (var elem in parameters)
         {
             sb.Append($"{elem.Key} : {elem.Value}\n");
         }
@@ -33,10 +33,10 @@ public class VLRequestBody
            params - {sb.ToString()}
          ";
     }
-    
+
     public static bool IsValidCameraParam(string paramStr)
     {
-        if(String.IsNullOrEmpty(paramStr))
+        if (String.IsNullOrEmpty(paramStr))
             return false;
 
         string[] elems = paramStr.Split(",");
@@ -51,11 +51,11 @@ public class VLRequestBody
         float texHeight = texture.height;
 
         string camParamStr;
-        if(body.parameters.ContainsKey("cameraParameters"))
+        if (body.parameters.ContainsKey("cameraParameters"))
         {
             camParamStr = body.parameters["cameraParameters"];
         }
-        else if(body.parameters.ContainsKey("camparams"))
+        else if (body.parameters.ContainsKey("camparams"))
         {
             camParamStr = body.parameters["camparams"];
         }
@@ -71,7 +71,7 @@ public class VLRequestBody
         float cy = float.Parse(camParamElems[3]);
 
         // texture가 portrait인 경우 intrinsic도 portrait인지 확인.
-        if(texWidth < texHeight && cx > cy)
+        if (texWidth < texHeight && cx > cy)
         {
             NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지(w {texWidth}, h {texHeight})와 camParam(cx {cx}, cy {cy})의 방향이 일치하지 않음");
             return false;
@@ -87,12 +87,12 @@ public class VLRequestBody
         float diffWidthRatio = diffWidth / texWidth;
         float diffHeightRatio = diffHeight / texHeight;
 
-        if(diffWidthRatio > 0.05f)
+        if (diffWidthRatio > 0.05f)
         {
             NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지의 width({texWidth})와 camParam의 cx({cx})의 차이가 큼");
             return false;
         }
-        if(diffHeightRatio > 0.05f)
+        if (diffHeightRatio > 0.05f)
         {
             NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지의 height({texHeight})와 camParam의 cy({cy})의 차이가 큼");
             return false;
@@ -101,9 +101,9 @@ public class VLRequestBody
         return true;
     }
 
-    public static VLRequestBody Create(ARCeye.RequestVLInfo requestInfo) 
+    public static VLRequestBody Create(ARCeye.RequestVLInfo requestInfo)
     {
-        if(IsARCeyeURL(requestInfo.url))
+        if (IsARCeyeURL(requestInfo.url))
         {
             return CreateARCeyeRequest(requestInfo);
         }
@@ -121,25 +121,28 @@ public class VLRequestBody
         return url.Contains(prefix1) || url.Contains(prefix2) || url.Contains(prefix3);
     }
 
-    private static VLRequestBody CreateARCeyeRequest(ARCeye.RequestVLInfo requestInfo) {
+    private static VLRequestBody CreateARCeyeRequest(ARCeye.RequestVLInfo requestInfo)
+    {
         VLRequestBody body = new VLRequestBody();
-        
+
         body.method = requestInfo.method;
         body.url = requestInfo.url;
         body.authorization = requestInfo.secretKey;
         body.filename = requestInfo.filename;
         body.imageFieldName = "image";
-        
-        if(VLRequestBody.IsValidCameraParam(requestInfo.cameraParam))
+
+        if (VLRequestBody.IsValidCameraParam(requestInfo.cameraParam))
         {
             body.parameters.Add("cameraParameters", requestInfo.cameraParam);
         }
-        
-        if(requestInfo.requestWithPosition && IsPositionBasedRequestValid()) {
+
+        if (requestInfo.requestWithPosition && IsPositionBasedRequestValid())
+        {
             body.parameters.Add("odometry", requestInfo.odometry);
             body.parameters.Add("lastPose", requestInfo.lastPose);
 
-            if(requestInfo.withGlobal) {
+            if (requestInfo.withGlobal)
+            {
                 body.parameters.Add("withGlobal", "true");
             }
         }
@@ -149,7 +152,8 @@ public class VLRequestBody
         return body;
     }
 
-    private static VLRequestBody CreateLABSRequest(ARCeye.RequestVLInfo requestInfo) {
+    private static VLRequestBody CreateLABSRequest(ARCeye.RequestVLInfo requestInfo)
+    {
         VLRequestBody body = new VLRequestBody();
         body.method = requestInfo.method;
         body.url = requestInfo.url;
@@ -157,22 +161,24 @@ public class VLRequestBody
         body.filename = requestInfo.filename;
         body.imageFieldName = "images";
 
-        if(VLRequestBody.IsValidCameraParam(requestInfo.cameraParam))
+        if (VLRequestBody.IsValidCameraParam(requestInfo.cameraParam))
         {
             body.parameters.Add("camparams", requestInfo.cameraParam);
         }
 
         // LABS 요청에는 location 필드가 필수.
-        if(!string.IsNullOrEmpty(requestInfo.location)) 
+        if (!string.IsNullOrEmpty(requestInfo.location))
         {
             body.parameters.Add("location", requestInfo.location);
         }
-        
-        if(requestInfo.requestWithPosition && IsPositionBasedRequestValid()) {
+
+        if (requestInfo.requestWithPosition && IsPositionBasedRequestValid())
+        {
             body.parameters.Add("odometry", requestInfo.odometry);
             body.parameters.Add("last-pose", requestInfo.lastPose);
 
-            if(requestInfo.withGlobal) {
+            if (requestInfo.withGlobal)
+            {
                 body.parameters.Add("withGlobal", "true");
             }
         }
@@ -186,7 +192,7 @@ public class VLRequestBody
     ///   현재 위치를 기반으로 요청을 보낼 수 있는지 확인.
     ///   Editor 모드에서 ARDatasetManager를 사용하지 않는 경우 항상 false가 리턴된다.
     /// </summary>
-    private static bool IsPositionBasedRequestValid() 
+    private static bool IsPositionBasedRequestValid()
     {
 #if UNITY_EDITOR
         // 코드 구조를 깔끔하게 하기 위해 여기에서 FindObjectOfType 실행.

@@ -71,7 +71,7 @@ namespace ARCeye
 
         public VLResponseParser(string responseBody)
         {
-            m_ResponseBody = responseBody;   
+            m_ResponseBody = responseBody;
         }
 
         public void Parse()
@@ -82,7 +82,7 @@ namespace ARCeye
             m_IsVLPassed = GetVLResult(m_RootObject);
 
             // VL 응답에 실패하는 경우 이후 일련의 파싱 과정을 진행하지 않음.
-            if(!m_IsVLPassed)
+            if (!m_IsVLPassed)
             {
                 return;
             }
@@ -129,7 +129,7 @@ namespace ARCeye
 
         protected string GetString(JObject jobject, string key, string defaultValue)
         {
-            if(!jobject.ContainsKey(key))
+            if (!jobject.ContainsKey(key))
             {
                 Debug.LogWarning($"Parsing Error! No `{key}` field in the response body\n\nResponse Body\n{m_ResponseBody}");
                 return defaultValue;
@@ -140,7 +140,7 @@ namespace ARCeye
 
         protected float GetFloat(JObject jobject, string key, float defaultValue)
         {
-            if(!jobject.ContainsKey(key))
+            if (!jobject.ContainsKey(key))
             {
                 Debug.LogWarning($"Parsing Error! No `{key}` field in the response body\n\nResponse Body\n{m_ResponseBody}");
                 return defaultValue;
@@ -152,15 +152,18 @@ namespace ARCeye
 
     public class ARCeyeResponseParser : VLResponseParser
     {
-        public ARCeyeResponseParser(string responseBody) : base(responseBody){}
+        public ARCeyeResponseParser(string responseBody) : base(responseBody) { }
 
         protected override bool GetVLResult(JObject jobject)
         {
             var resultObject = jobject["result"];
-            if(resultObject != null) {
+            if (resultObject != null)
+            {
                 string resultStr = GetString(jobject, "result", "FAILURE");
                 return (resultStr == "SUCCESS");
-            } else {
+            }
+            else
+            {
                 return false;
             }
         }
@@ -194,12 +197,12 @@ namespace ARCeye
 
     public class DevResponseParser : VLResponseParser
     {
-        public DevResponseParser(string responseBody) : base(responseBody){}
+        public DevResponseParser(string responseBody) : base(responseBody) { }
 
         protected override bool GetVLResult(JObject jobject)
         {
             var poseObject = jobject["Pose"];
-            if(poseObject == null)
+            if (poseObject == null)
             {
                 return false;
             }

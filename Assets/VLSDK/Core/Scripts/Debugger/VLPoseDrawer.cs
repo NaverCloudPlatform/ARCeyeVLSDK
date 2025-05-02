@@ -17,7 +17,7 @@ namespace ARCeye
 
         public void AddRawVLPose(VLResponseEventData responseData)
         {
-            if(!responseData.IsVLPassed)
+            if (!responseData.IsVLPassed)
             {
                 return;
             }

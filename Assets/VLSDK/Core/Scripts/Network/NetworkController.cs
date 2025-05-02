@@ -2,12 +2,14 @@
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Networking;
 using AOT;
-using Newtonsoft.Json.Linq;
+
+[assembly: InternalsVisibleTo("ARCeye.VLSDK.Tests")]
 
 namespace ARCeye
 {
@@ -38,13 +40,13 @@ namespace ARCeye
 
 
         [DllImport(dll)]
-        private static extern void SendSuccessResponseNative(int key, IntPtr msg);
+        internal static extern void SendSuccessResponseNative(int key, IntPtr msg);
 
         [DllImport(dll)]
-        private static extern void SendSuccessVLGetResponseNative(IntPtr msg, int code, IntPtr fptr);
+        internal static extern void SendSuccessVLGetResponseNative(IntPtr msg, int code, IntPtr fptr);
 
         [DllImport(dll)]
-        private static extern void SendFailureResponseNative(int key, IntPtr msg, int code);
+        internal static extern void SendFailureResponseNative(int key, IntPtr msg, int code);
 
 
 
@@ -117,7 +119,7 @@ namespace ARCeye
             // 현재 위치 기반 요청 여부 설정
             // useRequestWithPosition이 true인 경우에는 native에서 할당된 requestWithPosition 값을 그대로 사용.
             // useRequestWithPosition이 false인 경우에만 requestWithPosition 값을 강제로 false로 설정.
-            if(!s_Instance.useRequestWithPosition)
+            if (!s_Instance.useRequestWithPosition)
             {
                 requestInfo.requestWithPosition = false;
             }
@@ -315,13 +317,16 @@ namespace ARCeye
                     ResponseStatus responseStatus = ResponseStatus.UnknownError
                     ;
                     int responseCode = (int)www.responseCode;
-                    if(responseCode == 400) {
+                    if (responseCode == 400)
+                    {
                         responseStatus = ResponseStatus.BadRequestServer;
-                    } else if(responseCode == 500) {
+                    }
+                    else if (responseCode == 500)
+                    {
                         responseStatus = ResponseStatus.InternalServerError;
                     }
 
-                    SendFailureResponseNative(key, msgPtr, (int) responseStatus);
+                    SendFailureResponseNative(key, msgPtr, (int)responseStatus);
                 }
                 else
                 {

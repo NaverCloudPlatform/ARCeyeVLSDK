@@ -35,7 +35,7 @@ namespace ARCeye
 
         static private LinkedList<LogElem> s_LogList = new LinkedList<LogElem>();
         static private int s_MaxLogsCount = 100;
-        
+
         private static string m_CurrState = "INITIAL";
         private static string m_LayerInfo = "none";
 
@@ -74,7 +74,7 @@ namespace ARCeye
 
         void Update()
         {
-            if(Debug.isDebugBuild && m_UseDebugUI && m_MultiTouchDetector.CheckMultiTouch())
+            if (Debug.isDebugBuild && m_UseDebugUI && m_MultiTouchDetector.CheckMultiTouch())
             {
                 m_ShowDebugUI = !m_ShowDebugUI;
             }
@@ -105,7 +105,7 @@ namespace ARCeye
                 Rect viewArea = new Rect(windowX + leftMargin, windowY + topMargin, windowWidth - leftMargin, windowHeight - topMargin);
 
                 GUI.Box(windowArea, "");
-                
+
                 GUILayout.BeginArea(viewArea);
                 GUILayout.BeginVertical();
 
@@ -113,7 +113,7 @@ namespace ARCeye
 
                 GUILayout.Space(20);
 
-                DrawStateInfo();                
+                DrawStateInfo();
 
                 GUILayout.Space(20);
 
@@ -174,7 +174,7 @@ namespace ARCeye
             GUILayout.Label("GPS", m_TitleStyle);
             GUILayout.Space(10);
 
-            if(m_GeoCoordProvider)
+            if (m_GeoCoordProvider)
             {
                 GUILayout.Label($"{m_GeoCoordProvider.info.latitude}, {m_GeoCoordProvider.info.longitude}", m_ContentsStyle);
             }
@@ -225,30 +225,30 @@ namespace ARCeye
             {
                 case LogLevel.DEBUG:
                 case LogLevel.INFO:
-                {
-                    logStyle.normal.textColor = Color.white;
-                    break;
-                }
+                    {
+                        logStyle.normal.textColor = Color.white;
+                        break;
+                    }
                 case LogLevel.WARNING:
-                {
-                    logStyle.normal.textColor = Color.yellow;
-                    break;
-                }
+                    {
+                        logStyle.normal.textColor = Color.yellow;
+                        break;
+                    }
                 case LogLevel.ERROR:
-                {
-                    logStyle.normal.textColor = Color.red;
-                    break;
-                }
+                    {
+                        logStyle.normal.textColor = Color.red;
+                        break;
+                    }
                 case LogLevel.FATAL:
-                {
-                    logStyle.normal.textColor = Color.red;
-                    break;
-                }
+                    {
+                        logStyle.normal.textColor = Color.red;
+                        break;
+                    }
                 default:
-                {
-                    logStyle.normal.textColor = Color.white;
-                    break;
-                }
+                    {
+                        logStyle.normal.textColor = Color.white;
+                        break;
+                    }
             }
 
             logStyle.fontSize = 18;
@@ -267,17 +267,19 @@ namespace ARCeye
         {
             m_CurrState = state.ToString();
             Debug.Log($"[LogViewer] OnStateChanged : {state}");
-            
+
             // var locationInfo = m_VLSDKManager.GetLocationInfo();
             // Debug.Log($"[LogViewer] Latitude : {locationInfo.latitude}, Longitude : {locationInfo.longitude}");
         }
 
-        public void OnLayerInfoChanged(string layerInfo) {
+        public void OnLayerInfoChanged(string layerInfo)
+        {
             Debug.Log($"[LogViewer] OnLayerInfoChanged : {layerInfo}");
             m_LayerInfo = layerInfo;
         }
 
-        public void OnPoseUpdated(Matrix4x4 matrix, Matrix4x4 projMatrix, Matrix4x4 texMatrix, double ra) {
+        public void OnPoseUpdated(Matrix4x4 matrix, Matrix4x4 projMatrix, Matrix4x4 texMatrix, double ra)
+        {
             Matrix4x4 poseMatrix = matrix.inverse;
             m_Position = poseMatrix.GetColumn(3);
 
@@ -290,7 +292,8 @@ namespace ARCeye
             m_RelAltitude = value;
         }
 
-        public void OnObjectDetected(DetectedObject detectedObject) {
+        public void OnObjectDetected(DetectedObject detectedObject)
+        {
             Debug.Log("[LogViewer] OnObjectDetected : " + detectedObject.id);
         }
 
@@ -300,11 +303,11 @@ namespace ARCeye
 
         public void AddLogElem(LogElem logElem)
         {
-            if ((int) logElem.level >= (int) LogLevel.INFO)
+            if ((int)logElem.level >= (int)LogLevel.INFO)
             {
-                if(s_LogList == null)
+                if (s_LogList == null)
                 {
-                    s_LogList = new LinkedList<LogElem>();   
+                    s_LogList = new LinkedList<LogElem>();
                 }
 
                 if (s_LogList.Count > s_MaxLogsCount)
