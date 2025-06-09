@@ -53,7 +53,10 @@ namespace ARCeye
 
             if (texType == typeof(Texture2D))
             {
-                queryTexture = texObj as Texture2D;
+                // ARDataset의 경우 GetNativeTexturePtr()를 통해 그렸기 때문에 Texture2D의 내용을 Unity에서 확인할 수 없음.
+                // 아래 과정을 통해 Unity에서 관리 가능한 Texture2D로 변환.
+                queryTexture = ImageUtility.ConvertToTexture2D(texObj as Texture2D);
+
                 return true;
             }
             else if (texType == typeof(RenderTexture))

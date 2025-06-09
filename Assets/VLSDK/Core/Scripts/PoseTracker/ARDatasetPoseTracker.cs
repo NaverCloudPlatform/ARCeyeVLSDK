@@ -111,7 +111,7 @@ namespace ARCeye
 
             // Camera preview.
             m_ARDatasetManager.TryAcquireFrameImage(out Texture frameTexture);
-            frame.texture = frameTexture as Texture2D;
+            frame.texture = frameTexture;
 
             // Camera model matrix.
             Matrix4x4 modelMatrix = frameData.modelMatrix;

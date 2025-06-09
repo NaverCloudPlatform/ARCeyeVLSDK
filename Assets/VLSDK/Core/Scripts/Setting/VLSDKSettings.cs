@@ -28,7 +28,7 @@ namespace ARCeye
         }
 
         [SerializeField, Tooltip("Request interval before entering VL Pass state (unit: ms)")]
-        [Range(250, 3000)]
+        [Range(250, 5000)]
         private int m_VLIntervalInitial = 250;
         public int vlIntervalInitial
         {
@@ -36,7 +36,7 @@ namespace ARCeye
         }
 
         [SerializeField, Tooltip("Request interval after entering VL Pass state (unit: ms)")]
-        [Range(500, 3000)]
+        [Range(250, 5000)]
         private int m_VLIntervalPassed = 1000;
         public int vlIntervalPassed
         {
@@ -65,6 +65,31 @@ namespace ARCeye
         {
             get => m_InitialPoseDegree;
             set => m_InitialPoseDegree = value;
+        }
+
+
+        [SerializeField, Tooltip("VL Failure Count to 'Initial' to 'NotRecognized' State")]
+        private int m_FailureCountToNotRecognized = 20;
+        public int failureCountToNotRecognized
+        {
+            get => m_FailureCountToNotRecognized;
+            set => m_FailureCountToNotRecognized = value;
+        }
+
+        [SerializeField, Tooltip("VL Failure Count from 'VLPass' to 'VLFail' State")]
+        private int m_FailureCountToFail = 40;
+        public int failureCountToFail
+        {
+            get => m_FailureCountToFail;
+            set => m_FailureCountToFail = value;
+        }
+
+        [SerializeField, Tooltip("VL Failure Count from 'VLFail' to 'Initial' State")]
+        private int m_FailureCountToReset = 40;
+        public int failureCountToReset
+        {
+            get => m_FailureCountToReset;
+            set => m_FailureCountToReset = value;
         }
 
         [SerializeField, Tooltip("Blur the faces in the request image")]

@@ -76,6 +76,15 @@ namespace ARCeye
         [HideInInspector, MarshalAs(UnmanagedType.R4)]
         public float confidenceHigh;
 
+        [HideInInspector, MarshalAs(UnmanagedType.I4)]
+        public int failureCountToNotRecognized;
+
+        [HideInInspector, MarshalAs(UnmanagedType.I4)]
+        public int failureCountToFail;
+
+        [HideInInspector, MarshalAs(UnmanagedType.I4)]
+        public int failureCountToReset;
+
 
         [Header("Request Options")]
         [HideInInspector, MarshalAs(UnmanagedType.I4)]

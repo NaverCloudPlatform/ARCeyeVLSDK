@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Events;
 
 namespace ARCeye
 {
@@ -20,9 +21,19 @@ namespace ARCeye
         private SerializedProperty m_VLQualityProp;
         private SerializedProperty m_InitialPoseCountProp;
         private SerializedProperty m_InitialPoseDegreeProp;
+        private SerializedProperty m_FailureCountToNotRecognizedProp;
+        private SerializedProperty m_FailureCountToVLFailProp;
+        private SerializedProperty m_FailureCountToResetProp;
         private SerializedProperty m_FaceBlurringProp;
         private SerializedProperty m_ShowVLPoseProp;
         private SerializedProperty m_LogLevelProp;
+
+
+        private GUIContent m_LabelVLCount = new GUIContent("VL Count");
+        private GUIContent m_LabelYawDegree = new GUIContent("Yaw Degree");
+        private GUIContent m_LabelVLNotRecognized = new GUIContent("to NotRecognized");
+        private GUIContent m_LabelVLFail = new GUIContent("to VLFail");
+        private GUIContent m_LabelVLReset = new GUIContent("to Initial");
 
 
         void OnEnable()
@@ -37,6 +48,9 @@ namespace ARCeye
             m_VLQualityProp = serializedObject.FindProperty("m_VLQuality");
             m_InitialPoseCountProp = serializedObject.FindProperty("m_InitialPoseCount");
             m_InitialPoseDegreeProp = serializedObject.FindProperty("m_InitialPoseDegree");
+            m_FailureCountToNotRecognizedProp = serializedObject.FindProperty("m_FailureCountToNotRecognized");
+            m_FailureCountToVLFailProp = serializedObject.FindProperty("m_FailureCountToFail");
+            m_FailureCountToResetProp = serializedObject.FindProperty("m_FailureCountToReset");
             m_FaceBlurringProp = serializedObject.FindProperty("m_FaceBlurring");
             m_ShowVLPoseProp = serializedObject.FindProperty("m_ShowVLPose");
             m_LogLevelProp = serializedObject.FindProperty("m_LogLevel");
@@ -48,20 +62,30 @@ namespace ARCeye
 
             DrawLogo();
 
-            DrawVLURLList();
-            DrawGPSGuide();
-
-            if (m_VLSDKSettings.GPSGuide)
+            DrawLabel("VL Configs", () =>
             {
-                DrawLocationGeoJsonField();
-            }
+                DrawVLURLList();
+                DrawVLInterval();
+                DrawVLQuality();
+                DrawGPSGuide();
+                DrawFaceBlurring();
+            });
 
-            DrawVLInterval();
-            DrawVLQuality();
-            DrawInitialPoseInfo();
-            DrawFaceBlurring();
-            DrawShowVLPose();
-            DrawLogLevel();
+            DrawLabel("Initial Pose Calculation", () =>
+            {
+                DrawInitialPoseInfo();
+            });
+
+            DrawFailureCounts();
+            DrawDebugTools();
+        }
+
+        private void DrawLabel(string label, UnityAction action)
+        {
+            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            action?.Invoke();
+            EditorGUI.indentLevel--;
         }
 
         private void DrawLogo()
@@ -91,6 +115,11 @@ namespace ARCeye
 
             EditorUtility.SetDirty(m_GPSGuideProp.serializedObject.targetObject);
             m_GPSGuideProp.serializedObject.ApplyModifiedProperties();
+
+            if (m_VLSDKSettings.GPSGuide)
+            {
+                DrawLocationGeoJsonField();
+            }
         }
 
         private void DrawLocationGeoJsonField()
@@ -123,14 +152,35 @@ namespace ARCeye
 
         private void DrawInitialPoseInfo()
         {
-            EditorGUILayout.PropertyField(m_InitialPoseCountProp);
-            EditorGUILayout.PropertyField(m_InitialPoseDegreeProp);
+            EditorGUILayout.PropertyField(m_InitialPoseCountProp, m_LabelVLCount);
+            EditorGUILayout.PropertyField(m_InitialPoseDegreeProp, m_LabelYawDegree);
 
             EditorUtility.SetDirty(m_InitialPoseCountProp.serializedObject.targetObject);
             EditorUtility.SetDirty(m_InitialPoseDegreeProp.serializedObject.targetObject);
 
             m_InitialPoseCountProp.serializedObject.ApplyModifiedProperties();
             m_InitialPoseDegreeProp.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawFailureCounts()
+        {
+            EditorGUILayout.LabelField("Failure Counts", EditorStyles.boldLabel);
+
+            EditorGUI.indentLevel++;
+
+            EditorGUILayout.PropertyField(m_FailureCountToNotRecognizedProp, m_LabelVLNotRecognized);
+            EditorGUILayout.PropertyField(m_FailureCountToVLFailProp, m_LabelVLFail);
+            EditorGUILayout.PropertyField(m_FailureCountToResetProp, m_LabelVLReset);
+
+            EditorGUI.indentLevel--;
+
+            EditorUtility.SetDirty(m_FailureCountToNotRecognizedProp.serializedObject.targetObject);
+            EditorUtility.SetDirty(m_FailureCountToVLFailProp.serializedObject.targetObject);
+            EditorUtility.SetDirty(m_FailureCountToResetProp.serializedObject.targetObject);
+
+            m_FailureCountToNotRecognizedProp.serializedObject.ApplyModifiedProperties();
+            m_FailureCountToVLFailProp.serializedObject.ApplyModifiedProperties();
+            m_FailureCountToResetProp.serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawFaceBlurring()
@@ -141,19 +191,21 @@ namespace ARCeye
             m_FaceBlurringProp.serializedObject.ApplyModifiedProperties();
         }
 
-        private void DrawShowVLPose()
+        private void DrawDebugTools()
         {
+            EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
+
+            EditorGUI.indentLevel++;
+
             EditorGUILayout.PropertyField(m_ShowVLPoseProp);
-
-            EditorUtility.SetDirty(m_ShowVLPoseProp.serializedObject.targetObject);
-            m_ShowVLPoseProp.serializedObject.ApplyModifiedProperties();
-        }
-
-        private void DrawLogLevel()
-        {
             EditorGUILayout.PropertyField(m_LogLevelProp);
 
+            EditorGUI.indentLevel--;
+
+            EditorUtility.SetDirty(m_ShowVLPoseProp.serializedObject.targetObject);
             EditorUtility.SetDirty(m_LogLevelProp.serializedObject.targetObject);
+
+            m_ShowVLPoseProp.serializedObject.ApplyModifiedProperties();
             m_LogLevelProp.serializedObject.ApplyModifiedProperties();
         }
     }

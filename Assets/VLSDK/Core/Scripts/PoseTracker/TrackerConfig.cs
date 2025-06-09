@@ -63,6 +63,10 @@ namespace ARCeye
             m_Tracker.confidenceLow = 0.4f;
             m_Tracker.confidenceMedium = 0.6f;
             m_Tracker.confidenceHigh = 0.8f;
+
+            m_Tracker.failureCountToNotRecognized = 20;
+            m_Tracker.failureCountToFail = 40;
+            m_Tracker.failureCountToReset = 40;
         }
     }
 }

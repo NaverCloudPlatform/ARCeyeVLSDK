@@ -10,7 +10,7 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
-        const string PACKAGE_VERSION = "1.9.0";
+        const string PACKAGE_VERSION = "1.10.0";
 
         private PoseTracker m_PoseTracker;
         public PoseTracker poseTracker => m_PoseTracker;
@@ -333,6 +333,10 @@ namespace ARCeye
             m_Config.tracker.useGPSGuide = m_Settings.GPSGuide;
             m_Config.tracker.useFaceBlurring = m_Settings.faceBlurring;
             m_Config.tracker.vlQuality = m_Settings.vlQuality;
+
+            m_Config.tracker.failureCountToNotRecognized = m_Settings.failureCountToNotRecognized;
+            m_Config.tracker.failureCountToFail = m_Settings.failureCountToFail;
+            m_Config.tracker.failureCountToReset = m_Settings.failureCountToReset;
 
             m_Config.tracker.originPoseCount = m_Settings.initialPoseCount;
             m_Config.tracker.originPoseDegree = m_Settings.initialPoseDegree;
