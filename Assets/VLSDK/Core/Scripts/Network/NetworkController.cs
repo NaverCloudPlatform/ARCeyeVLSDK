@@ -196,7 +196,7 @@ namespace ARCeye
 
             yield return www.SendWebRequest();
 
-            HandleReponse(key, requestBody.method, www);
+            HandleResponse(key, requestBody.method, www);
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace ARCeye
         /// <summary>
         ///   수신한 결과를 바탕으로 VL 응답 처리.
         /// </summary>
-        private void HandleReponse(int key, string method, UnityWebRequest www)
+        private void HandleResponse(int key, string method, UnityWebRequest www)
         {
             string rawResponse = www.downloadHandler.text;
 
@@ -314,8 +314,8 @@ namespace ARCeye
                 if (method == "POST")
                 {
                     // 응답 코드를 바탕으로 ResponseStatus를 설정.
-                    ResponseStatus responseStatus = ResponseStatus.UnknownError
-                    ;
+                    ResponseStatus responseStatus = ResponseStatus.UnknownError;
+
                     int responseCode = (int)www.responseCode;
                     if (responseCode == 400)
                     {

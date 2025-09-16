@@ -39,8 +39,10 @@ namespace ARCeye
         private static string m_CurrState = "INITIAL";
         private static string m_LayerInfo = "none";
 
-        private Vector3 m_Position;
-        private Vector3 m_EulerRotation;
+        private Camera m_Camera;
+        private Transform m_Origin;
+        private Vector3 m_VLPosition;
+        private Vector3 m_VLRotation;
         private double m_RelAltitude;
 
         private GUIStyle m_TitleStyle = new GUIStyle();
@@ -62,8 +64,6 @@ namespace ARCeye
 
             m_ContentsStyle.normal.textColor = Color.white;
             m_ContentsStyle.fontSize = 20;
-
-
         }
 
         void Start()
@@ -95,7 +95,7 @@ namespace ARCeye
             if (m_ShowDebugUI)
             {
                 float windowWidth = 600;
-                float windowHeight = 900;
+                float windowHeight = 1200;
                 float windowX = (m_TargetScreenWidth - windowWidth) / 2;
                 float windowY = (m_TargetScreenHeight - windowHeight) / 2;
                 float topMargin = 15;
@@ -186,10 +186,46 @@ namespace ARCeye
 
         private void DrawPoseInfo()
         {
-            GUILayout.Label("Pose", m_TitleStyle);
+            if (m_Camera == null)
+            {
+                m_Camera = Camera.main;
+                m_Origin = m_Camera.transform.parent;
+            }
+
+            var localizedPosition = m_Camera.transform.position;
+            var localizedRotation = m_Camera.transform.rotation.eulerAngles;
+
+            var vioPosition = m_Camera.transform.localPosition;
+            var vioRotation = m_Camera.transform.localRotation.eulerAngles;
+
+            var originPosition = m_Origin.position;
+            var originRotation = m_Origin.rotation.eulerAngles;
+
+            GUILayout.Label("Localized Pose", m_TitleStyle);
             GUILayout.Space(10);
-            GUILayout.Label($"Position (x:{m_Position.x.ToString("N1")} y:{m_Position.y.ToString("N1")} z:{m_Position.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Label($"Rotation (x:{m_EulerRotation.x.ToString("N1")} y:{m_EulerRotation.y.ToString("N1")} z:{m_EulerRotation.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Label($"Position (x:{localizedPosition.x.ToString("N1")} y:{localizedPosition.y.ToString("N1")} z:{localizedPosition.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Label($"Rotation (x:{localizedRotation.x.ToString("N1")} y:{localizedRotation.y.ToString("N1")} z:{localizedRotation.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Space(10);
+
+            GUILayout.Label("VIO Pose", m_TitleStyle);
+            GUILayout.Space(10);
+            GUILayout.Label($"Position (x:{vioPosition.x.ToString("N1")} y:{vioPosition.y.ToString("N1")} z:{vioPosition.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Label($"Rotation (x:{vioRotation.x.ToString("N1")} y:{vioRotation.y.ToString("N1")} z:{vioRotation.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Space(10);
+
+            GUILayout.Label("VL Pose", m_TitleStyle);
+            GUILayout.Space(10);
+            GUILayout.Label($"Position (x:{m_VLPosition.x.ToString("N1")} y:{m_VLPosition.y.ToString("N1")} z:{m_VLPosition.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Label($"Rotation (x:{m_VLRotation.x.ToString("N1")} y:{m_VLRotation.y.ToString("N1")} z:{m_VLRotation.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Space(10);
+
+            GUILayout.Label("Origin Pose", m_TitleStyle);
+            GUILayout.Space(10);
+            GUILayout.Label($"Position (x:{originPosition.x.ToString("N1")} y:{originPosition.y.ToString("N1")} z:{originPosition.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Label($"Rotation (x:{originRotation.x.ToString("N1")} y:{originRotation.y.ToString("N1")} z:{originRotation.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Space(10);
+
+            GUILayout.Space(10);
             GUILayout.Label($"Altitude: {m_RelAltitude}", m_ContentsStyle);
         }
 
@@ -272,6 +308,27 @@ namespace ARCeye
             // Debug.Log($"[LogViewer] Latitude : {locationInfo.latitude}, Longitude : {locationInfo.longitude}");
         }
 
+        public void OnVLPoseRequested(VLRequestEventData eventData)
+        {
+
+        }
+
+        public void OnVLPoseResponded(VLResponseEventData eventData)
+        {
+            if (eventData == null)
+            {
+                Debug.LogError("[LogViewer] OnVLPoseResponded : eventData is null");
+                return;
+            }
+
+            // VL을 성공할 경우에만 VL Pose 업데이트.
+            if (eventData.Status == ResponseStatus.Success)
+            {
+                m_VLPosition = eventData.VLPosition;
+                m_VLRotation = eventData.VLRotation.eulerAngles;
+            }
+        }
+
         public void OnLayerInfoChanged(string layerInfo)
         {
             Debug.Log($"[LogViewer] OnLayerInfoChanged : {layerInfo}");
@@ -280,11 +337,7 @@ namespace ARCeye
 
         public void OnPoseUpdated(Matrix4x4 matrix, Matrix4x4 projMatrix, Matrix4x4 texMatrix, double ra)
         {
-            Matrix4x4 poseMatrix = matrix.inverse;
-            m_Position = poseMatrix.GetColumn(3);
 
-            Quaternion rotation = Quaternion.LookRotation(poseMatrix.GetColumn(2), poseMatrix.GetColumn(1));
-            m_EulerRotation = rotation.eulerAngles;
         }
 
         public void OnRelAltitudeUpdated(double value)

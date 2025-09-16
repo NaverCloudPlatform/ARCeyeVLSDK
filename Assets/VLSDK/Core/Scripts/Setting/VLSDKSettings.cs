@@ -100,6 +100,14 @@ namespace ARCeye
             set => m_FaceBlurring = value;
         }
 
+        // [SerializeField, Tooltip("Calculate the accurate height of the device based on plane detection.")]
+        // private bool m_AccurateHeight = false;
+        // public bool AccurateHeight
+        // {
+        //     get => m_AccurateHeight;
+        //     set => m_AccurateHeight = value;
+        // }
+
         [SerializeField, Tooltip("Visualize the responsed VL poses")]
         private bool m_ShowVLPose = false;
         public bool showVLPose

@@ -12,16 +12,13 @@ namespace ARCeye.Dataset
         void Awake()
         {
             m_PreviewImage = GetComponent<RawImage>();
-            if(m_PreviewImage == null) {
+            if (m_PreviewImage == null)
+            {
                 m_PreviewImage = gameObject.AddComponent<RawImage>();
             }
 
             var rectTransform = GetComponent<RectTransform>();
             SetAnchorsToCenter(rectTransform);
-
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-            gameObject.SetActive(false);
-#endif
         }
 
         void SetAnchorsToCenter(RectTransform rectTransform)
@@ -33,15 +30,15 @@ namespace ARCeye.Dataset
             }
         }
 
-        public void SetTexture(Texture texture) 
+        public void SetTexture(Texture texture)
         {
-            float texRatio = (float) texture.height / (float) texture.width;
-            float screenRatio = (float) Screen.height / (float) Screen.width;
+            float texRatio = (float)texture.height / (float)texture.width;
+            float screenRatio = (float)Screen.height / (float)Screen.width;
 
             Vector2 newSize;
 
             // texRatio가 더 클 경우 -> texture의 height를 Screen에 맞춤
-            if(texRatio < screenRatio)
+            if (texRatio < screenRatio)
             {
                 float previewWidth = Screen.height / texRatio;
                 float previewHeight = Screen.height;

@@ -1,18 +1,18 @@
 {
-    "name": "com.naverlabs.vlsdk",
-    "version": "1.8.1",
-    "displayName": "VLSDK",
-    "description": "ARC eye의 VL api를 Unity에서 쉽게 사용할 수 있도록 하는 패키지입니다.",
-    "unity": "2021.3",
-    "dependencies": {
-        "com.unity.modules.xr": "1.0.0",
-        "com.unity.xr.arcore": "5.1.5",
-        "com.unity.xr.arfoundation": "5.1.5",
-        "com.unity.xr.arkit": "5.1.5",
-        "com.unity.xr.management": "4.4.0",
-        "com.unity.nuget.newtonsoft-json": "3.2.1"
-    },
-    "author": {
-      "name": "NAVER LABS"
-    }
+  "name": "com.naverlabs.vlsdk",
+  "version": "1.11.0-preview.2",
+  "displayName": "VLSDK",
+  "description": "ARC eye의 VL api를 Unity에서 쉽게 사용할 수 있도록 하는 패키지입니다.",
+  "unity": "2021.3",
+  "dependencies": {
+    "com.unity.modules.xr": "1.0.0",
+    "com.unity.xr.arcore": "5.1.5",
+    "com.unity.xr.arfoundation": "5.1.5",
+    "com.unity.xr.arkit": "5.1.5",
+    "com.unity.xr.management": "4.4.0",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "author": {
+    "name": "NAVER LABS"
+  }
 }

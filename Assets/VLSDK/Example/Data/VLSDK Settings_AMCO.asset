@@ -17,7 +17,7 @@ MonoBehaviour:
     m_InvokeUrl: https://vl-arc-eye.ncloud.com/api/v1/96/7b1a278f5abe8e9da907fc9c29dfd432d60dc76e17b0fabab659d2a508bc65c4/location
     m_SecretKey: ZUpCdlJHVUZmWG9hVWJkZXJnZW94aWhiV3BGU0VPR2E=
     m_Inactive: 0
-  m_GPSGuide: 0
+  m_GPSGuide: 1
   m_LocationGeoJson: "{\n  \"type\": \"FeatureCollection\",\n  \"features\": [\n   
     {\n      \"type\": \"Feature\",\n      \"properties\": {\n        \"location\":
     \"amco\"\n      },\n      \"geometry\": {\n        \"coordinates\": [\n         
@@ -28,11 +28,14 @@ MonoBehaviour:
     ],\n            [\n              127.105970850419,\n              37.36339915759358\n           
     ]\n          ]\n        ],\n        \"type\": \"Polygon\"\n      },\n      \"id\":
     0\n    }\n  ]\n}"
-  m_VLIntervalInitial: 500
+  m_VLIntervalInitial: 300
   m_VLIntervalPassed: 1000
-  m_VLQuality: 1
+  m_VLQuality: 2
   m_InitialPoseCount: 1
   m_InitialPoseDegree: 3
+  m_FailureCountToNotRecognized: 20
+  m_FailureCountToFail: 5
+  m_FailureCountToReset: 20
   m_FaceBlurring: 0
   m_ShowVLPose: 1
-  m_LogLevel: 1
+  m_LogLevel: 0

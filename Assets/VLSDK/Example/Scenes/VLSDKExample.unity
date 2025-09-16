@@ -311,6 +311,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 78008889}
   m_CullTransparentMesh: 1
+--- !u!1 &134681317
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 134681319}
+  - component: {fileID: 134681318}
+  m_Layer: 0
+  m_Name: ARDatasetManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &134681318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134681317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b32231c78c21a4760b6aa34d5c58f30a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_DatasetPath: /Users/user/Documents/Datasets/VLSDK Dataset/AMCO/AMCO_GODIVA
+--- !u!4 &134681319
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134681317}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &230282947
 GameObject:
   m_ObjectHideFlags: 0
@@ -414,6 +459,72 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 205.1993, y: 292.9983}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &233931553
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 233931555}
+  - component: {fileID: 233931554}
+  m_Layer: 0
+  m_Name: Video Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!328 &233931554
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233931553}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 32900000, guid: 6c5643f2c065b40e5b5618d675bc5ad6, type: 3}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 8400000, guid: 59b55a5822e324b1192a9668c09d43fa, type: 2}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: <noninit>
+  m_RenderMode: 2
+  m_AspectRatio: 2
+  m_DataSource: 0
+  m_TimeUpdateMode: 2
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources: []
+  m_DirectAudioVolumes: []
+  m_Url: 
+  m_EnabledAudioTracks: 
+  m_DirectAudioMutes: 
+  m_ControlledAudioTrackCount: 0
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 0
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
+--- !u!4 &233931555
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233931553}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 5.0393724, y: 2.0295203, z: 164.07594}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &243476413
 GameObject:
   m_ObjectHideFlags: 0
@@ -1251,7 +1362,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1441230790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1265,7 +1376,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_DatasetPath: /Users/user/Documents/Datasets/VLSDK Dataset/AMCO/AMCO_GODIVA
-  m_Progress: 0
 --- !u!4 &1441230791
 Transform:
   m_ObjectHideFlags: 0
@@ -1375,6 +1485,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  m_OnARFrameUpdated:
+    m_PersistentCalls:
+      m_Calls: []
   m_OnPoseUpdated:
     m_PersistentCalls:
       m_Calls:
@@ -1448,7 +1561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbeecc812605d4a69afe84622d572b96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TextureToSend: {fileID: 2800000, guid: 23bf18f51e87240a09b3473e24e72191, type: 3}
+  m_TextureToSend: {fileID: 0}
 --- !u!4 &1493367229
 Transform:
   m_ObjectHideFlags: 0
@@ -1992,3 +2105,5 @@ SceneRoots:
   - {fileID: 244353713}
   - {fileID: 58044416}
   - {fileID: 719885469}
+  - {fileID: 134681319}
+  - {fileID: 233931555}

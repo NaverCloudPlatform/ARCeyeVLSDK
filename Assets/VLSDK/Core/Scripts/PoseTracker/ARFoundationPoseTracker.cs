@@ -12,9 +12,13 @@ namespace ARCeye
     {
         private ARCameraManager m_CameraManager;
         private UnityYuvCpuImage currVideoImage = new UnityYuvCpuImage();
+        private HeightCalculator m_HeightCalculator;
 
-        private const int MAJOR_AXIS_LENGTH = 640;  // 장축의 길이를 640으로 고정.
+        private const int MAJOR_AXIS_LENGTH_CPU_IMAGE = 1280;
+        private const int MAJOR_AXIS_LENGTH_REQUEST_IMAGE = 640;
         private bool m_IsPortrait;
+        private bool m_AccurateHeight = false;
+        private bool m_HasSetConfiguration = false;
 
         protected const float DEFAULT_FX = 474.457672f;
         protected const float DEFAULT_FY = 474.457672f;
@@ -36,6 +40,7 @@ namespace ARCeye
                            (Screen.orientation == ScreenOrientation.PortraitUpsideDown);
 
             InitComponents();
+            // InitHeightCalculator();
         }
 
         private void InitComponents()
@@ -45,6 +50,31 @@ namespace ARCeye
             {
                 GameObject.Destroy(datasetManager);
             }
+
+            Dataset.DebugPreview debugPreview = GameObject.FindObjectOfType<Dataset.DebugPreview>();
+            if (debugPreview != null)
+            {
+                debugPreview.gameObject.SetActive(false);
+            }
+        }
+
+        private void InitHeightCalculator()
+        {
+            if (!m_AccurateHeight)
+            {
+                return;
+            }
+
+            if (m_HeightCalculator == null)
+            {
+                m_HeightCalculator = (new GameObject("HeightCalculator")).AddComponent<HeightCalculator>();
+                m_HeightCalculator.Initialize();
+            }
+        }
+
+        public void UseAccurateHeight(bool useAccurateHeight)
+        {
+            m_AccurateHeight = useAccurateHeight;
         }
 
         public override void RegisterFrameLoop()
@@ -77,6 +107,8 @@ namespace ARCeye
         {
             ARFrame frame = new ARFrame();
 
+            UpdateConfigOnce();
+
             // Camera preview.
             if (!TryAcquireLatestImage(out UnityYuvCpuImage? videoImage, out UnityAction disposable))
             {
@@ -102,6 +134,40 @@ namespace ARCeye
             frame.disposable = disposable;
 
             return frame;
+        }
+
+        // 카메라 설정 세팅. m_CameraManager.GetConfigurations는 ARCameraManager의 로딩이 완료 된 후 설정 되어야 한다.
+        private void UpdateConfigOnce()
+        {
+            if (m_HasSetConfiguration)
+            {
+                return;
+            }
+
+            var configs = m_CameraManager.GetConfigurations(Allocator.Temp);
+            XRCameraConfiguration bestConfig = default;
+            int bestMinor = -1;
+
+            foreach (var config in configs)
+            {
+                int major = config.width > config.height ? config.width : config.height;
+                int minor = config.width > config.height ? config.height : config.width;
+                if (major == MAJOR_AXIS_LENGTH_CPU_IMAGE && minor > bestMinor)
+                {
+                    bestMinor = minor;
+                    bestConfig = config;
+                }
+            }
+
+            if (bestMinor > 0)
+            {
+                m_CameraManager.currentConfiguration = bestConfig;
+                Debug.Log($"Set ARCameraManager configuration: {bestConfig.width}x{bestConfig.height}");
+            }
+
+            configs.Dispose();
+
+            m_HasSetConfiguration = true;
         }
 
         unsafe public bool TryAcquireLatestImage(out UnityYuvCpuImage? image, out UnityAction disposable)
@@ -208,12 +274,12 @@ namespace ARCeye
                 // width가 장축인 경우.
                 if (cameraIntrinsics.principalPoint.x > cameraIntrinsics.principalPoint.y)
                 {
-                    scale = (float)MAJOR_AXIS_LENGTH / (float)cameraIntrinsics.resolution.x;
+                    scale = (float)MAJOR_AXIS_LENGTH_REQUEST_IMAGE / (float)cameraIntrinsics.resolution.x;
                 }
                 // height가 장축인 경우.
                 else
                 {
-                    scale = (float)MAJOR_AXIS_LENGTH / (float)cameraIntrinsics.resolution.y;
+                    scale = (float)MAJOR_AXIS_LENGTH_REQUEST_IMAGE / (float)cameraIntrinsics.resolution.y;
                 }
 
                 // 스마트폰의 경우 landscape 기준으로 param 전달. x,y 반대로 설정.

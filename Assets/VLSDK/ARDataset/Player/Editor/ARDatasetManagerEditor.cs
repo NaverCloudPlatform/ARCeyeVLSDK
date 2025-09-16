@@ -29,18 +29,18 @@ namespace ARCeye.Dataset
             DrawDatasetSelectorArea();
 
             EditorGUILayout.LabelField("Control", EditorStyles.boldLabel);
-            
+
             DrawProgress();
 
             DrawControlArea();
 
             GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
-            if(Event.current != null && Event.current.type == EventType.Used)
+            if (Event.current != null && Event.current.type == EventType.Used)
             {
                 m_IsDragging = true;
             }
-            else if(m_IsPlaying)
+            else if (m_IsPlaying)
             {
                 m_IsDragging = false;
             }
@@ -50,25 +50,25 @@ namespace ARCeye.Dataset
         {
             ARDatasetManager datasetManager = (ARDatasetManager)target;
 
-            if (datasetManager.isUpdating)
+            if (datasetManager.IsUpdating)
             {
                 Repaint();
             }
             else if (m_IsDragging)
             {
                 // 슬라이더 조작 중에는 업데이트를 멈춤
-                datasetManager.isUpdating = false;
+                datasetManager.IsUpdating = false;
             }
         }
 
         private void DrawDatasetSelectorArea()
         {
             ARDatasetManager datasetManager = (ARDatasetManager)target;
-            
+
             // 데이터셋 이름 출력.            
-            if(!string.IsNullOrEmpty(datasetManager.datasetPath))
+            if (!string.IsNullOrEmpty(datasetManager.DatasetPath))
             {
-                string directoryName = new DirectoryInfo(datasetManager.datasetPath).Name;
+                string directoryName = new DirectoryInfo(datasetManager.DatasetPath).Name;
                 EditorGUILayout.LabelField(directoryName);
             }
 
@@ -77,13 +77,13 @@ namespace ARCeye.Dataset
 
             Color originalColor = GUI.backgroundColor;
             GUI.backgroundColor = Color.green;
-            if(GUILayout.Button("Select Dataset Directory"))
+            if (GUILayout.Button("Select Dataset Directory"))
             {
                 string path = EditorUtility.OpenFolderPanel("Select a dataset directory", datasetRootPath, "");
 
-                if(CheckPathValidation(path))
+                if (CheckPathValidation(path))
                 {
-                    datasetManager.datasetPath = path;
+                    datasetManager.DatasetPath = path;
                     SaveDatasetPath();
                 }
                 else
@@ -93,7 +93,7 @@ namespace ARCeye.Dataset
             }
             GUI.backgroundColor = originalColor;
 
-            if(GUILayout.Button("Open Dataset Path"))
+            if (GUILayout.Button("Open Dataset Path"))
             {
                 EditorUtility.RevealInFinder(datasetRootPath);
             }
@@ -103,14 +103,14 @@ namespace ARCeye.Dataset
         {
             string prevDatasetPath = EditorPrefs.GetString("DatasetPath", Application.persistentDataPath);
 
-            if(Directory.Exists(prevDatasetPath))
+            if (Directory.Exists(prevDatasetPath))
             {
                 return prevDatasetPath;
             }
             else
             {
                 string parentPath = Directory.GetParent(prevDatasetPath).FullName;
-                if(Directory.Exists(parentPath))
+                if (Directory.Exists(parentPath))
                 {
                     return parentPath;
                 }
@@ -124,7 +124,7 @@ namespace ARCeye.Dataset
         private void SaveDatasetPath()
         {
             ARDatasetManager datasetManager = (ARDatasetManager)target;
-            EditorPrefs.SetString("DatasetPath", datasetManager.datasetPath);
+            EditorPrefs.SetString("DatasetPath", datasetManager.DatasetPath);
         }
 
         private bool CheckPathValidation(string directoryPath)
@@ -136,7 +136,7 @@ namespace ARCeye.Dataset
         private void DrawProgress()
         {
             ARDatasetManager datasetManager = (ARDatasetManager)target;
-            datasetManager.progress = EditorGUILayout.Slider("Progress", datasetManager.progress, 0.0f, 1.0f);
+            datasetManager.Progress = EditorGUILayout.Slider("Progress", datasetManager.Progress, 0.0f, 1.0f);
         }
 
         private void DrawControlArea()
@@ -147,9 +147,9 @@ namespace ARCeye.Dataset
 
             GUILayout.Label("Play Speed");
 
-            float speed = datasetManager.playSpeed;
+            float speed = datasetManager.PlaySpeed;
 
-            if(GUILayout.Button($"x{speed.ToString("N0")}"))
+            if (GUILayout.Button($"x{speed.ToString("N0")}"))
             {
                 datasetManager.TogglePlaySpeed();
             }
@@ -159,21 +159,21 @@ namespace ARCeye.Dataset
 
             GUILayout.BeginHorizontal();
 
-            GUI.enabled = !datasetManager.isUpdating;
+            GUI.enabled = !datasetManager.IsUpdating;
 
-            if(GUILayout.Button("Play"))
+            if (GUILayout.Button("Play"))
             {
                 m_IsPlaying = true;
                 m_IsDragging = false;
-                datasetManager.isUpdating = true;
+                datasetManager.IsUpdating = true;
             }
 
-            GUI.enabled = datasetManager.isUpdating;
+            GUI.enabled = datasetManager.IsUpdating;
 
-            if(GUILayout.Button("Pause"))
+            if (GUILayout.Button("Pause"))
             {
                 m_IsPlaying = false;
-                datasetManager.isUpdating = false;
+                datasetManager.IsUpdating = false;
             }
 
             GUI.enabled = true;
