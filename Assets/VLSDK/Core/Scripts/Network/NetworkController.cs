@@ -29,7 +29,7 @@ namespace ARCeye
         const string dll = "VLSDK";
 #endif
 
-        private List<Coroutine> m_RequestCoroutines = new List<Coroutine>();
+        private Dictionary<long, Coroutine> m_RequestCoroutines = new Dictionary<long, Coroutine>();
         private Coroutine m_RequestCoroutine = null;
 
         [DllImport(dll)]
@@ -149,10 +149,12 @@ namespace ARCeye
 
         private void OnSendingRequestAsync(int key, VLRequestBody body, Texture texture, int asyncCount = 20)
         {
+            long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
             if (m_RequestCoroutines.Count < asyncCount)
             {
-                var c = StartCoroutine(Upload(key, body, texture));
-                m_RequestCoroutines.Add(c);
+                var c = StartCoroutine(Upload(timestamp, key, body, texture));
+                m_RequestCoroutines.Add(timestamp, c);
             }
             else
             {
@@ -184,19 +186,20 @@ namespace ARCeye
 
         private void OnSendingLimitlessRequest(int key, VLRequestBody body, Texture texture)
         {
-            StartCoroutine(Upload(key, body, texture));
+            long timestamp = DateTime.Now.Ticks;
+            StartCoroutine(Upload(timestamp, key, body, texture));
         }
 
         /// <summary>
         ///   VLRequestBody를 이용하여 VL 요청을 보내고 응답을 처리.
         /// </summary>
-        IEnumerator Upload(int key, VLRequestBody requestBody, Texture texture)
+        IEnumerator Upload(long timestamp, int key, VLRequestBody requestBody, Texture texture)
         {
             UnityWebRequest www = HandleRequest(requestBody, texture);
 
             yield return www.SendWebRequest();
 
-            HandleReponse(key, requestBody.method, www);
+            HandleResponse(timestamp, key, requestBody.method, www);
         }
 
         /// <summary>
@@ -289,7 +292,7 @@ namespace ARCeye
         /// <summary>
         ///   수신한 결과를 바탕으로 VL 응답 처리.
         /// </summary>
-        private void HandleReponse(int key, string method, UnityWebRequest www)
+        private void HandleResponse(long timestamp, int key, string method, UnityWebRequest www)
         {
             string rawResponse = www.downloadHandler.text;
 
@@ -314,8 +317,8 @@ namespace ARCeye
                 if (method == "POST")
                 {
                     // 응답 코드를 바탕으로 ResponseStatus를 설정.
-                    ResponseStatus responseStatus = ResponseStatus.UnknownError
-                    ;
+                    ResponseStatus responseStatus = ResponseStatus.UnknownError;
+
                     int responseCode = (int)www.responseCode;
                     if (responseCode == 400)
                     {
@@ -339,7 +342,10 @@ namespace ARCeye
 
             if (m_RequestCoroutines.Count > 0)
             {
-                m_RequestCoroutines.RemoveAt(0);
+                if (!m_RequestCoroutines.Remove(timestamp))
+                {
+                    Debug.LogWarning("Failed to remove timestamp: " + timestamp);
+                }
             }
         }
 

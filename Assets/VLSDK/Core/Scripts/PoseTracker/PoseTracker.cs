@@ -100,6 +100,13 @@ namespace ARCeye
             set => m_OnLayerInfoChanged = value;
         }
 
+        protected UpdatedARFrameEvent m_OnARFrameUpdated;
+        public UpdatedARFrameEvent onARFrameUpdated
+        {
+            get => m_OnARFrameUpdated;
+            set => m_OnARFrameUpdated = value;
+        }
+
         protected UpdatedPoseEvent m_OnPoseUpdated;
         public UpdatedPoseEvent onPoseUpdated
         {
@@ -239,6 +246,8 @@ namespace ARCeye
             OnCreate(config);
 
             m_Frame = new UnityFrame();
+            m_Frame.realHeight = 1.5f;
+
             m_ARCamera = Camera.main.transform;
 
             InitNativeMethods();
@@ -373,6 +382,9 @@ namespace ARCeye
                 return;
             }
 
+            // 이벤트 호출.
+            m_OnARFrameUpdated?.Invoke(frame);
+
             // 카메라 intrinsic 값 설정.
             float fx = frame.intrinsic.fx;
             float fy = frame.intrinsic.fy;
@@ -422,7 +434,6 @@ namespace ARCeye
             m_Frame.viewMatrix = v;
             m_Frame.projMatrix = p;
             m_Frame.texTrans = t;
-            m_Frame.realHeight = 1.5f;
             m_Frame.geoCoord = new float[] { locationInfo.latitude, locationInfo.longitude };
 
 

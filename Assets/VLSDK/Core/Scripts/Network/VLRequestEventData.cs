@@ -15,6 +15,12 @@ namespace ARCeye
         private static Texture2D s_RequestTexture;
         public Texture2D RequestTexture => s_RequestTexture;
 
+        private static Vector2 s_FocalLength;
+        public Vector2 FocalLength => s_FocalLength;
+
+        private static Vector2 s_PrincipalPoint;
+        public Vector2 PrincipalPoint => s_PrincipalPoint;
+
 
         public static VLRequestEventData Create(VLRequestBody requestBody, byte[] imageBuffer)
         {
@@ -35,6 +41,9 @@ namespace ARCeye
             {
                 NativeLogger.DebugLog(LogLevel.ERROR, "Failed to convert image buffer to texture");
             }
+
+            s_FocalLength = new Vector2(requestBody.fx, requestBody.fy);
+            s_PrincipalPoint = new Vector2(requestBody.cx, requestBody.cy);
 
             Object.Destroy(texture);
         }

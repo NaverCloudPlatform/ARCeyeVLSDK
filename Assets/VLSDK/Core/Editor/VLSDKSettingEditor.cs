@@ -25,6 +25,7 @@ namespace ARCeye
         private SerializedProperty m_FailureCountToVLFailProp;
         private SerializedProperty m_FailureCountToResetProp;
         private SerializedProperty m_FaceBlurringProp;
+        // private SerializedProperty m_AccurateHeightProp;
         private SerializedProperty m_ShowVLPoseProp;
         private SerializedProperty m_LogLevelProp;
 
@@ -52,6 +53,7 @@ namespace ARCeye
             m_FailureCountToVLFailProp = serializedObject.FindProperty("m_FailureCountToFail");
             m_FailureCountToResetProp = serializedObject.FindProperty("m_FailureCountToReset");
             m_FaceBlurringProp = serializedObject.FindProperty("m_FaceBlurring");
+            // m_AccurateHeightProp = serializedObject.FindProperty("m_AccurateHeight");
             m_ShowVLPoseProp = serializedObject.FindProperty("m_ShowVLPose");
             m_LogLevelProp = serializedObject.FindProperty("m_LogLevel");
         }
@@ -69,6 +71,7 @@ namespace ARCeye
                 DrawVLQuality();
                 DrawGPSGuide();
                 DrawFaceBlurring();
+                // DrawAccurateHeight();
             });
 
             DrawLabel("Initial Pose Calculation", () =>
@@ -190,6 +193,14 @@ namespace ARCeye
             EditorUtility.SetDirty(m_FaceBlurringProp.serializedObject.targetObject);
             m_FaceBlurringProp.serializedObject.ApplyModifiedProperties();
         }
+
+        // private void DrawAccurateHeight()
+        // {
+        //     EditorGUILayout.PropertyField(m_AccurateHeightProp);
+
+        //     EditorUtility.SetDirty(m_AccurateHeightProp.serializedObject.targetObject);
+        //     m_AccurateHeightProp.serializedObject.ApplyModifiedProperties();
+        // }
 
         private void DrawDebugTools()
         {

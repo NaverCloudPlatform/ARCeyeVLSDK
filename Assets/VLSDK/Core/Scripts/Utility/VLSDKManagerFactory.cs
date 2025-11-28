@@ -31,10 +31,22 @@ namespace ARCeye
             }
 #else
             GameObject VLSDKManagerObject = new GameObject("VLSDKManager");
-            VLSDKManagerObject.AddComponent<VLSDKManager>();
-#endif 
+            
+            VLSDKManagerObject.AddComponent<TextureProvider>();
+            VLSDKManagerObject.AddComponent<NetworkController>();
+            VLSDKManagerObject.AddComponent<GeoCoordProvider>();
 
-            return VLSDKManagerObject.GetComponent<VLSDKManager>();
+            VLSDKManagerObject.AddComponent<VLSDKManager>();
+#endif
+
+            var vlsdkManager = VLSDKManagerObject.GetComponent<VLSDKManager>();
+            if (vlsdkManager == null)
+            {
+                Debug.LogError("Failed to get VLSDKManager component from created GameObject");
+                return null;
+            }
+
+            return vlsdkManager;
         }
     }
 }

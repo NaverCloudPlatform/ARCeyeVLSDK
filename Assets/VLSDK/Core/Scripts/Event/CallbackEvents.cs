@@ -22,6 +22,8 @@ namespace ARCeye
     [System.Serializable]
     public class ChangedLayerInfoEvent : UnityEvent<string> { }
     [System.Serializable]
+    public class UpdatedARFrameEvent : UnityEvent<ARFrame> { }
+    [System.Serializable]
     public class UpdatedPoseEvent : UnityEvent<Matrix4x4, Matrix4x4, Matrix4x4, double> { }
     [System.Serializable]
     public class UpdatedGeoCoordEvent : UnityEvent<double, double> { }

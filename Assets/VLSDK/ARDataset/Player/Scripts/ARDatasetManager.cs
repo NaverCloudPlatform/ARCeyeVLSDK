@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace ARCeye.Dataset
@@ -10,70 +8,74 @@ namespace ARCeye.Dataset
     {
         [SerializeField]
         private string m_DatasetPath;
-        public string datasetPath {
+        public string DatasetPath
+        {
             get => m_DatasetPath;
             set => m_DatasetPath = value;
         }
 
-        [SerializeField]
-        [Range(0.0f, 1.0f)]
-        private float m_Progress;
-        public float progress {
-            get => m_Progress;
-            set => m_Progress = value;
-        }
+        public float Progress { get; set; }
+        public bool IsUpdating { get; set; }
+        private bool m_IsPaused = false;
 
-        public bool testMode { get; set; } = false;
-        public double testLatitude { get; set; }
-        public double testLongitude { get; set; }
-        public Matrix4x4 testCameraOffset { get; set; } = Matrix4x4.identity;
-
-        public bool isUpdating { get; set; }
-
-        private float[] m_PlaySpeeds = new[] { 1.0f, 2.0f, 5.0f, 10.0f };
         private int m_PlaySpeedIndex = 0;
-        public float playSpeed { 
-            get {
-                return m_PlaySpeeds[m_PlaySpeedIndex];
-            }
-         }
+        private float[] m_PlaySpeeds = new[] { 1.0f, 2.0f, 5.0f, 10.0f };
+        public float PlaySpeed => m_PlaySpeeds[m_PlaySpeedIndex];
 
-        public event Action<FrameData> frameReceived;
-        private List<FrameData> m_FrameDataList;
+
+        private FrameDataLoader m_FrameDataLoader;
+
+
+        // 외부에서 프레임 데이터를 수신하는 이벤트.
+        public event Action<FrameData> FrameReceived;
         private FrameData m_CurrFrameData;
-        private DebugPreview m_DebugPreview;
-
-        private int m_CurrFrameIdx = 0;
-        private int m_TotalFrameCount = 0;
-        private bool m_IsPlaying = false;
+        private int m_CurrIdx = 0;
 
         private Camera m_MainCamera;
-        private Texture2D m_DatasetTexture;
+        private DebugPreview m_DebugPreview;
 
 
         private void Awake()
         {
-            isUpdating = true;
-            m_Progress = 0;
+            Progress = 0;
+            IsUpdating = true;
             m_MainCamera = Camera.main;
+
+            UpdateDatasetPath();
+            LoadAllFrameData();
         }
 
         private void Start()
         {
             m_DebugPreview = FindObjectOfType<DebugPreview>();
-            if(m_DebugPreview == null)
+
+            if (m_DebugPreview == null)
             {
                 Debug.LogError("Cannot find DebugPreivew in scene");
             }
 
-            StartCoroutine( UpdateFrame() );
+            StartCoroutine(UpdateFrame());
+        }
+
+        private void UpdateDatasetPath()
+        {
+            // StreamingAssets에서 읽어오는 데이터일 경우 각 디바이스에 맞는 StreamingAssets 경로로 변경.
+            if (DatasetPath.Contains("StreamingAssets"))
+            {
+                // StreamingAssets 하위의 경로 추출.
+                string key = "StreamingAssets";
+                int pivot = DatasetPath.IndexOf(key, StringComparison.Ordinal);
+                string subPath = DatasetPath.Substring(pivot + key.Length);
+
+                DatasetPath = Application.streamingAssetsPath + subPath;
+            }
         }
 
         private IEnumerator UpdateFrame()
         {
-            while(true)
+            while (true)
             {
-                if(!m_IsPlaying)
+                if (m_IsPaused || m_FrameDataLoader == null || !m_FrameDataLoader.IsCompleted)
                 {
                     yield return null;
                 }
@@ -82,115 +84,82 @@ namespace ARCeye.Dataset
                     FrameData currFrameData = ReadCurrFrame();
                     FrameData nextFrameData = ReadNextFrame();
 
-                    if(testMode)
-                    {
-                        Matrix4x4 modelMatrix = currFrameData.modelMatrix;
-                        currFrameData.modelMatrix = modelMatrix * testCameraOffset;
-                    }
-
                     m_CurrFrameData = currFrameData;
 
+                    // 두 프레임이 실행된 timestamp를 비교하여 실제 fps 시뮬레이션.
                     float interval = (nextFrameData.timestamp - currFrameData.timestamp) * 0.001f;
 
                     interval /= m_PlaySpeeds[m_PlaySpeedIndex];
 
                     yield return new WaitForSeconds(interval);
 
-                    frameReceived?.Invoke(currFrameData);
+                    // 외부로 프레임 데이터 전달.
+                    FrameReceived?.Invoke(currFrameData);
 
+                    // 다음 프레임 인덱스 계산.
                     UpdateProgress();
                 }
             }
         }
 
-        public void UpdateProgress()
-        {
-            if(isUpdating)
-            {
-                m_Progress = (float) m_CurrFrameIdx / (float) m_TotalFrameCount;
-            }
-            else
-            {
-                m_CurrFrameIdx = Mathf.FloorToInt(((float) m_TotalFrameCount) * m_Progress);
-            }
-        }
-
         private FrameData ReadCurrFrame()
         {
-            if(m_CurrFrameIdx >= m_FrameDataList.Count)
-            {
-                m_CurrFrameIdx = m_FrameDataList.Count - 1;
-            }
-
-            return m_FrameDataList[m_CurrFrameIdx];
+            m_CurrIdx = GetSafeFrameIndex(m_CurrIdx);
+            return m_FrameDataLoader.GetFrameData(m_CurrIdx);
         }
 
         private FrameData ReadNextFrame()
         {
-            m_CurrFrameIdx = GetNextFrameIndex();
-            return ReadCurrFrame();
+            m_CurrIdx = GetSafeFrameIndex(m_CurrIdx + 1);
+            return m_FrameDataLoader.GetFrameData(m_CurrIdx);
         }
 
-        private int GetNextFrameIndex()
+        private int GetSafeFrameIndex(int index)
         {
-            int currFrameIndex = m_CurrFrameIdx;
+            return Mathf.Clamp(index, 0, m_FrameDataLoader.DataCount - 1); ;
+        }
 
-            if(currFrameIndex + 1 < m_FrameDataList.Count)
+        public void UpdateProgress()
+        {
+            int dataCount = m_FrameDataLoader.DataCount;
+
+            if (IsUpdating)
             {
-                currFrameIndex++;
+                Progress = (float)m_CurrIdx / (float)dataCount;
             }
-
-            return currFrameIndex;
+            else
+            {
+                m_CurrIdx = Mathf.FloorToInt(((float)dataCount) * Progress);
+                Progress = (float)m_CurrIdx / (float)dataCount;
+            }
         }
 
         public void Play()
         {
-            // 유닛 테스트용 FrameData 로드.
-            if(testMode)
-            {
-                LoadTestFrameData();
-            }
-            // 데이터셋의 FrameData 로드.
-            else
-            {
-                LoadAllFrameData();
-            }
-
-            m_IsPlaying = true;
+            m_IsPaused = false;
         }
 
         public void Pause()
         {
-            m_IsPlaying = false;
+            m_IsPaused = true;
+        }
+
+        private void LoadAllFrameData()
+        {
+            Debug.Log("Start loading dataset...");
+
+            m_FrameDataLoader = new FrameDataLoader();
+            m_FrameDataLoader.Load(DatasetPath);
         }
 
         public bool TryAcquireFrameImage(out Texture texture)
         {
-            string datasetPath = m_DatasetPath;
+            string datasetPath = DatasetPath;
             string frameImagePath = $"{datasetPath}/{m_CurrFrameData.timestamp}.jpg";
-            if (File.Exists(frameImagePath))
-            {
-                byte[] fileData = File.ReadAllBytes(frameImagePath);
-                
-                if(m_DatasetTexture == null)
-                {
-                    m_DatasetTexture = new Texture2D(2, 2, TextureFormat.RGB24, false);
-                }
-                m_DatasetTexture.LoadImage(fileData);
 
-                texture = m_DatasetTexture;
-                return true;
-            }
-            else
-            {
-                texture = null;
-                // test mode가 아닐 경우에만 로그 출력.
-                if(!testMode)
-                {
-                    Debug.LogError("File not found at path: " + datasetPath);
-                }
-                return false;
-            }
+            texture = m_FrameDataLoader.GetFrameTexture(frameImagePath);
+
+            return texture != null;
         }
 
         public ARDatasetIntrinsic GetIntrinsic()
@@ -203,66 +172,16 @@ namespace ARCeye.Dataset
             m_DebugPreview.SetTexture(previewTexture);
         }
 
-        private void LoadTestFrameData()
-        {
-            const int MaxFrameCount = 100;
-
-
-            m_FrameDataList = new List<FrameData>();
-
-            for(int i=0 ; i<MaxFrameCount ; i++)
-            {
-                // 0.1초 단위로 timestamp 값을 증가.
-                var frameData = new FrameData();
-                frameData.timestamp = 1717988760000 + 100 * i;
-                frameData.latitude = testLatitude;
-                frameData.longitude = testLongitude;
-
-                m_FrameDataList.Add(frameData);
-            }
-
-            m_TotalFrameCount = m_FrameDataList.Count;
-        }
-
-        private void LoadAllFrameData()
-        {
-            Debug.Log("Start loading dataset...");
-
-            string datasetPath = m_DatasetPath;
-            string dataPath = datasetPath + "/" + "data.bin";
-
-            if(!File.Exists(dataPath))
-            {
-                Debug.LogError("Failed to find dataset at path : " + datasetPath);
-                return;
-            }
-
-            using FileStream fileStream = new FileStream(dataPath, FileMode.Open, FileAccess.Read);
-            using BinaryReader reader = new BinaryReader(fileStream);
-
-            m_FrameDataList = new List<FrameData>();
-
-            while(reader.BaseStream.Position != reader.BaseStream.Length)
-            {
-                string frameStr = reader.ReadString();
-                m_FrameDataList.Add(new FrameData(frameStr));
-            }
-
-            m_TotalFrameCount = m_FrameDataList.Count;
-
-            Debug.Log("Finish loading dataset!");
-        }
-
         public float GetTotalSeconds()
         {
-            if(m_FrameDataList == null)
+            if (!m_FrameDataLoader.IsCompleted)
             {
                 Debug.LogError("아직 데이터셋이 로드되지 않았음");
                 return 0;
             }
 
-            FrameData firstFrame = m_FrameDataList[0];
-            FrameData lastFrame = m_FrameDataList[m_FrameDataList.Count - 1];
+            FrameData firstFrame = m_FrameDataLoader.GetFrameData(0);
+            FrameData lastFrame = m_FrameDataLoader.GetFrameData(m_FrameDataLoader.DataCount - 1);
 
             float totalSeconds = (lastFrame.timestamp - firstFrame.timestamp) * 0.001f;
             return totalSeconds;
@@ -273,10 +192,9 @@ namespace ARCeye.Dataset
             m_PlaySpeedIndex = ++m_PlaySpeedIndex % m_PlaySpeeds.Length;
         }
 
-
         private void OnDrawGizmos()
         {
-            if(m_MainCamera != null)
+            if (m_MainCamera != null)
             {
                 Matrix4x4 poseMatrix = m_MainCamera.transform.localToWorldMatrix;
                 CameraDrawer.DrawFrame(poseMatrix, Color.magenta, 1.5f);
