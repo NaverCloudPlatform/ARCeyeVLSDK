@@ -327,7 +327,7 @@ namespace ARCeye
             Vector2 affineBasisY;
 
 #if UNITY_IOS
-            affineBasisX = new Vector2(displayMatrix[0, 0], displayMatrix[1, 0]);
+            affineBasisX = new Vector2(displayMatrix[0, 0], -displayMatrix[1, 0]);
             affineBasisY = new Vector2(displayMatrix[0, 1], displayMatrix[1, 1]);
 #elif UNITY_ANDROID
             affineBasisX = new Vector2(displayMatrix[0, 0], displayMatrix[0, 1]);
