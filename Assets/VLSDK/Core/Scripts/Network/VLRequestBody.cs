@@ -15,10 +15,6 @@ public class VLRequestBody
     public string filename;
     public string imageFieldName;
     public byte[] image;
-    public float fx;
-    public float fy;
-    public float cx;
-    public float cy;
     public Dictionary<string, string> parameters = new Dictionary<string, string>();
     public System.IntPtr nativeNetworkServiceHandle;
 
@@ -69,21 +65,21 @@ public class VLRequestBody
         }
 
         string[] camParamElems = camParamStr.Split(',');
-        body.fx = float.Parse(camParamElems[0]);
-        body.fy = float.Parse(camParamElems[1]);
-        body.cx = float.Parse(camParamElems[2]);
-        body.cy = float.Parse(camParamElems[3]);
+        float fx = float.Parse(camParamElems[0]);
+        float fy = float.Parse(camParamElems[1]);
+        float cx = float.Parse(camParamElems[2]);
+        float cy = float.Parse(camParamElems[3]);
 
         // texture가 portrait인 경우 intrinsic도 portrait인지 확인.
-        if (texWidth < texHeight && body.cx > body.cy)
+        if (texWidth < texHeight && cx > cy)
         {
-            NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지(w {texWidth}, h {texHeight})와 camParam(cx {body.cx}, cy {body.cy})의 방향이 일치하지 않음");
+            NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지(w {texWidth}, h {texHeight})와 camParam(cx {cx}, cy {cy})의 방향이 일치하지 않음");
             return false;
         }
 
         // texture의 해상도를 기반으로 intrinsic이 유효한 값인지 확인.
-        float camParamWidth = body.cx * 2;
-        float camParamHeight = body.cy * 2;
+        float camParamWidth = cx * 2;
+        float camParamHeight = cy * 2;
 
         float diffWidth = Mathf.Abs(texWidth - camParamWidth);
         float diffHeight = Mathf.Abs(texHeight - camParamHeight);
@@ -93,12 +89,12 @@ public class VLRequestBody
 
         if (diffWidthRatio > 0.05f)
         {
-            NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지의 width({texWidth})와 camParam의 cx({body.cx})의 차이가 큼");
+            NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지의 width({texWidth})와 camParam의 cx({cx})의 차이가 큼");
             return false;
         }
         if (diffHeightRatio > 0.05f)
         {
-            NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지의 height({texHeight})와 camParam의 cy({body.cy})의 차이가 큼");
+            NativeLogger.DebugLog(ARCeye.LogLevel.ERROR, $"요청 이미지의 height({texHeight})와 camParam의 cy({cy})의 차이가 큼");
             return false;
         }
 

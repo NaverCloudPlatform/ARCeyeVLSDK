@@ -24,8 +24,6 @@ namespace ARCeye
             InitDatasetManager();
             InitComponents();
 
-            DisableARFoundation();
-
             PlayDatasetManager();
         }
 
@@ -38,7 +36,7 @@ namespace ARCeye
 
             if (m_ARDatasetManager != null)
             {
-                if (m_ARDatasetManager.DatasetPath == "")
+                if (m_ARDatasetManager.datasetPath == "")
                 {
                     Debug.LogError("Dataset path is empty!");
                 }
@@ -54,39 +52,20 @@ namespace ARCeye
             m_GeoCoordProvider = GameObject.FindObjectOfType<GeoCoordProvider>();
         }
 
-        private void DisableARFoundation()
-        {
-            var backgroundType = Type.GetType("UnityEngine.XR.ARFoundation.ARCameraBackground, Unity.XR.ARFoundation");
-            var poseDriverType = Type.GetType("UnityEngine.InputSystem.XR.TrackedPoseDriver, Unity.InputSystem");
-
-            var arCameraBackground = GameObject.FindObjectOfType(backgroundType);
-            var trackedPoseDriver = GameObject.FindObjectOfType(poseDriverType);
-
-            if (arCameraBackground != null)
-            {
-                GameObject.Destroy(arCameraBackground);
-            }
-
-            if (trackedPoseDriver != null)
-            {
-                GameObject.Destroy(trackedPoseDriver);
-            }
-        }
-
         private void PlayDatasetManager()
         {
-            m_ARDatasetManager.FrameReceived += OnPreviewUpdated;
+            m_ARDatasetManager.frameReceived += OnPreviewUpdated;
             m_ARDatasetManager.Play();
         }
 
         public override void RegisterFrameLoop()
         {
-            m_ARDatasetManager.FrameReceived += OnCameraFrameReceived;
+            m_ARDatasetManager.frameReceived += OnCameraFrameReceived;
         }
 
         public override void UnregisterFrameLoop()
         {
-            m_ARDatasetManager.FrameReceived -= OnCameraFrameReceived;
+            m_ARDatasetManager.frameReceived -= OnCameraFrameReceived;
         }
 
         private void OnPreviewUpdated(FrameData frameData)

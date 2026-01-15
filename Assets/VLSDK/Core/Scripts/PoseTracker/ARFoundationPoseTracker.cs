@@ -12,12 +12,9 @@ namespace ARCeye
     {
         private ARCameraManager m_CameraManager;
         private UnityYuvCpuImage currVideoImage = new UnityYuvCpuImage();
-        private HeightCalculator m_HeightCalculator;
 
-        private const int MAJOR_AXIS_LENGTH_CPU_IMAGE = 1280;
-        private const int MAJOR_AXIS_LENGTH_REQUEST_IMAGE = 640;
-        private bool m_AccurateHeight = false;
-        private bool m_HasSetConfiguration = false;
+        private const int MAJOR_AXIS_LENGTH = 640;  // 장축의 길이를 640으로 고정.
+        private bool m_IsPortrait;
 
         protected const float DEFAULT_FX = 474.457672f;
         protected const float DEFAULT_FY = 474.457672f;
@@ -35,8 +32,10 @@ namespace ARCeye
                 Debug.LogError("Failed to find ARCameraManager. Please check AR Session Origin is placed in a scene.");
             }
 
+            m_IsPortrait = (Screen.orientation == ScreenOrientation.Portrait) ||
+                           (Screen.orientation == ScreenOrientation.PortraitUpsideDown);
+
             InitComponents();
-            // InitHeightCalculator();
         }
 
         private void InitComponents()
@@ -46,31 +45,6 @@ namespace ARCeye
             {
                 GameObject.Destroy(datasetManager);
             }
-
-            Dataset.DebugPreview debugPreview = GameObject.FindObjectOfType<Dataset.DebugPreview>();
-            if (debugPreview != null)
-            {
-                debugPreview.gameObject.SetActive(false);
-            }
-        }
-
-        private void InitHeightCalculator()
-        {
-            if (!m_AccurateHeight)
-            {
-                return;
-            }
-
-            if (m_HeightCalculator == null)
-            {
-                m_HeightCalculator = (new GameObject("HeightCalculator")).AddComponent<HeightCalculator>();
-                m_HeightCalculator.Initialize();
-            }
-        }
-
-        public void UseAccurateHeight(bool useAccurateHeight)
-        {
-            m_AccurateHeight = useAccurateHeight;
         }
 
         public override void RegisterFrameLoop()
@@ -96,10 +70,6 @@ namespace ARCeye
                 return;
 
             ARFrame frame = CreateARFrame(eventArgs);
-
-            if (frame == null)
-                return;
-
             UpdateFrame(frame);
         }
 
@@ -107,11 +77,10 @@ namespace ARCeye
         {
             ARFrame frame = new ARFrame();
 
-            UpdateConfigOnce();
-
             // Camera preview.
-            if (!TryAcquireLatestImage(eventArgs, out UnityYuvCpuImage? videoImage, out UnityAction disposable))
+            if (!TryAcquireLatestImage(out UnityYuvCpuImage? videoImage, out UnityAction disposable))
             {
+                Debug.LogError("Failed to acquire a requested video image");
                 return null;
             }
 
@@ -135,45 +104,11 @@ namespace ARCeye
             return frame;
         }
 
-        // 카메라 설정 세팅. m_CameraManager.GetConfigurations는 ARCameraManager의 로딩이 완료 된 후 설정 되어야 한다.
-        private void UpdateConfigOnce()
-        {
-            if (m_HasSetConfiguration)
-            {
-                return;
-            }
-
-            var configs = m_CameraManager.GetConfigurations(Allocator.Temp);
-            XRCameraConfiguration bestConfig = default;
-            int bestMinor = -1;
-
-            foreach (var config in configs)
-            {
-                int major = config.width > config.height ? config.width : config.height;
-                int minor = config.width > config.height ? config.height : config.width;
-                if (major == MAJOR_AXIS_LENGTH_CPU_IMAGE && minor > bestMinor)
-                {
-                    bestMinor = minor;
-                    bestConfig = config;
-                }
-            }
-
-            if (bestMinor > 0)
-            {
-                m_CameraManager.currentConfiguration = bestConfig;
-                Debug.Log($"Set ARCameraManager configuration: {bestConfig.width}x{bestConfig.height}");
-            }
-
-            configs.Dispose();
-
-            m_HasSetConfiguration = true;
-        }
-
-        unsafe public bool TryAcquireLatestImage(ARCameraFrameEventArgs eventArgs, out UnityYuvCpuImage? image, out UnityAction disposable)
+        unsafe public bool TryAcquireLatestImage(out UnityYuvCpuImage? image, out UnityAction disposable)
         {
             if (!m_CameraManager.TryAcquireLatestCpuImage(out XRCpuImage cpuImage))
             {
-                Debug.LogWarning("Failed to acquire latest CPU image using ARCameraManager.");
+                Debug.LogError("Failed to acquire latest CPU image using ARCameraManager.");
                 image = null;
                 disposable = null;
 
@@ -181,10 +116,6 @@ namespace ARCeye
 
                 return false;
             }
-
-            // displayMatrix로부터 회전 모드 계산
-            Matrix4x4 displayMatrix = eventArgs.displayMatrix ?? Matrix4x4.identity;
-            YuvRotationMode rotationMode = CalculateRotationMode(displayMatrix);
 
             var format = cpuImage.format;
             if (format == XRCpuImage.Format.AndroidYuv420_888)
@@ -213,7 +144,7 @@ namespace ARCeye
                 currVideoImage.vRowStride = vPlane.rowStride;
                 currVideoImage.vPixelStride = vPlane.pixelStride;
 
-                currVideoImage.rotationMode = rotationMode;
+                currVideoImage.rotationMode = YuvRotationMode.YUV_ROTATION_90;
 
                 image = currVideoImage;
                 disposable = () =>
@@ -242,7 +173,7 @@ namespace ARCeye
                 currVideoImage.uRowStride = uvPlane.rowStride;
                 currVideoImage.uPixelStride = uvPlane.pixelStride;
 
-                currVideoImage.rotationMode = rotationMode;
+                currVideoImage.rotationMode = YuvRotationMode.YUV_ROTATION_90;
 
                 image = currVideoImage;
                 disposable = () =>
@@ -277,12 +208,12 @@ namespace ARCeye
                 // width가 장축인 경우.
                 if (cameraIntrinsics.principalPoint.x > cameraIntrinsics.principalPoint.y)
                 {
-                    scale = (float)MAJOR_AXIS_LENGTH_REQUEST_IMAGE / (float)cameraIntrinsics.resolution.x;
+                    scale = (float)MAJOR_AXIS_LENGTH / (float)cameraIntrinsics.resolution.x;
                 }
                 // height가 장축인 경우.
                 else
                 {
-                    scale = (float)MAJOR_AXIS_LENGTH_REQUEST_IMAGE / (float)cameraIntrinsics.resolution.y;
+                    scale = (float)MAJOR_AXIS_LENGTH / (float)cameraIntrinsics.resolution.y;
                 }
 
                 // 스마트폰의 경우 landscape 기준으로 param 전달. x,y 반대로 설정.
@@ -313,54 +244,9 @@ namespace ARCeye
 
         private bool CheckIntrinsicTranspose(XRCameraIntrinsics cameraIntrinsics)
         {
-            bool isPortrait = (Screen.orientation == ScreenOrientation.Portrait) ||
-                            (Screen.orientation == ScreenOrientation.PortraitUpsideDown);
-
             return
-                (isPortrait && cameraIntrinsics.principalPoint.x > cameraIntrinsics.principalPoint.y) ||
-                (!isPortrait && cameraIntrinsics.principalPoint.x < cameraIntrinsics.principalPoint.y);
-        }
-
-        private YuvRotationMode CalculateRotationMode(Matrix4x4 displayMatrix)
-        {
-            Vector2 affineBasisX;
-            Vector2 affineBasisY;
-
-#if UNITY_IOS
-            affineBasisX = new Vector2(displayMatrix[0, 0], -displayMatrix[1, 0]);
-            affineBasisY = new Vector2(displayMatrix[0, 1], displayMatrix[1, 1]);
-#elif UNITY_ANDROID
-            affineBasisX = new Vector2(displayMatrix[0, 0], displayMatrix[0, 1]);
-            affineBasisY = new Vector2(displayMatrix[1, 0], displayMatrix[1, 1]);
-#else
-            affineBasisX = new Vector2(1.0f, 0.0f);
-            affineBasisY = new Vector2(0.0f, 1.0f);
-#endif
-
-            affineBasisX = affineBasisX.normalized;
-            affineBasisY = affineBasisY.normalized;
-
-            float angle = Mathf.Atan2(affineBasisX.y, affineBasisX.x) * Mathf.Rad2Deg;
-
-            if (angle < 0)
-                angle += 360f;
-
-            if (angle >= 315f || angle < 45f)
-            {
-                return YuvRotationMode.YUV_ROTATION_0;
-            }
-            else if (angle >= 45f && angle < 135f)
-            {
-                return YuvRotationMode.YUV_ROTATION_90;
-            }
-            else if (angle >= 135f && angle < 225f)
-            {
-                return YuvRotationMode.YUV_ROTATION_180;
-            }
-            else // 225 ~ 315
-            {
-                return YuvRotationMode.YUV_ROTATION_270;
-            }
+                (m_IsPortrait && cameraIntrinsics.principalPoint.x > cameraIntrinsics.principalPoint.y) ||
+                (!m_IsPortrait && cameraIntrinsics.principalPoint.x < cameraIntrinsics.principalPoint.y);
         }
 
         public Matrix4x4 MakeDisplayMatrix(Matrix4x4 rawDispRotMatrix)

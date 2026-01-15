@@ -10,7 +10,7 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
-        const string PACKAGE_VERSION = "1.11.1";
+        const string PACKAGE_VERSION = "1.10.1";
 
         private PoseTracker m_PoseTracker;
         public PoseTracker poseTracker => m_PoseTracker;
@@ -18,7 +18,6 @@ namespace ARCeye
         private NetworkController m_NetworkController;
         private GeoCoordProvider m_GeoCoordProvider;
         private TextureProvider m_TextureProvider;
-
 
 #if UNITY_IOS
         const string dll = "__Internal";
@@ -158,18 +157,6 @@ namespace ARCeye
         }
 
         [SerializeField]
-        private UpdatedARFrameEvent m_OnARFrameUpdated = new UpdatedARFrameEvent();
-        public UpdatedARFrameEvent OnARFrameUpdated
-        {
-            get => m_OnARFrameUpdated;
-            set
-            {
-                m_PoseTracker.onARFrameUpdated = value;
-                m_OnARFrameUpdated = value;
-            }
-        }
-
-        [SerializeField]
         private UpdatedPoseEvent m_OnPoseUpdated = new UpdatedPoseEvent();
         public UpdatedPoseEvent OnPoseUpdated
         {
@@ -297,7 +284,6 @@ namespace ARCeye
             m_OnPoseUpdated?.AddListener(UpdateOriginPose);
 
             m_PoseTracker.onStateChanged = m_OnStateChanged;
-            m_PoseTracker.onARFrameUpdated = m_OnARFrameUpdated;
             m_PoseTracker.onPoseUpdated = m_OnPoseUpdated;
             m_PoseTracker.onRelAltitudeUpdated = m_OnRelativeAltitudeUpdated;
             m_PoseTracker.onRegionCodeChanged = m_OnRegionCodeChanged;
@@ -332,6 +318,7 @@ namespace ARCeye
         {
             if (m_Config == null)
             {
+                Debug.LogWarning("[VLSDKManager] Config is null. Use default Config setting");
                 m_Config = new Config();
             }
 
@@ -391,7 +378,6 @@ namespace ARCeye
             else
             {
                 m_PoseTracker = new ARFoundationPoseTracker();
-                // (m_PoseTracker as ARFoundationPoseTracker).UseAccurateHeight(m_Settings.AccurateHeight);
             }
 #endif
 
@@ -430,8 +416,6 @@ namespace ARCeye
                 });
 
                 m_OnStateChanged?.AddListener(logViewer.OnStateChanged);
-                m_OnVLPoseRequested?.AddListener(logViewer.OnVLPoseRequested);
-                m_OnVLPoseResponded?.AddListener(logViewer.OnVLPoseResponded);
                 m_OnRegionCodeChanged?.AddListener(logViewer.OnLayerInfoChanged);
                 m_OnLayerInfoChanged?.AddListener(logViewer.OnLayerInfoChanged);
                 m_OnPoseUpdated?.AddListener(logViewer.OnPoseUpdated);

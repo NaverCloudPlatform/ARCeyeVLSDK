@@ -76,66 +76,19 @@ namespace ARCeye
 
         public void Parse()
         {
-            try
+            m_RootObject = JObject.Parse(m_ResponseBody);
+
+            // VL Pass 여부 저장.
+            m_IsVLPassed = GetVLResult(m_RootObject);
+
+            // VL 응답에 실패하는 경우 이후 일련의 파싱 과정을 진행하지 않음.
+            if (!m_IsVLPassed)
             {
-                m_RootObject = JObject.Parse(m_ResponseBody);
-
-                // VL Pass 여부 저장.
-                m_IsVLPassed = GetVLResult(m_RootObject);
-
-                // VL 응답에 실패하는 경우 이후 일련의 파싱 과정을 진행하지 않음.
-                if (!m_IsVLPassed)
-                {
-                    return;
-                }
-
-                // Pose 필드 파싱.
-                string pose = GetString(m_RootObject, PoseKey(), "0,false.jpg,0,0,0,1,0,0,0");
-
-                // 형태를 판단하여 적절한 파싱 메서드 호출
-                if (IsNewFormat(pose))
-                {
-                    ParseNewFormat(pose);
-                }
-                else
-                {
-                    ParseLegacyFormat(pose);
-                }
-
-                // 공통 처리
-                ProcessPoseData();
-
-                // DatasetInfo
-                m_DatasetInfo = GetString(m_RootObject, DatasetInfoKey(), "");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Parsing Error! Exception: {e.Message}\n\nResponse Body\n{m_ResponseBody}");
-                m_IsVLPassed = false;
                 return;
             }
-        }
 
-        /// <summary>
-        /// 새로운 형태인지 판단 (언더스코어가 포함되어 있는지 확인)
-        /// </summary>
-        private bool IsNewFormat(string pose)
-        {
-            // 1758596137537_false.jpg 형태인지 확인
-            string[] parts = pose.Split(',');
-            if (parts.Length > 0)
-            {
-                // 첫 번째 부분에 언더스코어가 있으면 새로운 형태
-                return parts[0].Contains("_");
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// 기존 형태 파싱: 1758596137537,false.jpg,7,8,9,1,0,0,0
-        /// </summary>
-        private void ParseLegacyFormat(string pose)
-        {
+            // Pose 필드 파싱.
+            string pose = GetString(m_RootObject, PoseKey(), "0,false.jpg,0,0,0,1,0,0,0");
             string[] parts = pose.Split(',');
 
             // Timestamp Parsing.
@@ -150,34 +103,6 @@ namespace ARCeye
             float qy = float.Parse(parts[7]);
             float qz = float.Parse(parts[8]);
 
-            SetPoseData(tx, ty, tz, qw, qx, qy, qz);
-        }
-
-        /// <summary>
-        /// 새로운 형태 파싱: 1758596137537_false.jpg,7,8,9,1,0,0,0
-        /// </summary>
-        private void ParseNewFormat(string pose)
-        {
-            string[] parts = pose.Split(',');
-
-            // Timestamp Parsing (언더스코어 앞 부분)
-            string timestampPart = parts[0].Split('_')[0];
-            m_Timestamp = long.Parse(timestampPart);
-
-            // Pose Parsing.
-            float tx = float.Parse(parts[1]);
-            float ty = float.Parse(parts[2]);
-            float tz = float.Parse(parts[3]);
-            float qw = float.Parse(parts[4]);
-            float qx = float.Parse(parts[5]);
-            float qy = float.Parse(parts[6]);
-            float qz = float.Parse(parts[7]);
-
-            SetPoseData(tx, ty, tz, qw, qx, qy, qz);
-        }
-
-        private void SetPoseData(float tx, float ty, float tz, float qw, float qx, float qy, float qz)
-        {
             // 위치와 회전을 나타내는 Vector3와 Quaternion 생성
             Vector3 position = new Vector3(tx, ty, 1.5f);
             Quaternion rotation = new Quaternion(qx, qy, qz, qw);
@@ -190,15 +115,16 @@ namespace ARCeye
             Matrix4x4 unityMatrix = lhMatrix;
             m_Position = unityMatrix.GetPosition();
             m_Rotation = Quaternion.LookRotation(unityMatrix.GetColumn(2), unityMatrix.GetColumn(1));
-        }
 
-        private void ProcessPoseData()
-        {
             // 응답 정확도 계산. confidence 값 사용.
             // m_Confidence = GetFloat(m_RootObject, ConfidenceKey(), 0.0f);;
 
             // 응답 정확도 계산. inlier 값 사용.
             m_Confidence = Mathf.Clamp01(GetFloat(m_RootObject, InlierKey(), 0.0f) / kMaxInliers);
+
+
+            // DatasetInfo
+            m_DatasetInfo = GetString(m_RootObject, DatasetInfoKey(), "");
         }
 
         protected string GetString(JObject jobject, string key, string defaultValue)

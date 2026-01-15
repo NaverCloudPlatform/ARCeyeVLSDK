@@ -928,7 +928,7 @@ MonoBehaviour:
   m_Camera: {fileID: 1983134864}
   m_OriginBaseGameObject: {fileID: 719039577}
   m_CameraFloorOffsetObject: {fileID: 1755474573}
-  m_RequestedTrackingOriginMode: 2
+  m_RequestedTrackingOriginMode: 0
   m_CameraYOffset: 1.1176
 --- !u!4 &719039579
 Transform:
@@ -1266,6 +1266,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_DatasetPath: /Users/user/Documents/Datasets/VLSDK Dataset/AMCO/AMCO_GODIVA
+  m_Progress: 0
 --- !u!4 &1441230791
 Transform:
   m_ObjectHideFlags: 0
@@ -1375,9 +1376,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_OnARFrameUpdated:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnPoseUpdated:
     m_PersistentCalls:
       m_Calls:

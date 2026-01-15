@@ -33,6 +33,9 @@ namespace ARCeye
         private float m_Confidence;
         public float Confidence => m_Confidence;
 
+        private string m_DatasetInfo;
+        public string DatasetInfo => m_DatasetInfo;
+
         private VLResponseParser m_VLResponseParser;
 
 
@@ -67,6 +70,7 @@ namespace ARCeye
             eventData.m_VLPosition = eventData.m_VLResponseParser.VLPosition;
             eventData.m_VLRotation = eventData.m_VLResponseParser.VLRotation;
             eventData.m_Confidence = eventData.m_VLResponseParser.Confidence;
+            eventData.m_DatasetInfo = eventData.m_VLResponseParser.DatasetInfo;
             eventData.m_ResponseBody = eventData.m_VLResponseParser.ResponseBody;
 
             return eventData;

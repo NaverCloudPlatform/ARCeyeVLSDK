@@ -29,8 +29,6 @@ namespace ARCeye
         private Vector3 m_GUIScale = Vector3.zero;
         private Matrix4x4 m_PrevGUIMat = Matrix4x4.identity;
         private Vector2 m_ScrollPosition;
-        private Vector2 m_MainScrollPosition;
-        private bool m_IsLandscape = false;
 
 
 
@@ -41,10 +39,8 @@ namespace ARCeye
         private static string m_CurrState = "INITIAL";
         private static string m_LayerInfo = "none";
 
-        private Camera m_Camera;
-        private Transform m_Origin;
-        private Vector3 m_VLPosition;
-        private Vector3 m_VLRotation;
+        private Vector3 m_Position;
+        private Vector3 m_EulerRotation;
         private double m_RelAltitude;
 
         private GUIStyle m_TitleStyle = new GUIStyle();
@@ -66,6 +62,8 @@ namespace ARCeye
 
             m_ContentsStyle.normal.textColor = Color.white;
             m_ContentsStyle.fontSize = 20;
+
+
         }
 
         void Start()
@@ -79,36 +77,6 @@ namespace ARCeye
             if (Debug.isDebugBuild && m_UseDebugUI && m_MultiTouchDetector.CheckMultiTouch())
             {
                 m_ShowDebugUI = !m_ShowDebugUI;
-            }
-
-            // 화면 방향 감지 및 타겟 해상도 업데이트
-            UpdateScreenOrientation();
-        }
-
-        /// <summary>
-        /// 현재 화면 방향을 감지하고 타겟 해상도를 조정한다.
-        /// </summary>
-        private void UpdateScreenOrientation()
-        {
-            bool isCurrentlyLandscape = Screen.width > Screen.height;
-
-            // 방향이 변경된 경우에만 타겟 해상도 업데이트
-            if (m_IsLandscape != isCurrentlyLandscape)
-            {
-                m_IsLandscape = isCurrentlyLandscape;
-
-                if (m_IsLandscape)
-                {
-                    // Landscape: 가로가 더 김
-                    m_TargetScreenWidth = 1280.0f;
-                    m_TargetScreenHeight = 720.0f;
-                }
-                else
-                {
-                    // Portrait: 세로가 더 김
-                    m_TargetScreenWidth = 720.0f;
-                    m_TargetScreenHeight = 1280.0f;
-                }
             }
         }
 
@@ -126,46 +94,19 @@ namespace ARCeye
 
             if (m_ShowDebugUI)
             {
-                // 화면 방향에 따라 윈도우 크기 조정
-                float windowWidth, windowHeight, logViewHeight, contentHeight;
-
-                if (m_IsLandscape)
-                {
-                    // Landscape 모드: 가로로 넓게, 스크롤 가능하도록 높이 제한
-                    windowWidth = 900;
-                    windowHeight = 650;
-                    logViewHeight = 200;
-                    contentHeight = 1200; // 실제 컨텐츠 높이
-                }
-                else
-                {
-                    // Portrait 모드: 세로로 길게
-                    windowWidth = 600;
-                    windowHeight = 1200;
-                    logViewHeight = 350;
-                    contentHeight = 1200;
-                }
-
+                float windowWidth = 600;
+                float windowHeight = 900;
                 float windowX = (m_TargetScreenWidth - windowWidth) / 2;
                 float windowY = (m_TargetScreenHeight - windowHeight) / 2;
                 float topMargin = 15;
                 float leftMargin = 30;
-                float rightMargin = 10; // 오른쪽 여백을 줄여서 스크롤바를 바깥쪽으로
 
                 Rect windowArea = new Rect(windowX, windowY, windowWidth, windowHeight);
-                Rect viewArea = new Rect(windowX + leftMargin, windowY + topMargin, windowWidth - leftMargin - rightMargin, windowHeight - topMargin * 2);
+                Rect viewArea = new Rect(windowX + leftMargin, windowY + topMargin, windowWidth - leftMargin, windowHeight - topMargin);
 
                 GUI.Box(windowArea, "");
 
-                // 메인 스크롤뷰로 전체 컨텐츠 감싸기
-                GUILayout.BeginArea(windowArea);
-
-                m_MainScrollPosition = GUI.BeginScrollView(
-                    new Rect(leftMargin, topMargin, windowWidth - leftMargin - rightMargin, windowHeight - topMargin * 2),
-                    m_MainScrollPosition,
-                    new Rect(0, 0, windowWidth - leftMargin - rightMargin - 20, contentHeight)
-                );
-
+                GUILayout.BeginArea(viewArea);
                 GUILayout.BeginVertical();
 
                 DrawVLSDKTitle();
@@ -188,11 +129,9 @@ namespace ARCeye
 
                 GUILayout.Space(20);
 
-                DrawLogScrollViewArea(viewArea, logViewHeight);
+                DrawLogScrollViewArea(viewArea);
 
                 GUILayout.EndVertical();
-
-                GUI.EndScrollView();
                 GUILayout.EndArea();
             }
 
@@ -247,50 +186,14 @@ namespace ARCeye
 
         private void DrawPoseInfo()
         {
-            if (m_Camera == null)
-            {
-                m_Camera = Camera.main;
-                m_Origin = m_Camera.transform.parent;
-            }
-
-            var localizedPosition = m_Camera.transform.position;
-            var localizedRotation = m_Camera.transform.rotation.eulerAngles;
-
-            var vioPosition = m_Camera.transform.localPosition;
-            var vioRotation = m_Camera.transform.localRotation.eulerAngles;
-
-            var originPosition = m_Origin.position;
-            var originRotation = m_Origin.rotation.eulerAngles;
-
-            GUILayout.Label("Localized Pose", m_TitleStyle);
+            GUILayout.Label("Pose", m_TitleStyle);
             GUILayout.Space(10);
-            GUILayout.Label($"Position (x:{localizedPosition.x.ToString("N1")} y:{localizedPosition.y.ToString("N1")} z:{localizedPosition.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Label($"Rotation (x:{localizedRotation.x.ToString("N1")} y:{localizedRotation.y.ToString("N1")} z:{localizedRotation.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Space(10);
-
-            GUILayout.Label("VIO Pose", m_TitleStyle);
-            GUILayout.Space(10);
-            GUILayout.Label($"Position (x:{vioPosition.x.ToString("N1")} y:{vioPosition.y.ToString("N1")} z:{vioPosition.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Label($"Rotation (x:{vioRotation.x.ToString("N1")} y:{vioRotation.y.ToString("N1")} z:{vioRotation.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Space(10);
-
-            GUILayout.Label("VL Pose", m_TitleStyle);
-            GUILayout.Space(10);
-            GUILayout.Label($"Position (x:{m_VLPosition.x.ToString("N1")} y:{m_VLPosition.y.ToString("N1")} z:{m_VLPosition.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Label($"Rotation (x:{m_VLRotation.x.ToString("N1")} y:{m_VLRotation.y.ToString("N1")} z:{m_VLRotation.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Space(10);
-
-            GUILayout.Label("Origin Pose", m_TitleStyle);
-            GUILayout.Space(10);
-            GUILayout.Label($"Position (x:{originPosition.x.ToString("N1")} y:{originPosition.y.ToString("N1")} z:{originPosition.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Label($"Rotation (x:{originRotation.x.ToString("N1")} y:{originRotation.y.ToString("N1")} z:{originRotation.z.ToString("N1")})", m_ContentsStyle);
-            GUILayout.Space(10);
-
-            GUILayout.Space(10);
+            GUILayout.Label($"Position (x:{m_Position.x.ToString("N1")} y:{m_Position.y.ToString("N1")} z:{m_Position.z.ToString("N1")})", m_ContentsStyle);
+            GUILayout.Label($"Rotation (x:{m_EulerRotation.x.ToString("N1")} y:{m_EulerRotation.y.ToString("N1")} z:{m_EulerRotation.z.ToString("N1")})", m_ContentsStyle);
             GUILayout.Label($"Altitude: {m_RelAltitude}", m_ContentsStyle);
         }
 
-        private void DrawLogScrollViewArea(Rect viewRect, float logViewHeight)
+        private void DrawLogScrollViewArea(Rect viewRect)
         {
             GUILayout.Label("Log", m_TitleStyle);
 
@@ -302,7 +205,7 @@ namespace ARCeye
                 s_IsLogScrollUpdated = false;
             }
 
-            m_ScrollPosition = GUILayout.BeginScrollView(m_ScrollPosition, GUILayout.Width(viewRect.width - 10), GUILayout.Height(logViewHeight));
+            m_ScrollPosition = GUILayout.BeginScrollView(m_ScrollPosition, GUILayout.Width(viewRect.width - 10), GUILayout.Height(350));
 
             foreach (var elem in s_LogList)
             {
@@ -369,27 +272,6 @@ namespace ARCeye
             // Debug.Log($"[LogViewer] Latitude : {locationInfo.latitude}, Longitude : {locationInfo.longitude}");
         }
 
-        public void OnVLPoseRequested(VLRequestEventData eventData)
-        {
-
-        }
-
-        public void OnVLPoseResponded(VLResponseEventData eventData)
-        {
-            if (eventData == null)
-            {
-                Debug.LogError("[LogViewer] OnVLPoseResponded : eventData is null");
-                return;
-            }
-
-            // VL을 성공할 경우에만 VL Pose 업데이트.
-            if (eventData.Status == ResponseStatus.Success)
-            {
-                m_VLPosition = eventData.VLPosition;
-                m_VLRotation = eventData.VLRotation.eulerAngles;
-            }
-        }
-
         public void OnLayerInfoChanged(string layerInfo)
         {
             Debug.Log($"[LogViewer] OnLayerInfoChanged : {layerInfo}");
@@ -398,7 +280,11 @@ namespace ARCeye
 
         public void OnPoseUpdated(Matrix4x4 matrix, Matrix4x4 projMatrix, Matrix4x4 texMatrix, double ra)
         {
+            Matrix4x4 poseMatrix = matrix.inverse;
+            m_Position = poseMatrix.GetColumn(3);
 
+            Quaternion rotation = Quaternion.LookRotation(poseMatrix.GetColumn(2), poseMatrix.GetColumn(1));
+            m_EulerRotation = rotation.eulerAngles;
         }
 
         public void OnRelAltitudeUpdated(double value)

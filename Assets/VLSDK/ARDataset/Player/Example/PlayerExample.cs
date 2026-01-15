@@ -22,18 +22,18 @@ namespace ARCeye.Dataset
 
         public void RegisterFrameLoop()
         {
-            if (m_ARDatasetManager != null)
+            if(m_ARDatasetManager != null)
             {
-                m_ARDatasetManager.FrameReceived += OnCameraFrameReceived;
+                m_ARDatasetManager.frameReceived += OnCameraFrameReceived;
                 m_ARDatasetManager.Play();
             }
         }
 
         public void UnregisterFrameLoop()
         {
-            if (m_ARDatasetManager != null)
+            if(m_ARDatasetManager != null)
             {
-                m_ARDatasetManager.FrameReceived -= OnCameraFrameReceived;
+                m_ARDatasetManager.frameReceived -= OnCameraFrameReceived;
                 m_ARDatasetManager.Pause();
             }
         }
@@ -50,7 +50,7 @@ namespace ARCeye.Dataset
 
         private void AcquireRequestedTexture(out Texture texture)
         {
-            if (!m_ARDatasetManager.TryAcquireFrameImage(out Texture frameTexture))
+            if(!m_ARDatasetManager.TryAcquireFrameImage(out Texture frameTexture)) 
             {
                 Debug.LogError("Failed to load preview texture");
                 texture = null;

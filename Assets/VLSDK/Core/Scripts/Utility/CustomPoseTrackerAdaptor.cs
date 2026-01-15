@@ -54,25 +54,11 @@ namespace ARCeye
             set => m_CustomDevicePoseTracker = value;
         }
 
-        public PoseTracker CustomPoseTracker
-        {
-            get
-            {
-#if UNITY_EDITOR
-                return m_CustomEditorPoseTracker;
-#else
-                return m_CustomDevicePoseTracker;
-#endif
-            }
-        }
 
         public void Initialize()
         {
-#if UNITY_EDITOR
             CreateEditorPoseTracker(m_EditorPoseTrackerClassName);
-#else
             CreateDevicePoseTracker(m_DevicePoseTrackerClassName);
-#endif
         }
 
         private void CreateEditorPoseTracker(string className)
