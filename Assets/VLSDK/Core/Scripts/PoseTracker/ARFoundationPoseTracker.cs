@@ -13,6 +13,7 @@ namespace ARCeye
         private ARCameraManager m_CameraManager;
         private UnityYuvCpuImage currVideoImage = new UnityYuvCpuImage();
         private HeightCalculator m_HeightCalculator;
+        private ARCameraFrameEventArgs m_LastFrameEventArgs;
 
         private const int MAJOR_AXIS_LENGTH_CPU_IMAGE = 1280;
         private const int MAJOR_AXIS_LENGTH_REQUEST_IMAGE = 640;
@@ -28,7 +29,7 @@ namespace ARCeye
         public override void OnCreate(Config config)
         {
             Debug.Log("Initialize DevicePoseTracker");
-            m_CameraManager = GameObject.FindObjectOfType<ARCameraManager>();
+            m_CameraManager = GameObject.FindAnyObjectByType<ARCameraManager>();
             if (m_CameraManager == null)
             {
                 Debug.LogError("Failed to find ARCameraManager.");
@@ -41,13 +42,17 @@ namespace ARCeye
 
         private void InitComponents()
         {
-            Dataset.ARDatasetManager datasetManager = GameObject.FindObjectOfType<Dataset.ARDatasetManager>();
-            if (datasetManager != null)
+            Type type = Type.GetType("ARCeye.Datasets.ARDatasetManager");
+            if (type != null)
             {
-                GameObject.Destroy(datasetManager);
+                var datasetManager = GameObject.FindAnyObjectByType(type);
+                if (datasetManager != null)
+                {
+                    GameObject.Destroy(datasetManager);
+                }
             }
 
-            Dataset.DebugPreview debugPreview = GameObject.FindObjectOfType<Dataset.DebugPreview>();
+            DebugPreview debugPreview = GameObject.FindAnyObjectByType<DebugPreview>();
             if (debugPreview != null)
             {
                 debugPreview.gameObject.SetActive(false);
@@ -92,18 +97,16 @@ namespace ARCeye
 
         private void OnCameraFrameReceived(ARCameraFrameEventArgs eventArgs)
         {
-            if (!m_IsInitialized)
-                return;
-
-            ARFrame frame = CreateARFrame(eventArgs);
-
-            if (frame == null)
-                return;
-
-            UpdateFrame(frame);
+            m_LastFrameEventArgs = eventArgs;
+            OnFrameLoop();
         }
 
-        protected ARFrame CreateARFrame(ARCameraFrameEventArgs eventArgs)
+        protected override ARFrame CreateARFrame()
+        {
+            return CreateARFrameFromEventArgs(m_LastFrameEventArgs);
+        }
+
+        protected ARFrame CreateARFrameFromEventArgs(ARCameraFrameEventArgs eventArgs)
         {
             ARFrame frame = new ARFrame();
 

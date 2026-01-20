@@ -34,6 +34,7 @@ namespace ARCeye
         private bool m_IsLoopRunning = false;
         private Coroutine? m_LoopCoroutine;
         private UnityAction? m_UpdateFrameAction;
+        private float m_TargetFrameInterval = 0f;
 
 
         private void OnDestroy()
@@ -41,10 +42,16 @@ namespace ARCeye
             s_ApplicationQuitting = true;
         }
 
-        public void StartFrameLoop(UnityAction updateFrameAction)
+        public void StartFrameLoop(UnityAction updateFrameAction, float targetFps = 0f)
         {
             m_UpdateFrameAction = updateFrameAction;
+            m_TargetFrameInterval = targetFps > 0f ? 1f / targetFps : 0f;
             m_IsLoopRunning = true;
+            if (m_LoopCoroutine != null)
+            {
+                StopCoroutine(m_LoopCoroutine);
+                m_LoopCoroutine = null;
+            }
             m_LoopCoroutine = StartCoroutine(FrameLoop());
         }
 
@@ -54,6 +61,7 @@ namespace ARCeye
             if (m_LoopCoroutine != null)
             {
                 StopCoroutine(m_LoopCoroutine);
+                m_LoopCoroutine = null;
             }
         }
 
@@ -65,10 +73,30 @@ namespace ARCeye
                 yield break;
             }
 
+            float nextTickTime = Time.realtimeSinceStartup;
+
             while (m_IsLoopRunning)
             {
                 m_UpdateFrameAction?.Invoke();
-                yield return null;
+
+                if (m_TargetFrameInterval <= 0f)
+                {
+                    yield return null;
+                    continue;
+                }
+
+                nextTickTime += m_TargetFrameInterval;
+                float waitSeconds = nextTickTime - Time.realtimeSinceStartup;
+                if (waitSeconds > 0f)
+                {
+                    yield return new WaitForSecondsRealtime(waitSeconds);
+                }
+                else
+                {
+                    // Frame processing took longer than the target interval; resync on next frame.
+                    nextTickTime = Time.realtimeSinceStartup;
+                    yield return null;
+                }
             }
         }
     }

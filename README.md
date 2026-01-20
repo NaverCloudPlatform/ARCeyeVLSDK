@@ -1,16 +1,33 @@
-[![kr](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/docs/badge/lang_kr.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.md)
-[![es](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/docs/badge/lang_en.svg)](https://github.com/NaverCloudPlatform/ARCeyeVLSDK/blob/main/README.en.md)
-
 # ARC eye VL SDK
 
-## 개요
+![](https://img.shields.io/badge/Unity-2021.3+-blue.svg?style=flat&logo=unity) ![](https://img.shields.io/badge/Unity-2022.3+-blue.svg?style=flat&logo=unity) ![](https://img.shields.io/badge/Unity-6000.0+-blue.svg?style=flat&logo=unity)
 
-ARC eye VL SDK는 ARC eye Visual Localization (VL) API를 이용하여 공간 상에서 모바일 기기의 위치를 측정하여 모바일 기기의 위치를 추정하는 Unity 패키지입니다. 이를 통해 공간 정보를 활용하는 AR 앱을 쉽게 구현할 수 있습니다.
+## Overview
 
-## 문서
+ARC eye VL SDK is a Unity package that estimates the position of mobile devices in space using the ARC eye Visual Localization (VL) API. This enables easy implementation of AR apps that utilize spatial information.
 
-[VLSDK documentation](https://ar.naverlabs.com/docs/vlsdk)
+## Installation
+
+### Installation via UPM (Recommended)
+
+1. Open Package Manager by clicking **Window > Package Manager** in the Unity top menu.
+1. Click the + button in the upper left corner of the Package Manager window, then click **Add package from git URL** and enter the following address:
+
+```
+https://github.com/NaverCloudPlatform/ARCeyeVLSDK.git?path=Assets/VLSDK
+```
+
+### Direct Addition to Project
+
+If you are not installing VLSDK via UPM, you can add it directly to your project using the following method.
+
+1. Download `vl-sdk-x.x.x.unitypackage` from the repository.
+1. Click **Assets > Import Packages > Custom Package…** in the Unity top menu, then find and add **vl-sdk-unity-x.x.x.unitypackage** to the project.
+
+## Usage
+
+For detailed usage instructions, please refer to the [official documentation](https://ar.naverlabs.com/docs/vlsdk).
 
 ## License
 
-전체 오픈소스 라이선스는 [LICENSE](./LICENSE) 에서 확인하세요.
+For the complete open source license, please check [LICENSE](./LICENSE).

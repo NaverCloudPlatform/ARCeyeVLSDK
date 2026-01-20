@@ -229,8 +229,32 @@ namespace ARCeye
         private static extern IntPtr FindLocationNative(double lat, double lon);
 
         public virtual void OnCreate(Config config) { }
-        public abstract void RegisterFrameLoop();
-        public abstract void UnregisterFrameLoop();
+
+        public virtual void RegisterFrameLoop()
+        {
+            FrameLoopRunner.Instance?.StartFrameLoop(OnFrameLoop, GetTargetFrameRate());
+        }
+
+        public virtual void UnregisterFrameLoop()
+        {
+            FrameLoopRunner.Instance?.StopFrameLoop();
+        }
+
+        protected virtual float GetTargetFrameRate() => 0f;
+
+        protected virtual void OnFrameLoop()
+        {
+            if (!m_IsInitialized)
+                return;
+
+            ARFrame frame = CreateARFrame();
+            if (frame != null)
+            {
+                UpdateFrame(frame);
+            }
+        }
+
+        protected abstract ARFrame CreateARFrame();
 
 
         public PoseTracker()
@@ -298,6 +322,11 @@ namespace ARCeye
             string geojson = config.vlAreaGeoJson;
             if (!config.tracker.useGPSGuide)
             {
+                geojson = null;
+            }
+            else if (!GeoJsonUtility.IsValidGeoJsonFormat(geojson))
+            {
+                Debug.LogError("Invalid `Location GeoJson` format in VLSDK Settings. Please check https://ar.naverlabs.com/docs/vlsdk/docs/getting_start/create_settings#gps-guide");
                 geojson = null;
             }
 

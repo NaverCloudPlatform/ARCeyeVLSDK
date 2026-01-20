@@ -20,13 +20,13 @@ namespace ARCeye
 
         public void Initialize()
         {
-            m_ARPlaneManager = GameObject.FindObjectOfType<ARPlaneManager>();
+            m_ARPlaneManager = GameObject.FindAnyObjectByType<ARPlaneManager>();
             if (m_ARPlaneManager == null)
             {
                 m_ARPlaneManager = gameObject.AddComponent<ARPlaneManager>();
             }
 
-            m_ARRaycastManager = GameObject.FindObjectOfType<ARRaycastManager>();
+            m_ARRaycastManager = GameObject.FindAnyObjectByType<ARRaycastManager>();
             if (m_ARRaycastManager == null)
             {
                 m_ARRaycastManager = gameObject.AddComponent<ARRaycastManager>();

@@ -30,7 +30,6 @@ namespace ARCeye
 #endif
 
         private Dictionary<long, Coroutine> m_RequestCoroutines = new Dictionary<long, Coroutine>();
-        private Coroutine m_RequestCoroutine = null;
 
         [DllImport(dll)]
         private static extern void SetRequestFuncNative(RequestVLDelegate func);
@@ -337,7 +336,6 @@ namespace ARCeye
                 }
             }
 
-            m_RequestCoroutine = null;
             www.Dispose();
 
             if (m_RequestCoroutines.Count > 0)

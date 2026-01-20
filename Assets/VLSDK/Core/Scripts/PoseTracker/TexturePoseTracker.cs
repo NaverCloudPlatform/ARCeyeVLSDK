@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ARCeye.Dataset;
 
 namespace ARCeye
 {
@@ -26,8 +25,8 @@ namespace ARCeye
 
         private void InitComponents()
         {
-            m_DebugPreview = GameObject.FindObjectOfType<DebugPreview>();
-            m_TextureProvider = GameObject.FindObjectOfType<TextureProvider>();
+            m_DebugPreview = GameObject.FindAnyObjectByType<DebugPreview>();
+            m_TextureProvider = GameObject.FindAnyObjectByType<TextureProvider>();
             if (m_TextureProvider == null)
             {
                 Debug.LogError("TextureProvider not found in the scene. If you want to use TexturePoseTracker, please add TextureProvider to the scene.");
@@ -35,26 +34,7 @@ namespace ARCeye
             }
         }
 
-        public override void RegisterFrameLoop()
-        {
-            FrameLoopRunner.Instance?.StartFrameLoop(OnFrameUpdated);
-        }
-
-        public override void UnregisterFrameLoop()
-        {
-            FrameLoopRunner.Instance?.StopFrameLoop();
-        }
-
-        private void OnFrameUpdated()
-        {
-            if (!m_IsInitialized)
-                return;
-
-            ARFrame frame = CreateARFrame();
-            UpdateFrame(frame);
-        }
-
-        public ARFrame CreateARFrame()
+        protected override ARFrame CreateARFrame()
         {
             ARFrame frame = new ARFrame();
 

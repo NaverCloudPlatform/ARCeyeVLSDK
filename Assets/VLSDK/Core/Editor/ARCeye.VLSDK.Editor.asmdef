@@ -4,7 +4,9 @@
     "references": [
         "ARCeye.VLSDK",
         "ARCeye.Dataset.Decoder",
-        "Unity.XR.ARFoundation"
+        "Unity.XR.ARFoundation",
+        "Unity.XR.Management",
+        "Unity.XR.Management.Editor"
     ],
     "includePlatforms": [
         "Editor"

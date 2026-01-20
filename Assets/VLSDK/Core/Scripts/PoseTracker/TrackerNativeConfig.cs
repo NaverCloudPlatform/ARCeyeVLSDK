@@ -65,6 +65,9 @@ namespace ARCeye
         public bool useWithGlobal;
 
         [HideInInspector, MarshalAs(UnmanagedType.U1)]
+        public bool useLocalVLSearch;
+
+        [HideInInspector, MarshalAs(UnmanagedType.U1)]
         public bool useFaceBlurring;
 
         [HideInInspector, MarshalAs(UnmanagedType.R4)]

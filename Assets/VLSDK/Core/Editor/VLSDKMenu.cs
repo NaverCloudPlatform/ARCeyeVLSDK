@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.XR.ARFoundation;
 using UnityEditor.SceneManagement;
-using ARCeye.Dataset;
 
 namespace ARCeye
 {
@@ -17,13 +16,13 @@ namespace ARCeye
         [MenuItem("GameObject/ARC-eye/VL SDK/Create VLSDKManager")]
         private static void CreateVLSDKManager()
         {
-            if(CheckIsVLSDKManagerExisting())
+            if (CheckIsVLSDKManagerExisting())
             {
                 Debug.LogWarning("VLSDKManager가 이미 추가 되어있습니다.");
                 return;
             }
 
-            if(!CheckIsARSessionExisting())
+            if (!CheckIsARSessionExisting())
             {
                 Debug.LogError("ARSession 혹은 XROrigin을 찾을 수 없습니다. Scene에 ARSession과 XROrigin을 추가해주세요.");
                 return;
@@ -31,8 +30,9 @@ namespace ARCeye
 
             string[] settingGUIDInAssets = AssetDatabase.FindAssets("t:VLSDKSettings");
 
-            if(settingGUIDInAssets.Length == 0) {
-                Debug.LogWarning("VLSDK Settings 파일을 찾을 수 없습니다. 패키지를 다시 로드해주세요");
+            if (settingGUIDInAssets.Length == 0)
+            {
+                Debug.LogWarning("VLSDK Settings 파일을 찾을 수 없습니다. VLSDK Settings를 생성해주세요.");
                 return;
             }
 
@@ -42,7 +42,7 @@ namespace ARCeye
             // Assign VLSDKSettings
             string settingGUID = settingGUIDInAssets[0];
             string settingsPath = AssetDatabase.GUIDToAssetPath(settingGUID);
-            VLSDKSettings settings = (VLSDKSettings) AssetDatabase.LoadAssetAtPath(settingsPath, typeof(VLSDKSettings));            
+            VLSDKSettings settings = (VLSDKSettings)AssetDatabase.LoadAssetAtPath(settingsPath, typeof(VLSDKSettings));
             VLSDKManager.settings = settings;
 
             // Create LogViewer
@@ -65,40 +65,40 @@ namespace ARCeye
 
         private static bool CheckIsVLSDKManagerExisting()
         {
-            var VLSDKManager = GameObject.FindObjectOfType<VLSDKManager>();
+            var VLSDKManager = GameObject.FindAnyObjectByType<VLSDKManager>();
             return VLSDKManager != null;
         }
 
         private static bool CheckIsARSessionExisting()
         {
-            System.Type arSessionType       = GetTypeFromAssemblies("UnityEngine.XR.ARFoundation.ARSession");
+            System.Type arSessionType = GetTypeFromAssemblies("UnityEngine.XR.ARFoundation.ARSession");
             System.Type arSessionOriginType = GetTypeFromAssemblies("UnityEngine.XR.ARFoundation.ARSessionOrigin");
             System.Type arCameraManagerType = GetTypeFromAssemblies("UnityEngine.XR.ARFoundation.ARCameraManager");
 
-            m_ARCameraManager = GameObject.FindObjectOfType<ARCameraManager>();
+            m_ARCameraManager = GameObject.FindAnyObjectByType<ARCameraManager>();
 
-            var obj1 = arSessionType != null ? GameObject.FindObjectOfType(arSessionType) : null;
-            var obj2 = arSessionOriginType != null ? GameObject.FindObjectOfType(arSessionOriginType) : null;
-            var obj3 = arCameraManagerType != null ? GameObject.FindObjectOfType(arCameraManagerType) : null;
+            var obj1 = arSessionType != null ? GameObject.FindAnyObjectByType(arSessionType) : null;
+            var obj2 = arSessionOriginType != null ? GameObject.FindAnyObjectByType(arSessionOriginType) : null;
+            var obj3 = arCameraManagerType != null ? GameObject.FindAnyObjectByType(arCameraManagerType) : null;
 
             return obj1 != null && (obj2 != null || obj3 != null);
         }
 
-        public static Type GetTypeFromAssemblies( string TypeName )
+        public static Type GetTypeFromAssemblies(string TypeName)
         {
-            var type = Type.GetType( TypeName );
-            if( type != null )
+            var type = Type.GetType(TypeName);
+            if (type != null)
                 return type;
 
             var currentAssembly = System.Reflection.Assembly.GetExecutingAssembly();
             var referencedAssemblies = currentAssembly.GetReferencedAssemblies();
-            foreach( var assemblyName in referencedAssemblies )
+            foreach (var assemblyName in referencedAssemblies)
             {
-                var assembly = System.Reflection.Assembly.Load( assemblyName );
-                if( assembly != null )
+                var assembly = System.Reflection.Assembly.Load(assemblyName);
+                if (assembly != null)
                 {
-                    type = assembly.GetType( TypeName );
-                    if( type != null )
+                    type = assembly.GetType(TypeName);
+                    if (type != null)
                         return type;
                 }
             }
@@ -111,7 +111,7 @@ namespace ARCeye
             Canvas previewCanvas = m_ARCameraManager.GetComponentInChildren<Canvas>();
 
             // Add debug preview texture.
-            if(previewCanvas == null)
+            if (previewCanvas == null)
             {
                 previewCanvas = ObjectFactory.CreateGameObject("Canvas", typeof(Canvas)).GetComponent<Canvas>();
                 previewCanvas.transform.SetParent(m_ARCameraManager.transform);
@@ -122,11 +122,11 @@ namespace ARCeye
             previewCanvas.planeDistance = previewCanvas.worldCamera.farClipPlane - 0.1f;
 
             DebugPreview debugPreview = previewCanvas.GetComponentInChildren<DebugPreview>();
-            if(debugPreview == null)
+            if (debugPreview == null)
             {
                 GameObject debugPreviewObject = ObjectFactory.CreateGameObject("DebugPreview", typeof(DebugPreview));
                 debugPreviewObject.transform.SetParent(previewCanvas.transform);
-                
+
                 RectTransform debugPreviewRT = debugPreviewObject.AddComponent<RectTransform>();
 
                 debugPreviewRT.anchorMin = Vector2.zero;

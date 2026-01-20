@@ -36,15 +36,6 @@ namespace ARCeye
             RemoveDeprecatedNativePlugins();
         }
 
-        [MenuItem("ARC eye/VLSDK/Fix define symbols issue")]
-        public static void SetupVLSDK()
-        {
-            // UPM으로 설치한 경우 VLSDKImportPreprocess가 정상적으로 실행되지 않을 수도 있음.
-            AddDefineSymbols();
-
-            Debug.Log("Fix define symbols issue complete");
-        }
-
         private static void AddPackagesToManifest()
         {
             // manifest.json 파일 경로

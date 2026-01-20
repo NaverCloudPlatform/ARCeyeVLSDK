@@ -1,0 +1,16 @@
+{
+    "name": "ARCeye.Dataset.Decoder.Example",
+    "rootNamespace": "",
+    "references": [
+        "ARCeye.Dataset.Decoder"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

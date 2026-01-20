@@ -10,7 +10,7 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
-        const string PACKAGE_VERSION = "1.11.1";
+        const string PACKAGE_VERSION = "1.12.0";
 
         private PoseTracker m_PoseTracker;
         public PoseTracker poseTracker => m_PoseTracker;
@@ -374,7 +374,7 @@ namespace ARCeye
             }
             else
             {
-                m_PoseTracker = new ARDatasetPoseTracker();
+                m_PoseTracker = new TexturePoseTracker();
 
                 // unit test일 경우에는 모든 필터 비활성화.
                 m_Config.tracker.useTranslationFilter = !settings.testMode;

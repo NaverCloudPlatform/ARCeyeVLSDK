@@ -35,7 +35,6 @@ namespace ARCeye
                 return;
             }
 
-            const float low1Accuracy = 0.1f;
             const float low2Accuracy = 0.2f;
             const float med1Accuracy = 0.4f;
             const float med2Accuracy = 0.5f;

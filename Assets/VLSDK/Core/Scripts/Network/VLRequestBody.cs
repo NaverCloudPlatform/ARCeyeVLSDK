@@ -3,7 +3,6 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ARCeye.Dataset;
 using ARCeye;
 
 public class VLRequestBody
@@ -199,8 +198,14 @@ public class VLRequestBody
     private static bool IsPositionBasedRequestValid()
     {
 #if UNITY_EDITOR
-        // 코드 구조를 깔끔하게 하기 위해 여기에서 FindObjectOfType 실행.
-        ARDatasetManager datasetManager = GameObject.FindObjectOfType<ARDatasetManager>();
+        Type type = Type.GetType("ARCeye.Datasets.ARDatasetManager");
+        if (type == null)
+        {
+            return false;
+        }
+
+        // 코드 구조를 깔끔하게 하기 위해 여기에서 FindAnyObjectByType 실행.
+        var datasetManager = GameObject.FindAnyObjectByType(type);
         return datasetManager != null;
 #else
         return true;
