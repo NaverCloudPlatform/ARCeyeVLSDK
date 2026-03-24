@@ -324,6 +324,25 @@ namespace ARCeye
                 (!isPortrait && cameraIntrinsics.principalPoint.x < cameraIntrinsics.principalPoint.y);
         }
 
+        /// <summary>
+        /// Android에서 전달되는 값
+        ///  0.00000    -0.80000    0.00000    0.00000
+        //  -1.00000    0.00000    0.00000    0.00000
+        //   1.00000    0.90000    1.00000    0.00000
+        //   0.00000    0.00000    0.00000    1.00000
+        ///   iOS에서 전달되는 값
+        ///  0.00000	-0.82022   0.00000    0.00000
+        //  -1.00000	0.00000	   0.00000    0.00000
+        //   1.00000	0.91011	   1.00000    0.00000
+        //   0.00000	0.00000	   0.00000    1.00000
+        /// displayMatrix
+        ///  [0, 0]     [0, 1]     [0, 2]     [0, 3]
+        ///  [1, 0]     [1, 1]     [1, 2]     [1, 3]
+        ///  [2, 0]     [2, 1]     [2, 2]     [2, 3]
+        ///  [3, 0]     [3, 1]     [3, 2]     [3, 3]
+        /// 관련 자료
+        /// https://docs.unity3d.com/Packages/com.unity.xr.arfoundation@6.1/manual/features/camera/display-matrix-format-and-derivation.html?q=display%20matrix
+        /// 
         private YuvRotationMode CalculateRotationMode(Matrix4x4 displayMatrix)
         {
             Vector2 affineBasisX;
@@ -333,7 +352,7 @@ namespace ARCeye
             affineBasisX = new Vector2(displayMatrix[0, 0], -displayMatrix[1, 0]);
             affineBasisY = new Vector2(displayMatrix[0, 1], displayMatrix[1, 1]);
 #elif UNITY_ANDROID
-            affineBasisX = new Vector2(displayMatrix[0, 0], displayMatrix[0, 1]);
+            affineBasisX = new Vector2(displayMatrix[0, 0], -displayMatrix[0, 1]);
             affineBasisY = new Vector2(displayMatrix[1, 0], displayMatrix[1, 1]);
 #else
             affineBasisX = new Vector2(1.0f, 0.0f);

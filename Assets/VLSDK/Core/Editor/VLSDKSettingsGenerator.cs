@@ -5,8 +5,9 @@ using System.IO;
 
 namespace ARCeye
 {
-    public class VLSDKSettingsGenerator {
-        [MenuItem("Assets/Create/ARCeye/VLSDKSettings")]
+    public class VLSDKSettingsGenerator
+    {
+        [MenuItem("Assets/Create/ARC eye/VLSDKSettings")]
         public static void CreateVLSDKSettings()
         {
             VLSDKSettings asset = ScriptableObject.CreateInstance<VLSDKSettings>();

@@ -13,7 +13,7 @@ namespace ARCeye
         private static ARCameraManager m_ARCameraManager;
 
 
-        [MenuItem("GameObject/ARC-eye/VL SDK/Create VLSDKManager")]
+        [MenuItem("GameObject/ARC eye/VL SDK/Create VLSDKManager")]
         private static void CreateVLSDKManager()
         {
             if (CheckIsVLSDKManagerExisting())

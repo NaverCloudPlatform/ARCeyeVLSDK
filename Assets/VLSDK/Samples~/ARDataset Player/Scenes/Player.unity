@@ -163,7 +163,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 123078761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eab06138ce9614c6bb0288f709df98d9, type: 3}
+  m_Script: {fileID: 11500000, guid: ef097a87c236c4b3c8cba838046e98b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_ARDatasetManager: {fileID: 1426711373}
@@ -779,11 +779,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1426711372}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b32231c78c21a4760b6aa34d5c58f30a, type: 3}
+  m_Script: {fileID: 11500000, guid: 7fec755b050e445debc10a2600546cfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_DatasetPath: /Users/user/Library/Application Support/NAVERLABS/VLSDKDatasetRecorder/240905_115739
-  m_Progress: 0
+  m_DatasetPath: /Users/user/Documents/Datasets/VLSDK Dataset/AMCO/AMCO_GODIVA
 --- !u!4 &1426711374
 Transform:
   m_ObjectHideFlags: 0

@@ -12,7 +12,7 @@ namespace ARCeye
         public List<VLURL> URLList { get => m_URLList; }
 
         [field: SerializeField, Tooltip("Estimate which invoke URL to use based on GPS location")]
-        private bool m_GPSGuide = true;
+        private bool m_GPSGuide = false;
         public bool GPSGuide
         {
             get => m_GPSGuide;

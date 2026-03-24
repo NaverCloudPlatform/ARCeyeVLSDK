@@ -108,7 +108,7 @@ namespace ARCeye
                 fixItMessage = "Set Location Usage Description in Player Settings",
                 fixItAutomatic = false,
                 buildTargetGroup = new[] { BuildTargetGroup.iOS },
-                error = false
+                error = true
             });
 
             // Graphics API Validation (Android)
@@ -167,7 +167,7 @@ namespace ARCeye
             s_ValidationRules.Add(new VLSDKValidationRule
             {
                 message = "VLSDK_ARFOUNDATION must be defined in Scripting Define Symbols",
-                category = "Scripting Define Symbols",
+                category = "Project Settings",
                 checkPredicate = () => IsDefineSymbolSet("VLSDK_ARFOUNDATION"),
                 fixIt = () => AddDefineSymbol("VLSDK_ARFOUNDATION"),
                 fixItMessage = "Add VLSDK_ARFOUNDATION to Scripting Define Symbols",
@@ -180,7 +180,7 @@ namespace ARCeye
             s_ValidationRules.Add(new VLSDKValidationRule
             {
                 message = "VLSDK_NEWTONSOFT_JSON must be defined in Scripting Define Symbols",
-                category = "Scripting Define Symbols",
+                category = "Project Settings",
                 checkPredicate = () => IsDefineSymbolSet("VLSDK_NEWTONSOFT_JSON"),
                 fixIt = () => AddDefineSymbol("VLSDK_NEWTONSOFT_JSON"),
                 fixItMessage = "Add VLSDK_NEWTONSOFT_JSON to Scripting Define Symbols",
@@ -188,6 +188,22 @@ namespace ARCeye
                 buildTargetGroup = null,
                 error = true
             });
+
+#if UNITY_6000_0_OR_NEWER
+            // Application Entry Point Validation (Android, Unity 6+)
+            s_ValidationRules.Add(new VLSDKValidationRule
+            {
+                message = "Application Entry Point must be set to `Activity` only",
+                category = "Project Settings",
+                checkPredicate = () => IsApplicationEntryActivityOnly(),
+                fixIt = () => SetApplicationEntryActivityOnly(),
+                fixItMessage = "Set Application Entry Point to `Activity` only in Player Settings",
+                fixItAutomatic = false,
+                buildTargetGroup = new[] { BuildTargetGroup.Android },
+                error = true,
+                settingsPath = "Project/Player"
+            });
+#endif
 
             // Multiple Main Cameras Validation
             s_ValidationRules.Add(new VLSDKValidationRule
@@ -346,6 +362,19 @@ namespace ARCeye
 
             return mainCameras.Count <= 1;
         }
+
+#if UNITY_6000_0_OR_NEWER
+        private static bool IsApplicationEntryActivityOnly()
+        {
+            return PlayerSettings.Android.applicationEntry == AndroidApplicationEntry.Activity;
+        }
+
+        private static void SetApplicationEntryActivityOnly()
+        {
+            PlayerSettings.Android.applicationEntry = AndroidApplicationEntry.Activity;
+            Debug.Log("Application Entry Point has been set to Activity only.");
+        }
+#endif
 
         public static void RefreshRules()
         {

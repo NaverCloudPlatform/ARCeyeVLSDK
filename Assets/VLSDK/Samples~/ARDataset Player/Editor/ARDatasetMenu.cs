@@ -16,7 +16,7 @@ namespace ARCeye.Dataset
         private static ARCameraManager m_ARCameraManager;
 
 
-        [MenuItem("GameObject/ARC-eye/Dataset/Create ARDatasetManager")]
+        [MenuItem("GameObject/ARC eye/Dataset/Create ARDatasetManager")]
         private static void CreateARDatasetManager()
         {
             if (CheckIsARDatasetManagerExisting())
