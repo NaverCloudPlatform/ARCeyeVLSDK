@@ -1,6 +1,6 @@
 {
   "name": "com.naverlabs.vlsdk",
-  "version": "1.12.1",
+  "version": "1.12.2",
   "displayName": "VLSDK",
   "description": "Unity package that provides seamless integration with ARC eye's Visual Localization (VL) API, enabling developers to easily implement advanced AR positioning and tracking capabilities in their Unity applications.",
   "unity": "2021.3",

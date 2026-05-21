@@ -10,7 +10,7 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
-        const string PACKAGE_VERSION = "1.12.1";
+        const string PACKAGE_VERSION = "1.12.2";
 
         private PoseTracker m_PoseTracker;
         public PoseTracker poseTracker => m_PoseTracker;
