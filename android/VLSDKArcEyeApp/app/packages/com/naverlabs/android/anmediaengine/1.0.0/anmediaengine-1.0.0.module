@@ -1,0 +1,81 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.naverlabs.android",
+    "module": "anmediaengine",
+    "version": "1.0.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.14.2"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseVariantReleaseApiPublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "anmediaengine-1.0.0.aar",
+          "url": "anmediaengine-1.0.0.aar",
+          "size": 60157,
+          "sha512": "cad6addbb0a34c508a84bd234acae4902e49820a5c6b08b3cc3c6deee73d809297e06294de071fa9b94dad371af7c5abe308f2145da74754deb6b705d1b9c336",
+          "sha256": "c552e069ce865d9aa6439b96fa676e3b6cea185e0c4ed67830f396ee028dddc1",
+          "sha1": "ed33f0852608d50795b8120402c2a1b47b4507ef",
+          "md5": "a59e025eaa29e917fd2908c80bfa486c"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseRuntimePublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.jcodec",
+          "module": "jcodec",
+          "version": {
+            "requires": "0.2.5"
+          }
+        },
+        {
+          "group": "org.jcodec",
+          "module": "jcodec-android",
+          "version": {
+            "requires": "0.2.5"
+          }
+        },
+        {
+          "group": "android.arch.lifecycle",
+          "module": "common-java8",
+          "version": {
+            "requires": "1.1.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "anmediaengine-1.0.0.aar",
+          "url": "anmediaengine-1.0.0.aar",
+          "size": 60157,
+          "sha512": "cad6addbb0a34c508a84bd234acae4902e49820a5c6b08b3cc3c6deee73d809297e06294de071fa9b94dad371af7c5abe308f2145da74754deb6b705d1b9c336",
+          "sha256": "c552e069ce865d9aa6439b96fa676e3b6cea185e0c4ed67830f396ee028dddc1",
+          "sha1": "ed33f0852608d50795b8120402c2a1b47b4507ef",
+          "md5": "a59e025eaa29e917fd2908c80bfa486c"
+        }
+      ]
+    }
+  ]
+}

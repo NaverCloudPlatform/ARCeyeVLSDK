@@ -1,0 +1,6 @@
+framework module VLSDK {
+  umbrella header "VLSDK.h"
+  export *
+
+  module * { export * }
+}

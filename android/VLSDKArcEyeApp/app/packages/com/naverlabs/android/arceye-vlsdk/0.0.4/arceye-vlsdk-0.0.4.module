@@ -1,0 +1,118 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.naverlabs.android",
+    "module": "arceye-vlsdk",
+    "version": "0.0.4",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.14.2"
+    }
+  },
+  "variants": [
+    {
+      "name": "arceyeReleaseVariantArceyeReleaseApiPublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "com.google.ar",
+          "module": "core",
+          "version": {
+            "requires": "1.49.0"
+          }
+        },
+        {
+          "group": "com.google.mlkit",
+          "module": "face-detection",
+          "version": {
+            "requires": "16.1.7"
+          }
+        },
+        {
+          "group": "androidx.media3",
+          "module": "media3-datasource-okhttp",
+          "version": {
+            "requires": "1.5.1"
+          }
+        },
+        {
+          "group": "com.naverlabs.android",
+          "module": "anmediaengine",
+          "version": {
+            "requires": "1.0.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "arceye-vlsdk-0.0.4.aar",
+          "url": "arceye-vlsdk-0.0.4.aar",
+          "size": 15615643,
+          "sha512": "c441dd57fae661eba32055aa733a63399ef960df1b1b67d5c43e742f5356545745ceb545b2b8d76a1a65294647b6c1fbeb15111fc753ad82d16105e826d0f9a9",
+          "sha256": "b748b9e9f7ee5933eff27174aaf04a25743517d6cfdf4e48f28211a4f2d6a454",
+          "sha1": "338182de907ee288241a1e1d24354f04b7d10ddb",
+          "md5": "1c0f7c2a5c4db49abc8d49a1c7c62e3a"
+        }
+      ]
+    },
+    {
+      "name": "arceyeReleaseVariantArceyeReleaseRuntimePublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "com.google.ar",
+          "module": "core",
+          "version": {
+            "requires": "1.49.0"
+          }
+        },
+        {
+          "group": "com.google.mlkit",
+          "module": "face-detection",
+          "version": {
+            "requires": "16.1.7"
+          }
+        },
+        {
+          "group": "androidx.media3",
+          "module": "media3-datasource-okhttp",
+          "version": {
+            "requires": "1.5.1"
+          }
+        },
+        {
+          "group": "com.naverlabs.android",
+          "module": "anmediaengine",
+          "version": {
+            "requires": "1.0.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "arceye-vlsdk-0.0.4.aar",
+          "url": "arceye-vlsdk-0.0.4.aar",
+          "size": 15615643,
+          "sha512": "c441dd57fae661eba32055aa733a63399ef960df1b1b67d5c43e742f5356545745ceb545b2b8d76a1a65294647b6c1fbeb15111fc753ad82d16105e826d0f9a9",
+          "sha256": "b748b9e9f7ee5933eff27174aaf04a25743517d6cfdf4e48f28211a4f2d6a454",
+          "sha1": "338182de907ee288241a1e1d24354f04b7d10ddb",
+          "md5": "1c0f7c2a5c4db49abc8d49a1c7c62e3a"
+        }
+      ]
+    }
+  ]
+}

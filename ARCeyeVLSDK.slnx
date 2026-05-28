@@ -1,5 +1,0 @@
-﻿<Solution>
-  <Project Path="ARCeye.VLSDK.csproj" />
-  <Project Path="ARCeye.VLSDK.Editor.csproj" />
-  <Project Path="ARCeye.VLSDK.Preprocess.Editor.csproj" />
-</Solution>
