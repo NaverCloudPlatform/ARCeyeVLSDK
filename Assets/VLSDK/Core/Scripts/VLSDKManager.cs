@@ -10,7 +10,7 @@ namespace ARCeye
 {
     public class VLSDKManager : MonoBehaviour, IGPSLocationRequester
     {
-        const string PACKAGE_VERSION = "1.12.2";
+        const string PACKAGE_VERSION = "1.13.0";
 
         private PoseTracker m_PoseTracker;
         public PoseTracker poseTracker => m_PoseTracker;
@@ -295,6 +295,7 @@ namespace ARCeye
             Initialize();
 
             m_OnPoseUpdated?.AddListener(UpdateOriginPose);
+            m_OnStateChanged?.AddListener(OnTrackerStateChanged);
 
             m_PoseTracker.onStateChanged = m_OnStateChanged;
             m_PoseTracker.onARFrameUpdated = m_OnARFrameUpdated;
@@ -326,6 +327,36 @@ namespace ARCeye
             }
             m_ARCamera = mainCamera.transform;
             m_Origin = m_ARCamera.parent;
+
+            ForceOriginChainIdentity();
+        }
+
+        // m_Origin의 상위(XR Origin) 계층이 world identity라는 전제로 UpdateOriginPose의 좌표 계산이 이뤄진다.
+        // 사용자가 상위 계층을 임의로 이동/회전/스케일한 상태로 두면 Localized Pose와 어긋나므로 강제로 원점 고정한다.
+        private void ForceOriginChainIdentity()
+        {
+            if (m_Origin == null)
+            {
+                return;
+            }
+
+            for (Transform current = m_Origin.parent; current != null; current = current.parent)
+            {
+                bool isIdentity = current.localPosition == Vector3.zero
+                    && current.localRotation == Quaternion.identity
+                    && current.localScale == Vector3.one;
+
+                if (isIdentity)
+                {
+                    continue;
+                }
+
+                Debug.LogWarning($"[VLSDKManager] Transform '{current.name}' above the origin is not at identity. Forcing it back to the world origin to keep the Localized Pose aligned.");
+
+                current.localPosition = Vector3.zero;
+                current.localRotation = Quaternion.identity;
+                current.localScale = Vector3.one;
+            }
         }
 
         private void InitConfig()
@@ -391,7 +422,7 @@ namespace ARCeye
             else
             {
                 m_PoseTracker = new ARFoundationPoseTracker();
-                // (m_PoseTracker as ARFoundationPoseTracker).UseAccurateHeight(m_Settings.AccurateHeight);
+                (m_PoseTracker as ARFoundationPoseTracker).UseAccurateHeight(m_Settings.AccurateHeight);
             }
 #endif
 
@@ -470,6 +501,15 @@ namespace ARCeye
             m_NativeLogger.Release();
         }
 
+        // 세션 리셋(INITIAL 전이) 시점에도 원점 고정을 재적용해 런타임 중 상위 계층이 흐트러진 경우를 복구한다.
+        private void OnTrackerStateChanged(TrackerState state)
+        {
+            if (state == TrackerState.INITIAL)
+            {
+                ForceOriginChainIdentity();
+            }
+        }
+
         private void UpdateOriginPose(Matrix4x4 localizedViewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 texMatrix, double relativeAltitude)
         {
             // VL 수신 결과의 WC Transform Matrix 계산.
@@ -545,6 +585,11 @@ namespace ARCeye
         public void EnableResetByDevicePose(bool active)
         {
             m_PoseTracker.EnableResetByDevicePose(active);
+        }
+
+        public void SetRealHeight(float height)
+        {
+            m_PoseTracker.SetRealHeight(height);
         }
 
         /* -- GPS Location Requester -- */

@@ -21,13 +21,13 @@ namespace ARCeye.Dataset
         {
             if (CheckIsARDatasetManagerExisting())
             {
-                Debug.LogWarning("ARDatasetManager가 이미 추가 되어있습니다.");
+                Debug.LogWarning("ARDatasetManager is already added.");
                 return;
             }
 
             if (!CheckIsARSessionExisting())
             {
-                Debug.LogError("AR 시스템이 초기화 되지 않아 ARDatasetManager를 생성할 수 없습니다.");
+                Debug.LogError("Cannot create ARDatasetManager because the AR system is not initialized.");
                 return;
             }
 

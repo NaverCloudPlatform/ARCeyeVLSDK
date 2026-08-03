@@ -4,8 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Networking;
 using AOT;
 
@@ -29,7 +31,11 @@ namespace ARCeye
         const string dll = "VLSDK";
 #endif
 
+        // 대기열 밖에서 실행되는 요청의 ID. 유효한 요청 ID는 1부터 시작한다.
+        private const long k_UnqueuedRequestId = 0;
+
         private Dictionary<long, Coroutine> m_RequestCoroutines = new Dictionary<long, Coroutine>();
+        private long m_NextRequestId = k_UnqueuedRequestId;
 
         [DllImport(dll)]
         private static extern void SetRequestFuncNative(RequestVLDelegate func);
@@ -148,12 +154,14 @@ namespace ARCeye
 
         private void OnSendingRequestAsync(int key, VLRequestBody body, Texture texture, int asyncCount = 20)
         {
-            long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            // 하나의 프레임에서 URL 후보별로 요청이 연달아 생성되기 때문에
+            // 시간 값은 요청의 고유 키가 될 수 없다.
+            long requestId = ++m_NextRequestId;
 
             if (m_RequestCoroutines.Count < asyncCount)
             {
-                var c = StartCoroutine(Upload(timestamp, key, body, texture));
-                m_RequestCoroutines.Add(timestamp, c);
+                var c = StartCoroutine(Upload(requestId, key, body, texture));
+                m_RequestCoroutines.Add(requestId, c);
             }
             else
             {
@@ -185,20 +193,80 @@ namespace ARCeye
 
         private void OnSendingLimitlessRequest(int key, VLRequestBody body, Texture texture)
         {
-            long timestamp = DateTime.Now.Ticks;
-            StartCoroutine(Upload(timestamp, key, body, texture));
+            // 대기열 제한을 받지 않는 요청이기 때문에 m_RequestCoroutines에 등록하지 않는다.
+            StartCoroutine(Upload(k_UnqueuedRequestId, key, body, texture));
         }
 
         /// <summary>
         ///   VLRequestBody를 이용하여 VL 요청을 보내고 응답을 처리.
         /// </summary>
-        IEnumerator Upload(long timestamp, int key, VLRequestBody requestBody, Texture texture)
+        IEnumerator Upload(long requestId, int key, VLRequestBody requestBody, Texture texture)
         {
+            // POST 요청은 JPEG 인코딩을 백그라운드 스레드로 오프로드.
+            // 코루틴은 첫 yield 전까지 네이티브 재진입 경로에서 동기 실행되므로,
+            // 아래 동기 구간은 리드백 결과 복사 + 인코딩 Task 시작 등 가벼운 작업만 수행.
+            if (requestBody.method == "POST")
+            {
+                Texture2D queryTexture = texture as Texture2D;
+                if (queryTexture == null)
+                {
+                    NativeLogger.DebugLog(ARCeye.LogLevel.WARNING, "Query texture is not a Texture2D. Request is skipped");
+                    RemoveRequestCoroutine(requestId);
+                    yield break;
+                }
+
+                // 리드백 직후의 픽셀을 byte[] 사본으로 캡처. 이후 리드백과 경합 없이 백그라운드에서 사용.
+                byte[] rawData = queryTexture.GetRawTextureData();
+                GraphicsFormat graphicsFormat = queryTexture.graphicsFormat;
+                uint width = (uint)queryTexture.width;
+                uint height = (uint)queryTexture.height;
+
+                // 배열 기반 인코딩은 스레드 안전하므로 백그라운드 스레드에서 실행.
+                Task<byte[]> encodeTask = Task.Run(
+                    () => EncodeJpegInBackground(rawData, graphicsFormat, width, height));
+
+                // 인코딩 완료까지 대기. 이 지점부터는 네이티브 호출 밖(다음 프레임 이후)에서 실행됨.
+                yield return new WaitUntil(() => encodeTask.IsCompleted);
+
+                byte[] encoded = null;
+                if (encodeTask.IsFaulted)
+                {
+                    NativeLogger.DebugLog(ARCeye.LogLevel.WARNING, "Failed to encode a query image in background. " + encodeTask.Exception?.GetBaseException().Message);
+                }
+                else
+                {
+                    encoded = encodeTask.Result;
+                }
+
+                if (encoded == null || encoded.Length == 0)
+                {
+                    NativeLogger.DebugLog(ARCeye.LogLevel.WARNING, "Encoded query image is empty. Request is skipped");
+                    RemoveRequestCoroutine(requestId);
+                    yield break;
+                }
+
+                requestBody.image = encoded;
+            }
+
+            // 무거운 작업(멀티파트 바디 생성) 및 UnityWebRequest 생성/전송은 모두 메인 스레드에서 수행.
             UnityWebRequest www = HandleRequest(requestBody, texture);
 
             yield return www.SendWebRequest();
 
-            HandleResponse(timestamp, key, requestBody.method, www);
+            HandleResponse(requestId, key, requestBody.method, www);
+        }
+
+        private void RemoveRequestCoroutine(long requestId)
+        {
+            if (requestId == k_UnqueuedRequestId)
+            {
+                return;
+            }
+
+            if (!m_RequestCoroutines.Remove(requestId))
+            {
+                Debug.LogWarning("Failed to remove request id: " + requestId);
+            }
         }
 
         /// <summary>
@@ -230,8 +298,7 @@ namespace ARCeye
 
             if (requestBody.method == "POST")
             {
-                requestBody.image = ConvertToJpegData(requestBody.filename, texture);
-
+                // requestBody.image는 Upload 코루틴에서 백그라운드 인코딩으로 이미 세팅됨.
                 www.method = "POST";
                 www.uploadHandler = GenerateUploadHandler(requestBody);
             }
@@ -245,11 +312,10 @@ namespace ARCeye
             return www;
         }
 
-        private byte[] ConvertToJpegData(string filename, Texture texture)
+        // 백그라운드 스레드에서 실행되는 JPEG 인코딩. GetRawTextureData 기반 배열 입력이라 스레드 안전.
+        private static byte[] EncodeJpegInBackground(byte[] rawData, GraphicsFormat format, uint width, uint height)
         {
-            Texture2D previewTex = texture as Texture2D;
-            byte[] data = ImageConversion.EncodeToJPG(previewTex, 85);
-            return data;
+            return ImageConversion.EncodeArrayToJPG(rawData, format, width, height, 0, 85);
         }
 
         private UploadHandler GenerateUploadHandler(VLRequestBody requestBody)
@@ -291,7 +357,7 @@ namespace ARCeye
         /// <summary>
         ///   수신한 결과를 바탕으로 VL 응답 처리.
         /// </summary>
-        private void HandleResponse(long timestamp, int key, string method, UnityWebRequest www)
+        private void HandleResponse(long requestId, int key, string method, UnityWebRequest www)
         {
             string rawResponse = www.downloadHandler.text;
 
@@ -338,13 +404,7 @@ namespace ARCeye
 
             www.Dispose();
 
-            if (m_RequestCoroutines.Count > 0)
-            {
-                if (!m_RequestCoroutines.Remove(timestamp))
-                {
-                    Debug.LogWarning("Failed to remove timestamp: " + timestamp);
-                }
-            }
+            RemoveRequestCoroutine(requestId);
         }
 
 

@@ -384,6 +384,11 @@ namespace ARCeye
             EnableResetByDevicePoseNative(value);
         }
 
+        public void SetRealHeight(float height)
+        {
+            m_Frame.realHeight = height;
+        }
+
         /// <summary>
         ///   위도, 경도값을 이용하여 하나의 location 값을 받아온다.
         /// </summary>

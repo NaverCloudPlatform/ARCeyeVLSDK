@@ -37,7 +37,7 @@ namespace ARCeye
             }
 
             InitComponents();
-            // InitHeightCalculator();
+            InitHeightCalculator();
         }
 
         private void InitComponents()
@@ -134,6 +134,12 @@ namespace ARCeye
 
             frame.yuvBuffer = videoImage;
             frame.disposable = disposable;
+
+            // AR 평면 검출로 계산한 실제 높이를 프레임에 반영. 검출 전(realHeight <= 0)에는 기본값 유지.
+            if (m_AccurateHeight && m_HeightCalculator != null && m_HeightCalculator.realHeight > 0f)
+            {
+                m_Frame.realHeight = m_HeightCalculator.realHeight;
+            }
 
             return frame;
         }
